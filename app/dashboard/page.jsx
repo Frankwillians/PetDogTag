@@ -1,254 +1,275 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
-import { QRCodeSVG } from 'qrcode.react'
+import { useState, useEffect } from 'react'
+import { createClient } from '@supabase/supabase-js'
+import { useRouter } from 'next/navigation'
 
-export default function DashboardPage() {
+// Inicializa o cliente do Supabase no front-end
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+export default function Dashboard() {
+  const router = useRouter()
+  const [user, setUser] = useState(null)
   const [pets, setPets] = useState([])
   const [loading, setLoading] = useState(true)
-  const [form, setForm] = useState({ name: '', species: '', breed: '', bio: '', owner_name: '', contact_phone: '' })
-  const [message, setMessage] = useState('')
-  const [selectedPetForQR, setSelectedPetForQR] = useState(null)
 
-  async function fetchPets() {
-    setLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+  // Estados do formulário de cadastro de pet
+  const [nome, setNome] = useState('')
+  const [especie, setEspecie] = useState('')
+  const [raca, setRaca] = useState('')
+  const [dono, setDono] = useState('')
+  const [telefone, setTelefone] = useState('')
+  const [observacoes, setObservacoes] = useState('')
+  const [erroForm, setErroForm] = useState('')
+  const [sucessoForm, setSucessoForm] = useState('')
+
+  useEffect(() => {
+    async function checkUserAndFetchPets() {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        router.push('/login') // Redireciona se não estiver logado
+        return
+      }
+
+      setUser(session.user)
+      await fetchPets(session.user.id)
       setLoading(false)
-      return
     }
 
+    checkUserAndFetchPets()
+  }, [router])
+
+  async function fetchPets(userId) {
     const { data, error } = await supabase
       .from('pets')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
 
-    if (!error) setPets(data || [])
-    setLoading(false)
+    if (!error && data) {
+      setPets(data)
+    }
   }
 
-  useEffect(() => {
-    fetchPets()
-  }, [])
-
-  async function handleCreatePet(e) {
+  // Função para cadastrar novo pet
+  async function handleCadastrarPet(e) {
     e.preventDefault()
-    setMessage('')
+    setErroForm('')
+    setSucessoForm('')
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      setMessage('Você precisa estar logado para cadastrar um pet.')
+    if (!nome || !especie) {
+      setErroForm('Preencha pelo menos o Nome e a Espécie do pet.')
       return
     }
 
     const { error } = await supabase.from('pets').insert([
       {
         user_id: user.id,
-        name: form.name,
-        species: form.species,
-        breed: form.breed,
-        bio: form.bio,
-        owner_name: form.owner_name,
-        contact_phone: form.contact_phone,
-        is_active: false
+        name: nome,
+        species: especie,
+        breed: raca,
+        owner_name: dono,
+        phone: telefone,
+        notes: observacoes,
+        is_active: false // Inicia pendente até o pagamento
       }
     ])
 
     if (error) {
-      setMessage('Erro ao cadastrar pet: ' + error.message)
+      setErroForm('Erro ao cadastrar pet: ' + error.message)
     } else {
-      setMessage('Pet cadastrado com sucesso! Efetue o pagamento para liberar a tag.')
-      setForm({ name: '', species: '', breed: '', bio: '', owner_name: '', contact_phone: '' })
-      fetchPets()
+      setSucessoForm('Pet cadastrado com sucesso!')
+      setNome('')
+      setEspecie('')
+      setRaca('')
+      setDono('')
+      setTelefone('')
+      setObservacoes('')
+      fetchPets(user.id)
     }
   }
 
+  // Função para iniciar o pagamento via Checkout Pro do Mercado Pago
+  async function handlePagar(petId) {
+    try {
+      const res = await fetch('/api/pagamento', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ petId, email: user?.email })
+      })
+
+      const data = await res.json()
+
+      if (data.url) {
+        window.location.href = data.url // Redireciona para o ambiente seguro do Mercado Pago
+      } else {
+        alert('Erro ao gerar link de pagamento: ' + (data.error || 'Erro desconhecido'))
+      }
+    } catch (error) {
+      console.error('Erro na requisição de pagamento:', error)
+      alert('Erro ao processar o pagamento.')
+    }
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
+        <p>Carregando painel...</p>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 p-6 md:p-10 font-sans">
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-6">
       <div className="max-w-4xl mx-auto">
         
-        {/* Header */}
-        <header className="mb-8 flex justify-between items-center border-b border-slate-800 pb-5">
+        {/* Cabeçalho */}
+        <div className="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-white">DarkStar Pets</h1>
-            <p className="text-xs text-slate-400 mt-1">Painel de Gerenciamento de Dog Tags Inteligentes</p>
+            <h1 className="text-2xl font-bold text-indigo-400">DarkStar Pets</h1>
+            <p className="text-sm text-slate-400">Painel de Gerenciamento de Dog Tags Inteligentes</p>
           </div>
           <button
-            onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }}
-            className="text-xs bg-slate-800 text-slate-300 px-4 py-2 rounded-xl font-semibold hover:bg-slate-700 hover:text-white transition border border-slate-700"
+            onClick={handleLogout}
+            className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm px-4 py-2 rounded-xl transition font-medium"
           >
             Sair da Conta
           </button>
-        </header>
-
-        {message && (
-          <div className="mb-6 p-4 rounded-xl bg-blue-950/60 border border-blue-800/60 text-blue-300 text-sm font-medium shadow-lg">
-            {message}
-          </div>
-        )}
+        </div>
 
         {/* Formulário de Cadastro */}
-        <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl shadow-xl p-6 md:p-8 mb-10 border border-slate-700/60">
-          <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-            Cadastrar Novo Pet
-          </h2>
-          <form onSubmit={handleCreatePet} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl mb-10">
+          <h2 className="text-lg font-semibold mb-4 text-indigo-300">🐾 Cadastrar Novo Pet</h2>
+
+          {erroForm && <div className="bg-red-900/50 border border-red-700 text-red-200 p-3 rounded-xl mb-4 text-sm">{erroForm}</div>}
+          {sucessoForm && <div className="bg-emerald-900/50 border border-emerald-700 text-emerald-200 p-3 rounded-xl mb-4 text-sm">{sucessoForm}</div>}
+
+          <form onSubmit={handleCadastrarPet} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
               placeholder="Nome do Pet (ex: Thor)"
-              value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
-              required
-              className="bg-slate-900/80 border border-slate-700 text-slate-100 placeholder-slate-500 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
             />
             <input
               type="text"
               placeholder="Espécie (ex: Cachorro, Gato)"
-              value={form.species}
-              onChange={e => setForm({ ...form, species: e.target.value })}
-              required
-              className="bg-slate-900/80 border border-slate-700 text-slate-100 placeholder-slate-500 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
+              value={especie}
+              onChange={(e) => setEspecie(e.target.value)}
+              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
             />
             <input
               type="text"
               placeholder="Raça (Opcional)"
-              value={form.breed}
-              onChange={e => setForm({ ...form, breed: e.target.value })}
-              className="bg-slate-900/80 border border-slate-700 text-slate-100 placeholder-slate-500 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
+              value={raca}
+              onChange={(e) => setRaca(e.target.value)}
+              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
             />
             <input
               type="text"
               placeholder="Seu Nome (Dono)"
-              value={form.owner_name}
-              onChange={e => setForm({ ...form, owner_name: e.target.value })}
-              required
-              className="bg-slate-900/80 border border-slate-700 text-slate-100 placeholder-slate-500 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
+              value={dono}
+              onChange={(e) => setDono(e.target.value)}
+              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
             />
             <input
               type="text"
               placeholder="Telefone / WhatsApp com DDD"
-              value={form.contact_phone}
-              onChange={e => setForm({ ...form, contact_phone: e.target.value })}
-              required
-              className="bg-slate-900/80 border border-slate-700 text-slate-100 placeholder-slate-500 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
+              value={telefone}
+              onChange={(e) => setTelefone(e.target.value)}
+              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm md:col-span-2 focus:outline-none focus:border-indigo-500"
             />
             <textarea
               placeholder="Informações extras (alergias, cuidados...)"
-              value={form.bio}
-              onChange={e => setForm({ ...form, bio: e.target.value })}
-              className="bg-slate-900/80 border border-slate-700 text-slate-100 placeholder-slate-500 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition md:col-span-2 h-24 resize-none"
-            />
+              value={observacoes}
+              onChange={(e) => setObservacoes(e.target.value)}
+              rows="3"
+              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm md:col-span-2 focus:outline-none focus:border-indigo-500"
+            ></textarea>
+
             <button
               type="submit"
-              className="md:col-span-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-600/20 transition duration-200"
+              className="md:col-span-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-indigo-600/20"
             >
               Cadastrar Pet no Sistema
             </button>
           </form>
         </div>
 
-        {/* Modal de QR Code */}
-        {selectedPetForQR && (
-          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl">
-              <h3 className="text-xl font-bold text-white mb-1">QR Code: {selectedPetForQR.name}</h3>
-              <p className="text-xs text-slate-400 mb-6">Escaneie para testar o sistema de resgate</p>
-              
-              <div className="flex justify-center bg-white p-4 rounded-xl shadow-inner mb-4">
-                <QRCodeSVG
-                  value={`${window.location.origin}/pet/${selectedPetForQR.id}`}
-                  size={190}
-                  level={"H"}
-                  includeMargin={true}
-                />
-              </div>
+        {/* Listagem de Pets */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4 text-slate-200">Meus Pets Cadastrados</h2>
 
-              <p className="text-xs text-slate-400 mb-6 truncate bg-slate-900/60 p-2 rounded-lg border border-slate-700/50">
-                {window.location.origin}/pet/{selectedPetForQR.id}
-              </p>
-
-              <button
-                onClick={() => setSelectedPetForQR(null)}
-                className="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl text-sm transition"
-              >
-                Fechar
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Lista de Pets */}
-        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          Meus Pets Cadastrados
-        </h2>
-
-        {loading ? (
-          <p className="text-slate-400">Carregando seus pets...</p>
-        ) : pets.length === 0 ? (
-          <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-8 text-center text-slate-400">
-            Nenhum pet cadastrado no momento. Use o formulário acima para começar.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {pets.map(pet => (
-              <div key={pet.id} className="bg-slate-800/60 border border-slate-700/60 p-5 rounded-2xl shadow-xl flex flex-col justify-between hover:border-slate-600 transition">
-                <div>
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-bold text-white">{pet.name}</h3>
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-bold tracking-wide ${pet.is_active ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/50' : 'bg-amber-950 text-amber-400 border border-amber-800/50'}`}>
-                      {pet.is_active ? 'Ativo' : 'Pendente (R$ 10)'}
-                    </span>
+          {pets.length === 0 ? (
+            <p className="text-slate-500 text-sm">Nenhum pet cadastrado ainda. Cadastre acima para gerar sua Dog Tag!</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {pets.map((pet) => (
+                <div key={pet.id} className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-lg font-bold text-white">{pet.name}</h3>
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${pet.is_active ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}`}>
+                        {pet.is_active ? 'Ativo' : 'Pendente (R$ 10,00)'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-400 mb-4">{pet.species} {pet.breed ? `• ${pet.breed}` : ''}</p>
                   </div>
-                  <p className="text-sm text-slate-400 mb-4">{pet.species} {pet.breed ? `• ${pet.breed}` : ''}</p>
-                </div>
-                
-                <div className="pt-4 border-t border-slate-700/60 flex flex-col gap-2">
-                  {pet.is_active ? (
-                    <button
-                      onClick={() => setSelectedPetForQR(pet)}
-                      className="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-center py-2.5 rounded-xl text-sm font-bold shadow transition"
-                    >
-                      Ver / Baixar QR Code
-                    </button>
-                  ) : (
-                    <button
-                      onClick={async () => {
-                        const { data: { user } } = await supabase.auth.getUser()
-                        const res = await fetch('/api/pagamento', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ petId: pet.id, email: user.email })
-                        })
-                        const data = await res.json()
-                        if (data.qr_code) {
-                          navigator.clipboard.writeText(data.qr_code)
-                          alert("Código Pix Copia e Cola gerado e copiado para a área de transferência! (Valor: R$ 10,00)")
-                        } else {
-                          alert("Erro ao gerar pagamento: " + JSON.stringify(data))
-                        }
-                      }}
-                      className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-center py-2.5 rounded-xl text-sm font-bold shadow transition"
-                    >
-                      Pagar Pix Ativação (R$ 10,00)
-                    </button>
-                  )}
 
-                  <a
-                    href={`/pet/${pet.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full bg-slate-700/60 hover:bg-slate-700 text-slate-300 hover:text-white text-center py-2.5 rounded-xl text-sm font-semibold transition border border-slate-700"
-                  >
-                    Ver Página Pública
-                  </a>
+                  <div className="space-y-2 mt-4">
+                    {pet.is_active ? (
+                      <>
+                        <a
+                          href={`/pet/${pet.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full text-center bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium py-2 rounded-xl transition"
+                        >
+                          Ver / Baixar QR Code
+                        </a>
+                        <a
+                          href={`/pet/${pet.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full text-center bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium py-2 rounded-xl transition"
+                        >
+                          Ver Página Pública
+                        </a>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handlePagar(pet.id)}
+                          className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold py-2.5 rounded-xl transition shadow"
+                        >
+                          Pagar Ativação (R$ 10,00)
+                        </button>
+                        <a
+                          href={`/pet/${pet.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full text-center bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium py-2 rounded-xl transition"
+                        >
+                          Ver Página Pública
+                        </a>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   )
