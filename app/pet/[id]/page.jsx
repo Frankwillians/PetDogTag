@@ -1,15 +1,21 @@
 'use client'
 
-import { useEffect, useState, use } from 'react' // Importamos o hook 'use'
+import { useEffect, useState, use } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import QRCode from 'qrcode'
 
+// Inicialização segura do Supabase com verificação para evitar erros de chave ausente
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error("ERRO CRÍTICO: Variáveis de ambiente do Supabase não encontradas!")
+}
+
+const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '')
 
 export default function PetPublicPage({ params }) {
-  // Desembrulhamos os parâmetros de forma segura para o Next.js 15+
+  // Desembrulha os parâmetros de forma segura para o Next.js atual
   const resolvedParams = use(params)
   const id = resolvedParams.id
   
@@ -23,6 +29,10 @@ export default function PetPublicPage({ params }) {
   const currentUrl = typeof window !== 'undefined' ? window.location.href : `https://pet-dog-tag-pzem.vercel.app/pet/${id}`
 
   useEffect(() => {
+    // Log para depurar se as chaves estão chegando no navegador
+    console.log("Supabase URL carregada:", supabaseUrl ? "OK" : "VAZIA");
+    console.log("Supabase Anon Key carregada:", supabaseAnonKey ? "OK" : "VAZIA");
+
     async function fetchPetData() {
       if (!id) return;
       
@@ -87,13 +97,15 @@ export default function PetPublicPage({ params }) {
           setSucessoLocalizacao(true)
           alert("Localização enviada com sucesso! O dono do pet foi avisado.")
         } catch (err) {
+          console.error("Erro ao inserir alerta:", err)
           alert("Erro ao salvar localização no banco.")
         } finally {
           setEnviandoLocalizacao(false)
         }
       },
-      () => {
-        alert("Permissão negada.")
+      (error) => {
+        console.error("Erro de geolocalização:", error)
+        alert("Permissão de localização negada ou indisponível.")
         setEnviandoLocalizacao(false)
       },
       { enableHighAccuracy: true }
@@ -135,23 +147,33 @@ export default function PetPublicPage({ params }) {
           </div>
           <div>
             <span className="text-slate-500 block text-xs uppercase font-semibold">WhatsApp:</span>
-            <a href={`https://wa.me/55${pet.phone?.replace(/\D/g, '')}`} target="_blank" className="text-emerald-400 font-bold hover:underline">{pet.phone}</a>
+            <a href={`https://wa.me/55${pet.phone?.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 font-bold hover:underline block">{pet.phone}</a>
           </div>
+          {pet.notes && (
+            <div>
+              <span className="text-slate-500 block text-xs uppercase font-semibold">Cuidados e Alergias:</span>
+              <span className="text-amber-300 font-medium">{pet.notes}</span>
+            </div>
+          )}
         </div>
 
         <div className="mb-8">
-          <button onClick={handleEnviarLocalizacao} disabled={enviandoLocalizacao || sucessoLocalizacao} className={`w-full py-3.5 rounded-xl text-sm font-bold shadow-lg transition ${sucessoLocalizacao ? 'bg-emerald-700' : 'bg-red-600 hover:bg-red-500'}`}>
-            {enviandoLocalizacao ? 'Obtendo GPS...' : sucessoLocalizacao ? '📍 Enviado!' : '📍 Enviar Minha Localização'}
+          <button 
+            onClick={handleEnviarLocalizacao} 
+            disabled={enviandoLocalizacao || sucessoLocalizacao} 
+            className={`w-full py-3.5 rounded-xl text-sm font-bold shadow-lg transition ${sucessoLocalizacao ? 'bg-emerald-700 text-white' : 'bg-red-600 hover:bg-red-500 text-white'}`}
+          >
+            {enviandoLocalizacao ? 'Obtendo GPS...' : sucessoLocalizacao ? '📍 Localização Enviada!' : '📍 Enviar Minha Localização'}
           </button>
         </div>
 
         {pet.is_active && (
           <div className="border-t border-slate-800 pt-6 text-center">
             <h2 className="text-sm font-semibold text-indigo-400 mb-3">Gerenciamento (Dono)</h2>
-            {qrCodeDataUrl && <img src={qrCodeDataUrl} className="w-36 h-36 mx-auto mb-4 bg-white p-2 rounded-lg" />}
+            {qrCodeDataUrl && <img src={qrCodeDataUrl} alt="QR Code" className="w-36 h-36 mx-auto mb-4 bg-white p-2 rounded-lg" />}
             <div className="space-y-2">
-              <a href={qrCodeDataUrl} download={`qrcode-${pet.name}.png`} className="block w-full bg-indigo-600 text-white text-xs py-2.5 rounded-xl">Baixar PNG</a>
-              <button onClick={downloadSvg} className="block w-full bg-slate-800 text-slate-300 text-xs py-2.5 rounded-xl border border-slate-700">Baixar SVG (CNC)</button>
+              <a href={qrCodeDataUrl} download={`qrcode-${pet.name}.png`} className="block w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs py-2.5 rounded-xl transition">Baixar PNG</a>
+              <button onClick={downloadSvg} className="block w-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs py-2.5 rounded-xl border border-slate-700 transition">Baixar SVG (CNC)</button>
             </div>
           </div>
         )}
