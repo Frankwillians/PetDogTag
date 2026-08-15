@@ -4,7 +4,7 @@ import { useEffect, useState, use } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import QRCode from 'qrcode'
 
-// Inicialização segura do Supabase com verificação para evitar erros de chave ausente
+// Inicialização segura do Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -15,7 +15,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '')
 
 export default function PetPublicPage({ params }) {
-  // Desembrulha os parâmetros de forma segura para o Next.js atual
   const resolvedParams = use(params)
   const id = resolvedParams.id
   
@@ -29,10 +28,6 @@ export default function PetPublicPage({ params }) {
   const currentUrl = typeof window !== 'undefined' ? window.location.href : `https://pet-dog-tag-pzem.vercel.app/pet/${id}`
 
   useEffect(() => {
-    // Log para depurar se as chaves estão chegando no navegador
-    console.log("Supabase URL carregada:", supabaseUrl ? "OK" : "VAZIA");
-    console.log("Supabase Anon Key carregada:", supabaseAnonKey ? "OK" : "VAZIA");
-
     async function fetchPetData() {
       if (!id) return;
       
@@ -89,17 +84,30 @@ export default function PetPublicPage({ params }) {
         const { latitude, longitude } = position.coords
 
         try {
+          // 1. Salva o alerta de geolocalização no banco de dados do Supabase
           const { error } = await supabase
             .from('pet_alerts')
             .insert([{ pet_id: id, latitude, longitude }])
 
           if (error) throw error
           setSucessoLocalizacao(true)
-          alert("Localização enviada com sucesso! O dono do pet foi avisado.")
+
+          // 2. Prepara o link do Google Maps com as coordenadas exatas
+          const linkGoogleMaps = `https://www.google.com/maps?q=${latitude},${longitude}`
+          
+          // 3. Monta a mensagem automática e redireciona para o WhatsApp do dono
+          const mensagem = encodeURIComponent(`🚨 Olá! Encontrei seu pet ${pet.name}! Estou aqui: ${linkGoogleMaps}`)
+          const numeroWhatsApp = pet.phone ? pet.phone.replace(/\D/g, '') : ''
+
+          if (numeroWhatsApp) {
+            window.location.href = `https://wa.me/55${numeroWhatsApp}?text=${mensagem}`
+          } else {
+            alert("Localização salva com sucesso! O dono não cadastrou um telefone, mas o alerta foi registrado.")
+          }
+
         } catch (err) {
           console.error("Erro ao inserir alerta:", err)
           alert("Erro ao salvar localização no banco.")
-        } finally {
           setEnviandoLocalizacao(false)
         }
       },
