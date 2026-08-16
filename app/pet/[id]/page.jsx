@@ -24,6 +24,7 @@ export default function PetProfilePage() {
   const [notes, setNotes] = useState('')
   const [icone, setIcone] = useState('🐾')
   const [fotoUrl, setFotoUrl] = useState('')
+  const [enviandoFoto, setEnviandoFoto] = useState(false)
 
   useEffect(() => {
     async function fetchPetAndUser() {
@@ -80,10 +81,37 @@ export default function PetProfilePage() {
     }
   }
 
-  // Função para gerar o PDF da Dog Tag para CNC / Impressão (Usa foto ou patinha padrão)
-// Função atualizada para gerar o PDF da Dog Tag convertendo a imagem via Base64 (resolve o erro de imagem em branco)
+  // Função para lidar com o upload da foto direto para o Supabase Storage
+  const handleUploadFoto = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
 
-const gerarPdfTag = async (petData) => {
+    setEnviandoFoto(true)
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${petId}-${Math.random()}.${fileExt}`
+    const filePath = `${fileName}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('fotos-pets')
+      .upload(filePath, file)
+
+    if (uploadError) {
+      alert('Erro ao fazer upload da imagem: ' + uploadError.message)
+      setEnviandoFoto(false)
+      return
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('fotos-pets')
+      .getPublicUrl(filePath)
+
+    setFotoUrl(publicUrl)
+    setEnviandoFoto(false)
+    alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
+  }
+
+  // Função para gerar o PDF da Dog Tag para CNC com Base64 para evitar erros
+  const gerarPdfTag = async (petData) => {
     const doc = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
@@ -111,7 +139,6 @@ const gerarPdfTag = async (petData) => {
       imagemParaUsar = especie.includes('gato') ? imgPadraoGato : imgPadraoCao
     }
 
-    // Função auxiliar para converter imagem externa em Base64 seguro para o PDF
     const toBase64 = async (url) => {
       try {
         const response = await fetch(url, { mode: 'cors' })
@@ -138,7 +165,7 @@ const gerarPdfTag = async (petData) => {
 
     doc.setFont("helvetica", "bold")
     doc.setFontSize(14)
-    doc.text(petData.name, 45, 72, { align: 'center' }) // Nome do pet
+    doc.text(petData.name, 45, 72, { align: 'center' })
 
     doc.setFontSize(8)
     doc.setFont("helvetica", "italic")
@@ -149,8 +176,8 @@ const gerarPdfTag = async (petData) => {
     doc.line(80, 25, 80, 95)
     doc.setLineDash([], 0)
 
-    // LADO 2: VERSO (Contorno + QR Code + Alerta)
-    doc.rect(90, 30, 60, 60) // Quadrado do Verso
+    // LADO 2: VERSO (Contorno + QR Code)
+    doc.rect(90, 30, 60, 60)
 
     const linkPublico = `https://pet-dog-tag-pzem.vercel.app/pet/${petData.id}`
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkPublico)}`
@@ -241,7 +268,6 @@ const gerarPdfTag = async (petData) => {
             <img src={fotoExibicao} alt={pet.name} className="w-24 h-24 object-cover rounded-full border-2 border-indigo-500 shadow-md bg-slate-950 p-1" />
           </div>
 
-          {/* Ícone escolhido exibido apenas ao lado do nome do pet */}
           <h1 className="text-3xl font-extrabold text-white flex items-center justify-center gap-2">
             <span>{pet.icone || '🐾'}</span> {pet.name}
           </h1>
@@ -263,7 +289,7 @@ const gerarPdfTag = async (petData) => {
               />
             </div>
             <div>
-              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Ícone ao Lado do Nome</label>
+              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Ícone da Plaqueta (ao lado do nome)</label>
               <select 
                 value={icone} 
                 onChange={(e) => setIcone(e.target.value)}
@@ -277,14 +303,14 @@ const gerarPdfTag = async (petData) => {
               </select>
             </div>
             <div>
-              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Link da Foto (Opcional - Para a CNC)</label>
+              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Foto do Pet (Upload para o PDF)</label>
               <input 
-                type="url" 
-                value={fotoUrl} 
-                onChange={(e) => setFotoUrl(e.target.value)} 
-                placeholder="https://exemplo.com/foto.jpg"
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                type="file" 
+                accept="image/*"
+                onChange={handleUploadFoto}
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
               />
+              {enviandoFoto && <p className="text-[10px] text-indigo-400 mt-1 animate-pulse">Enviando foto...</p>}
             </div>
             <div>
               <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">WhatsApp de Contato</label>
@@ -336,13 +362,14 @@ const gerarPdfTag = async (petData) => {
 
         {/* CONDICIONAL DE AÇÕES */}
         {isDono ? (
+          /* SE FOR O DONO: Editar, Baixar Molde PDF CNC e ver QR Code */
           <div className="space-y-4 pt-2">
             {!editando && (
               <button
                 onClick={() => setEditando(true)}
                 className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-xl text-sm transition"
               >
-                ✏️ Alterar Dados / Ícone
+                ✏️ Alterar Dados / Foto
               </button>
             )}
 
@@ -350,7 +377,7 @@ const gerarPdfTag = async (petData) => {
               onClick={() => gerarPdfTag(pet)}
               className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2"
             >
-              🛠️ Baixar Molde PDF para CNC
+              🛠️ Baixar Molde PDF (CNC / Impressão)
             </button>
 
             <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
@@ -381,6 +408,7 @@ const gerarPdfTag = async (petData) => {
             </div>
           </div>
         ) : (
+          /* SE FOR ESTRANHO (RUA): Apenas o botão de GPS */
           <button
             onClick={handleEnviarLocalizacao}
             className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-red-600/20 transition flex items-center justify-center gap-2"
