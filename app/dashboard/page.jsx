@@ -230,16 +230,12 @@ export default function Dashboard() {
                       <>
                         <a
                           href={`/pet/${pet.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className="block w-full text-center bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium py-2 rounded-xl transition"
                         >
                           Ver / Baixar QR Code
                         </a>
                         <a
                           href={`/pet/${pet.id}?public=true`}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className="block w-full text-center bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium py-2 rounded-xl transition"
                         >
                           Ver Página Pública
@@ -255,8 +251,6 @@ export default function Dashboard() {
                         </button>
                         <a
                           href={`/pet/${pet.id}?public=true`}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className="block w-full text-center bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium py-2 rounded-xl transition"
                         >
                           Ver Página Pública
