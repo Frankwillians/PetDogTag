@@ -11,13 +11,13 @@ const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '')
 
 export default function PetProfilePage() {
   const params = useParams()
-  const petId = params.id
+  // Garante compatibilidade caso o params venha assíncrono ou direto
+  const petId = params?.id
 
   const [pet, setPet] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isDono, setIsDono] = useState(false)
 
-  // Estados para edição (caso o dono queira alterar os dados)
   const [editando, setEditando] = useState(false)
   const [nome, setNome] = useState('')
   const [telefone, setTelefone] = useState('')
@@ -26,11 +26,17 @@ export default function PetProfilePage() {
   const [fotoUrl, setFotoUrl] = useState('')
   const [enviandoFoto, setEnviandoFoto] = useState(false)
 
+  // Pega dinamicamente o domínio atual (funciona tanto local quanto na Vercel)
+  const [baseUrl, setBaseUrl] = useState('')
+
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setBaseUrl(window.location.origin)
+    }
+
     async function fetchPetAndUser() {
       if (!petId) return
 
-      // 1. Busca os dados do pet no Supabase
       const { data: petData, error } = await supabase
         .from('pets')
         .select('*')
@@ -50,10 +56,8 @@ export default function PetProfilePage() {
       setIcone(petData.icone || '🐾')
       setFotoUrl(petData.foto_url || '')
 
-      // 2. Verifica se existe um usuário logado no momento
       const { data: { user } } = await supabase.auth.getUser()
 
-      // 3. Compara se o ID do usuário logado é o mesmo do dono cadastrado no pet
       if (user && petData.user_id && user.id === petData.user_id) {
         setIsDono(true)
       }
@@ -64,7 +68,6 @@ export default function PetProfilePage() {
     fetchPetAndUser()
   }, [petId])
 
-  // Função para salvar alterações feitas pelo dono
   const handleSalvarAlteracoes = async (e) => {
     e.preventDefault()
     const { error } = await supabase
@@ -81,7 +84,6 @@ export default function PetProfilePage() {
     }
   }
 
-  // Função para lidar com o upload da foto direto para o Supabase Storage
   const handleUploadFoto = async (e) => {
     const file = e.target.files[0]
     if (!file) return
@@ -110,7 +112,6 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  // Função para gerar o PDF da Dog Tag para CNC com Base64 para evitar erros
   const gerarPdfTag = async (petData) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -118,17 +119,19 @@ export default function PetProfilePage() {
       format: 'a4'
     })
 
+    const currentDomain = window.location.origin
+    const linkDinamico = `${currentDomain}/pet/${petData.id}`
+
     doc.setFont("helvetica", "bold")
     doc.setFontSize(14)
     doc.text(`Molde CNC / Dobrável - Plaqueta: ${petData.name}`, 15, 15)
 
     doc.setFontSize(9)
     doc.setFont("helvetica", "normal")
-    doc.text(`Contato: ${petData.phone} | Link: https://pet-dog-tag-pzem.vercel.app/pet/${petData.id}`, 15, 21)
+    doc.text(`Contato: ${petData.phone} | Link: ${linkDinamico}`, 15, 21)
 
-    // LADO 1: FRENTE (Contorno + Foto/Patinha + Nome do Pet)
     doc.setLineWidth(0.4)
-    doc.rect(15, 30, 60, 60) // Quadrado da Frente
+    doc.rect(15, 30, 60, 60)
 
     const imgPadraoCao = 'https://cdn-icons-png.flaticon.com/512/616/616408.png'
     const imgPadraoGato = 'https://cdn-icons-png.flaticon.com/512/616/616554.png'
@@ -171,16 +174,13 @@ export default function PetProfilePage() {
     doc.setFont("helvetica", "italic")
     doc.text('[ Lado Frontal ]', 45, 84, { align: 'center' })
 
-    // LINHA DE DOBRA CENTRALIZADA
     doc.setLineDash([1.5, 1.5], 0)
     doc.line(80, 25, 80, 95)
     doc.setLineDash([], 0)
 
-    // LADO 2: VERSO (Contorno + QR Code)
     doc.rect(90, 30, 60, 60)
 
-    const linkPublico = `https://pet-dog-tag-pzem.vercel.app/pet/${petData.id}`
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkPublico)}`
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkDinamico)}`
 
     try {
       const base64Qr = await toBase64(qrUrl)
@@ -203,7 +203,6 @@ export default function PetProfilePage() {
     }
   }
 
-  // Função para enviar localização via WhatsApp (Apenas para quem achou o pet)
   const handleEnviarLocalizacao = () => {
     if (!pet?.phone) {
       alert('Número de contato não disponível.')
@@ -248,7 +247,7 @@ export default function PetProfilePage() {
     )
   }
 
-  const linkPublicoPet = `https://pet-dog-tag-pzem.vercel.app/pet/${pet.id}`
+  const linkPublicoPet = `${baseUrl}/pet/${pet.id}`
   const urlQrCodeImg = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(linkPublicoPet)}`
   
   const especieAtual = (pet.species || '').toLowerCase()
@@ -258,7 +257,6 @@ export default function PetProfilePage() {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-6">
         
-        {/* Cabeçalho */}
         <div className="text-center">
           <div className="inline-block bg-indigo-950 border border-indigo-800 text-indigo-400 text-xs font-semibold px-3 py-1 rounded-full mb-3">
             {isDono ? '🛡️ PAINEL DO DONO (GERENCIAMENTO)' : '🐾 PERFIL DE EMERGÊNCIA / PET'}
@@ -274,7 +272,6 @@ export default function PetProfilePage() {
           <p className="text-sm text-slate-400 capitalize mt-1">{pet.species} {pet.breed ? `• ${pet.breed}` : ''}</p>
         </div>
 
-        {/* SE FOR O DONO E ESTIVER EDITANDO OS DADOS */}
         {isDono && editando ? (
           <form onSubmit={handleSalvarAlteracoes} className="space-y-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
             <h2 className="text-xs font-bold uppercase text-indigo-400 mb-2">Editar Dados do Pet</h2>
@@ -289,7 +286,7 @@ export default function PetProfilePage() {
               />
             </div>
             <div>
-              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Ícone da Plaqueta (ao lado do nome)</label>
+              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Ícone da Plaqueta</label>
               <select 
                 value={icone} 
                 onChange={(e) => setIcone(e.target.value)}
@@ -303,7 +300,7 @@ export default function PetProfilePage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Foto do Pet (Upload para o PDF)</label>
+              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Foto do Pet</label>
               <input 
                 type="file" 
                 accept="image/*"
@@ -341,7 +338,6 @@ export default function PetProfilePage() {
             </div>
           </form>
         ) : (
-          /* Informações Básicas */
           <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3 text-sm">
             <div className="flex justify-between border-b border-slate-800 pb-2">
               <span className="text-slate-400 font-semibold uppercase text-xs">Dono:</span>
@@ -360,9 +356,7 @@ export default function PetProfilePage() {
           </div>
         )}
 
-        {/* CONDICIONAL DE AÇÕES */}
         {isDono ? (
-          /* SE FOR O DONO: Editar, Baixar Molde PDF CNC e ver QR Code */
           <div className="space-y-4 pt-2">
             {!editando && (
               <button
@@ -408,7 +402,6 @@ export default function PetProfilePage() {
             </div>
           </div>
         ) : (
-          /* SE FOR ESTRANHO (RUA): Apenas o botão de GPS */
           <button
             onClick={handleEnviarLocalizacao}
             className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-red-600/20 transition flex items-center justify-center gap-2"
