@@ -81,7 +81,9 @@ export default function PetProfilePage() {
   }
 
   // Função para gerar o PDF da Dog Tag para CNC / Impressão (Usa foto ou patinha padrão)
-  const gerarPdfTag = async (petData) => {
+// Função atualizada para gerar o PDF da Dog Tag convertendo a imagem via Base64 (resolve o erro de imagem em branco)
+
+const gerarPdfTag = async (petData) => {
     const doc = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
@@ -109,22 +111,34 @@ export default function PetProfilePage() {
       imagemParaUsar = especie.includes('gato') ? imgPadraoGato : imgPadraoCao
     }
 
+    // Função auxiliar para converter imagem externa em Base64 seguro para o PDF
+    const toBase64 = async (url) => {
+      try {
+        const response = await fetch(url, { mode: 'cors' })
+        const blob = await response.blob()
+        return new Promise((resolve) => {
+          const reader = new FileReader()
+          reader.onloadend = () => resolve(reader.result)
+          reader.readAsDataURL(blob)
+        })
+      } catch (e) {
+        console.warn('Falha ao converter imagem para base64:', e)
+        return null
+      }
+    }
+
     try {
-      const img = new Image()
-      img.crossOrigin = 'Anonymous'
-      img.src = imagemParaUsar
-      await new Promise((resolve, reject) => {
-        img.onload = resolve
-        img.onerror = reject
-      })
-      doc.addImage(img, 'PNG', 30, 35, 30, 30)
+      const base64Img = await toBase64(imagemParaUsar)
+      if (base64Img) {
+        doc.addImage(base64Img, 'PNG', 30, 35, 30, 30)
+      }
     } catch (err) {
       console.warn('Não foi possível carregar a imagem no PDF.', err)
     }
 
     doc.setFont("helvetica", "bold")
     doc.setFontSize(14)
-    doc.text(petData.name, 45, 72, { align: 'center' })
+    doc.text(petData.name, 45, 72, { align: 'center' }) // Nome do pet
 
     doc.setFontSize(8)
     doc.setFont("helvetica", "italic")
@@ -135,32 +149,27 @@ export default function PetProfilePage() {
     doc.line(80, 25, 80, 95)
     doc.setLineDash([], 0)
 
-    // LADO 2: VERSO (Contorno + QR Code)
-    doc.rect(90, 30, 60, 60)
+    // LADO 2: VERSO (Contorno + QR Code + Alerta)
+    doc.rect(90, 30, 60, 60) // Quadrado do Verso
 
     const linkPublico = `https://pet-dog-tag-pzem.vercel.app/pet/${petData.id}`
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkPublico)}`
 
     try {
-      const response = await fetch(qrUrl)
-      const blob = await response.blob()
-      const reader = new FileReader()
-
-      reader.readAsDataURL(blob)
-      reader.onloadend = () => {
-        const base64data = reader.result
-        doc.addImage(base64data, 'PNG', 103, 35, 34, 34)
-        
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(8)
-        doc.text('LEIA O QR CODE', 120, 76, { align: 'center' })
-        
-        doc.setFont("helvetica", "italic")
-        doc.setFontSize(8)
-        doc.text('[ Lado Traseiro / Verso ]', 120, 84, { align: 'center' })
-
-        doc.save(`dog-tag-${petData.name.toLowerCase()}.pdf`)
+      const base64Qr = await toBase64(qrUrl)
+      if (base64Qr) {
+        doc.addImage(base64Qr, 'PNG', 103, 35, 34, 34)
       }
+      
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(8)
+      doc.text('LEIA O QR CODE', 120, 76, { align: 'center' })
+      
+      doc.setFont("helvetica", "italic")
+      doc.setFontSize(8)
+      doc.text('[ Lado Traseiro / Verso ]', 120, 84, { align: 'center' })
+
+      doc.save(`dog-tag-${petData.name.toLowerCase()}.pdf`)
     } catch (error) {
       console.error('Erro ao gerar QR Code no PDF:', error)
       alert('Erro ao gerar o PDF. Tente novamente.')
