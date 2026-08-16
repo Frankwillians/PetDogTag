@@ -26,15 +26,15 @@ export default function LandingPage() {
       <main className="max-w-5xl w-full mx-auto px-6 py-16 text-center space-y-10">
         
         <div className="inline-flex items-center gap-2 bg-indigo-950/80 border border-indigo-800/60 text-indigo-400 text-xs font-semibold px-4 py-1.5 rounded-full shadow-inner animate-pulse">
-          ⚡ A tecnologia mais rápida de reencontro de pets do mercado
+          🛡️ Prevenção e Segurança Inteligente para Pets
         </div>
 
         <h1 className="text-4xl sm:text-7xl font-black text-white tracking-tight leading-[1.1]">
-          Seu pet perdido de volta para casa em <span className="text-indigo-500 underline decoration-indigo-500/30">minutos, não dias.</span>
+          Proteja o seu pet com uma <span className="text-indigo-500 underline decoration-indigo-500/30">plaqueta inteligente.</span>
         </h1>
 
         <p className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          Crie uma plaqueta inteligente com QR Code em segundos. Quem achar o seu animal escaneia com a câmera do celular e envia a <strong>localização exata do GPS direto no seu WhatsApp</strong>.
+          Evite sustos. Crie uma tag com QR Code em segundos e imprima em casa. Se ele escapar, quem o encontrar escaneia a coleira e envia a <strong>localização exata do GPS direto no seu WhatsApp</strong>.
         </p>
 
         {/* BOTÕES DE AÇÃO */}
@@ -57,7 +57,7 @@ export default function LandingPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-6 max-w-3xl mx-auto text-center">
           <div className="bg-slate-900/50 border border-slate-900 p-4 rounded-xl">
             <p className="text-2xl sm:text-3xl font-extrabold text-white">100%</p>
-            <p className="text-xs text-slate-400">Prático e Instantâneo</p>
+            <p className="text-xs text-slate-400">Prático e Preventivo</p>
           </div>
           <div className="bg-slate-900/50 border border-slate-900 p-4 rounded-xl">
             <p className="text-2xl sm:text-3xl font-extrabold text-white">Zero</p>
@@ -65,7 +65,7 @@ export default function LandingPage() {
           </div>
           <div className="col-span-2 sm:col-span-1 bg-slate-900/50 border border-slate-900 p-4 rounded-xl">
             <p className="text-2xl sm:text-3xl font-extrabold text-indigo-400">24/7</p>
-            <p className="text-xs text-slate-400">Proteção Ativa na Rua</p>
+            <p className="text-xs text-slate-400">Proteção Ativa na Coleira</p>
           </div>
         </div>
 
@@ -95,8 +95,8 @@ export default function LandingPage() {
             <div className="bg-slate-900 border border-slate-800/80 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-indigo-500/50 transition">
               <div className="text-3xl font-black text-indigo-500/20 absolute top-4 right-4">03</div>
               <div className="text-2xl">📍</div>
-              <h3 className="font-bold text-white text-lg">Resgate Rápido</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">Quem achar o animal aponta a câmera, lê o QR code e o seu WhatsApp recebe a localização GPS instantânea.</p>
+              <h3 className="font-bold text-white text-lg">Segurança Ativa</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">Se alguém achar o animal, aponta a câmera, lê o QR code e o seu WhatsApp recebe a localização GPS instantânea.</p>
             </div>
 
           </div>
@@ -106,10 +106,10 @@ export default function LandingPage() {
         <div className="pt-16 pb-8">
           <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 border border-indigo-800/50 p-8 sm:p-12 rounded-3xl space-y-6 shadow-2xl">
             <h2 className="text-2xl sm:text-4xl font-extrabold text-white">
-              Não espere seu pet se perder para agir.
+              Garanta a segurança do seu melhor amigo hoje mesmo.
             </h2>
             <p className="text-slate-300 text-sm sm:text-base max-w-xl mx-auto">
-              Garanta a segurança do seu melhor amigo agora mesmo por um preço simbólico.
+              Tenha tranquilidade sabendo que qualquer pessoa pode te contatar em segundos se houver um imprevisto.
             </p>
             <div>
               <Link 
