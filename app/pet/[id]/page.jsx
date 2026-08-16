@@ -251,7 +251,7 @@ export default function PetProfilePage() {
   const especieAtual = (pet.species || '').toLowerCase()
   const fotoExibicao = pet.foto_url || (especieAtual.includes('gato') ? 'https://cdn-icons-png.flaticon.com/512/616/616554.png' : 'https://cdn-icons-png.flaticon.com/512/616/616408.png')
 
-  const pagamentoAprovado = pet.status === 'aprovado' || pet.pago === true
+  const pagamentoAprovado = pet.is_active === true
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
