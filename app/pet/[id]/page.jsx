@@ -1,190 +1,257 @@
 'use client'
 
-import { useEffect, useState, use } from 'react'
+import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
-import QRCode from 'qrcode'
 
-// Inicialização segura do Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error("ERRO CRÍTICO: Variáveis de ambiente do Supabase não encontradas!")
-}
-
 const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '')
 
-export default function PetPublicPage({ params }) {
-  const resolvedParams = use(params)
-  const id = resolvedParams.id
-  
+export default function PetProfilePage() {
+  const params = useParams()
+  const petId = params.id
+
   const [pet, setPet] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('')
-  const [qrCodeSvg, setQrCodeSvg] = useState('')
-  const [enviandoLocalizacao, setEnviandoLocalizacao] = useState(false)
-  const [sucessoLocalizacao, setSucessoLocalizacao] = useState(false)
+  const [isDono, setIsDono] = useState(false)
 
-  const currentUrl = typeof window !== 'undefined' ? window.location.href : `https://pet-dog-tag-pzem.vercel.app/pet/${id}`
+  // Estados para edição (caso o dono queira alterar os dados)
+  const [editando, setEditando] = useState(false)
+  const [nome, setNome] = useState('')
+  const [telefone, setTelefone] = useState('')
+  const [notes, setNotes] = useState('')
 
   useEffect(() => {
-    async function fetchPetData() {
-      if (!id) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('pets')
-          .select('*')
-          .eq('id', id)
-          .single()
+    async function fetchPetAndUser() {
+      if (!petId) return
 
-        if (error) throw error
-        setPet(data)
-      } catch (err) {
-        console.error("Erro ao buscar pet:", err)
-        setPet(null)
-      } finally {
+      // 1. Busca os dados do pet no Supabase
+      const { data: petData, error } = await supabase
+        .from('pets')
+        .select('*')
+        .eq('id', petId)
+        .single()
+
+      if (error || !petData) {
+        console.error('Erro ao buscar pet:', error)
         setLoading(false)
+        return
       }
+
+      setPet(petData)
+      setNome(petData.name || '')
+      setTelefone(petData.phone || '')
+      setNotes(petData.notes || '')
+
+      // 2. Verifica se existe um usuário logado no momento
+      const { data: { user } } = await supabase.auth.getUser()
+
+      // 3. Compara se o ID do usuário logado é o mesmo do dono cadastrado no pet
+      if (user && petData.user_id && user.id === petData.user_id) {
+        setIsDono(true)
+      }
+
+      setLoading(false)
     }
 
-    fetchPetData()
-  }, [id])
+    fetchPetAndUser()
+  }, [petId])
 
-  useEffect(() => {
-    if (id) {
-      QRCode.toDataURL(currentUrl, { width: 1000, margin: 2 }, (err, url) => {
-        if (!err) setQrCodeDataUrl(url)
-      })
-      QRCode.toString(currentUrl, { type: 'svg', margin: 2 }, (err, svgString) => {
-        if (!err) setQrCodeSvg(svgString)
-      })
+  // Função para salvar alterações feitas pelo dono
+  const handleSalvarAlteracoes = async (e) => {
+    e.preventDefault()
+    const { error } = await supabase
+      .from('pets')
+      .update({ name: nome, phone: telefone, notes: notes })
+      .eq('id', petId)
+
+    if (error) {
+      alert('Erro ao atualizar os dados do pet.')
+    } else {
+      alert('Dados atualizados com sucesso!')
+      setPet({ ...pet, name: nome, phone: telefone, notes: notes })
+      setEditando(false)
     }
-  }, [id, currentUrl])
-
-  const downloadSvg = () => {
-    const blob = new Blob([qrCodeSvg], { type: 'image/svg+xml' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `qrcode-dogtag-${id}.svg`
-    a.click()
   }
 
+  // Função para enviar localização via WhatsApp (Apenas para quem achou o pet)
   const handleEnviarLocalizacao = () => {
-    if (!navigator.geolocation) {
-      alert("Seu navegador não suporta geolocalização.")
+    if (!pet?.phone) {
+      alert('Número de contato não disponível.')
       return
     }
 
-    setEnviandoLocalizacao(true)
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords
-
-        try {
-          // 1. Salva o alerta de geolocalização no banco de dados do Supabase
-          const { error } = await supabase
-            .from('pet_alerts')
-            .insert([{ pet_id: id, latitude, longitude }])
-
-          if (error) throw error
-          setSucessoLocalizacao(true)
-
-          // 2. Prepara o link do Google Maps com as coordenadas exatas
-          const linkGoogleMaps = `https://www.google.com/maps?q=${latitude},${longitude}`
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude
+          const lng = position.coords.longitude
+          const mapsLink = `https://www.google.com/maps?q=${lat},${lng}`
           
-          // 3. Monta a mensagem automática e redireciona para o WhatsApp do dono
-          const mensagem = encodeURIComponent(`🚨 Olá! Encontrei seu pet ${pet.name}! Estou aqui: ${linkGoogleMaps}`)
-          const numeroWhatsApp = pet.phone ? pet.phone.replace(/\D/g, '') : ''
-
-          if (numeroWhatsApp) {
-            window.location.href = `https://wa.me/55${numeroWhatsApp}?text=${mensagem}`
-          } else {
-            alert("Localização salva com sucesso! O dono não cadastrou um telefone, mas o alerta foi registrado.")
-          }
-
-        } catch (err) {
-          console.error("Erro ao inserir alerta:", err)
-          alert("Erro ao salvar localização no banco.")
-          setEnviandoLocalizacao(false)
+          const mensagem = encodeURIComponent(`Olá! Encontrei seu pet ${pet.name}. Aqui está minha localização atual: ${mapsLink}`)
+          window.open(`https://wa.me/55${pet.phone}?text=${mensagem}`, '_blank')
+        },
+        () => {
+          alert('Não foi possível obter sua localização. Verifique as permissões do navegador.')
         }
-      },
-      (error) => {
-        console.error("Erro de geolocalização:", error)
-        alert("Permissão de localização negada ou indisponível.")
-        setEnviandoLocalizacao(false)
-      },
-      { enableHighAccuracy: true }
-    )
+      )
+    } else {
+      alert('Seu navegador não suporta geolocalização.')
+    }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
-        <p>Carregando informações do pet...</p>
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
+        <p className="text-sm text-slate-400 animate-pulse">Carregando informações do pet...</p>
       </div>
     )
   }
 
   if (!pet) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6 text-center">
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6 text-center">
         <div>
-          <h1 className="text-2xl font-bold text-red-400 mb-2">Pet não encontrado</h1>
-          <p className="text-slate-400 text-sm">Verifique se o ID da tag está correto.</p>
+          <h1 className="text-xl font-bold text-red-400 mb-2">Pet não encontrado</h1>
+          <p className="text-sm text-slate-400">Verifique o link da plaqueta ou entre em contato com o suporte.</p>
         </div>
       </div>
     )
   }
 
+  const linkPublicoPet = `https://pet-dog-tag-pzem.vercel.app/pet/${pet.id}`
+  const urlQrCodeImg = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(linkPublicoPet)}`
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 flex flex-col items-center justify-center">
-      <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl">
-        <div className="text-center mb-6">
-          <span className="bg-red-950 text-red-400 border border-red-800 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">🚨 Pet Perdido?</span>
-          <h1 className="text-3xl font-extrabold text-white mt-3">{pet.name}</h1>
-          <p className="text-sm text-slate-400">{pet.species} {pet.breed ? `• ${pet.breed}` : ''}</p>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-6">
+        
+        {/* Cabeçalho */}
+        <div className="text-center">
+          <div className="inline-block bg-indigo-950 border border-indigo-800 text-indigo-400 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+            {isDono ? '🛡️ PAINEL DO DONO (GERENCIAMENTO)' : '🐾 PERFIL DE EMERGÊNCIA / PET'}
+          </div>
+          <h1 className="text-3xl font-extrabold text-white">{pet.name}</h1>
+          <p className="text-sm text-slate-400 capitalize mt-1">{pet.species} {pet.breed ? `• ${pet.breed}` : ''}</p>
         </div>
 
-        <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl mb-6 space-y-3 text-sm">
-          <div>
-            <span className="text-slate-500 block text-xs uppercase font-semibold">Dono:</span>
-            <span className="text-slate-200 font-medium">{pet.owner_name}</span>
-          </div>
-          <div>
-            <span className="text-slate-500 block text-xs uppercase font-semibold">WhatsApp:</span>
-            <a href={`https://wa.me/55${pet.phone?.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 font-bold hover:underline block">{pet.phone}</a>
-          </div>
-          {pet.notes && (
+        {/* ======================================================== */}
+        {/* SE FOR O DONO E ESTIVER EDITANDO OS DADOS               */}
+        {/* ======================================================== */}
+        {isDono && editando ? (
+          <form onSubmit={handleSalvarAlteracoes} className="space-y-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
+            <h2 className="text-xs font-bold uppercase text-indigo-400 mb-2">Editar Dados do Pet</h2>
             <div>
-              <span className="text-slate-500 block text-xs uppercase font-semibold">Cuidados e Alergias:</span>
-              <span className="text-amber-300 font-medium">{pet.notes}</span>
+              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Nome do Pet</label>
+              <input 
+                type="text" 
+                value={nome} 
+                onChange={(e) => setNome(e.target.value)} 
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                required
+              />
             </div>
-          )}
-        </div>
-
-        <div className="mb-8">
-          <button 
-            onClick={handleEnviarLocalizacao} 
-            disabled={enviandoLocalizacao || sucessoLocalizacao} 
-            className={`w-full py-3.5 rounded-xl text-sm font-bold shadow-lg transition ${sucessoLocalizacao ? 'bg-emerald-700 text-white' : 'bg-red-600 hover:bg-red-500 text-white'}`}
-          >
-            {enviandoLocalizacao ? 'Obtendo GPS...' : sucessoLocalizacao ? '📍 Localização Enviada!' : '📍 Enviar Minha Localização'}
-          </button>
-        </div>
-
-        {pet.is_active && (
-          <div className="border-t border-slate-800 pt-6 text-center">
-            <h2 className="text-sm font-semibold text-indigo-400 mb-3">Gerenciamento (Dono)</h2>
-            {qrCodeDataUrl && <img src={qrCodeDataUrl} alt="QR Code" className="w-36 h-36 mx-auto mb-4 bg-white p-2 rounded-lg" />}
-            <div className="space-y-2">
-              <a href={qrCodeDataUrl} download={`qrcode-${pet.name}.png`} className="block w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs py-2.5 rounded-xl transition">Baixar PNG</a>
-              <button onClick={downloadSvg} className="block w-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs py-2.5 rounded-xl border border-slate-700 transition">Baixar SVG (CNC)</button>
+            <div>
+              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">WhatsApp de Contato</label>
+              <input 
+                type="text" 
+                value={telefone} 
+                onChange={(e) => setTelefone(e.target.value)} 
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                required
+              />
             </div>
+            <div>
+              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Cuidados / Alergias</label>
+              <textarea 
+                value={notes} 
+                onChange={(e) => setNotes(e.target.value)} 
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                rows="3"
+              />
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-lg text-xs transition">
+                Salvar Alterações
+              </button>
+              <button type="button" onClick={() => setEditando(false)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-lg text-xs transition">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        ) : (
+          /* Informações Básicas (Visível para ambos) */
+          <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3 text-sm">
+            <div className="flex justify-between border-b border-slate-800 pb-2">
+              <span className="text-slate-400 font-semibold uppercase text-xs">Dono:</span>
+              <span className="text-slate-200 font-medium">{pet.owner_name}</span>
+            </div>
+            <div className="flex justify-between border-b border-slate-800 pb-2">
+              <span className="text-slate-400 font-semibold uppercase text-xs">WhatsApp:</span>
+              <span className="text-slate-200 font-medium">{pet.phone || 'Não informado'}</span>
+            </div>
+            {pet.notes && (
+              <div>
+                <span className="text-slate-400 font-semibold uppercase text-xs block mb-1">Cuidados / Alergias:</span>
+                <p className="text-slate-300 bg-slate-900 p-2 rounded-lg">{pet.notes}</p>
+              </div>
+            )}
           </div>
         )}
+
+        {/* ======================================================== */}
+        {/* CONDICIONAL DE AÇÕES: QUEM VÊ O QUE?                     */}
+        {/* ======================================================== */}
+        {isDono ? (
+          /* SE FOR O DONO LOGADO: Mostra opções de alterar dados e baixar QR Code (SEM GPS) */
+          <div className="space-y-4 pt-2">
+            {!editando && (
+              <button
+                onClick={() => setEditando(true)}
+                className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-xl text-sm transition"
+              >
+                ✏️ Alterar Dados do Pet
+              </button>
+            )}
+
+            <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
+              <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta:</p>
+              <div className="flex justify-center">
+                <img 
+                  src={urlQrCodeImg} 
+                  alt="QR Code da Dog Tag" 
+                  className="w-32 h-32 border-4 border-white rounded-lg shadow-md" 
+                />
+              </div>
+              <div className="flex gap-2 pt-1">
+                <a 
+                  href={urlQrCodeImg} 
+                  download={`qrcode-${pet.name}.png`}
+                  target="_blank"
+                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 rounded-lg text-center transition"
+                >
+                  Baixar PNG
+                </a>
+                <a 
+                  href="/dashboard"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-lg text-center transition"
+                >
+                  Painel Geral
+                </a>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* SE FOR UM ESTRANHO (LEU O QR CODE NA RUA): Mostra apenas o botão de GPS */
+          <button
+            onClick={handleEnviarLocalizacao}
+            className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-red-600/20 transition flex items-center justify-center gap-2"
+          >
+            📍 Enviar Minha Localização
+          </button>
+        )}
+
       </div>
     </div>
   )
