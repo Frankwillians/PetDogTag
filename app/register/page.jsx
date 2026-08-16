@@ -16,7 +16,7 @@ export default function RegisterPage() {
   const [errorMsg, setErrorMsg] = useState('')
   const router = useRouter()
 
-  const handleRegister = async (e) => {
+  const handleRegister = async (e)  => {
     e.preventDefault()
     setLoading(true)
     setErrorMsg('')
@@ -36,9 +36,19 @@ export default function RegisterPage() {
       return
     }
 
+    // 2. Dispara o e-mail de boas-vindas personalizado via Resend
+    try {
+      await fetch('/api/boas-vindas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, nome })
+      })
+    } catch (err) {
+      console.error('Erro ao chamar rota de boas-vindas:', err)
+    }
+
     setLoading(false)
-    alert('Conta criada com sucesso! Faça login para continuar.')
-    router.push('/login')
+    router.push('/dashboard')
   }
 
   return (
@@ -100,7 +110,7 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-indigo-600/20 transition mt-2"
           >
-            {loading ? 'Cadastrando...' : 'Cadastrar'}
+            {loading ? 'Criando conta...' : 'Cadastrar'}
           </button>
         </form>
 
