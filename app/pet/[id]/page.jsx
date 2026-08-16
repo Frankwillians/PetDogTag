@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import { jsPDF } from 'jspdf'
+
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -12,7 +13,11 @@ const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '')
 export default function PetProfilePage() {
   const params = useParams()
   const petId = params?.id
+  const searchParams = useSearchParams()
+  const modoPublicoForcado = searchParams.get('public') === 'true'
 
+  const isDono = isDonoReal && !visualizarComoPublico && !modoPublicoForcado
+  
   const [pet, setPet] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isDonoReal, setIsDonoReal] = useState(false)

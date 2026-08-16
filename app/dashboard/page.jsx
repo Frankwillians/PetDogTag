@@ -273,4 +273,4 @@ export default function Dashboard() {
       </div>
     </div>
   )
-}
+}<a href={`/pet/${pet.id}?public=true`}>Ver Página Pública</a>
