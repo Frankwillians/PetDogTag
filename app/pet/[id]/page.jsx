@@ -11,7 +11,6 @@ const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '')
 
 export default function PetProfilePage() {
   const params = useParams()
-  // Garante compatibilidade caso o params venha assíncrono ou direto
   const petId = params?.id
 
   const [pet, setPet] = useState(null)
@@ -26,7 +25,6 @@ export default function PetProfilePage() {
   const [fotoUrl, setFotoUrl] = useState('')
   const [enviandoFoto, setEnviandoFoto] = useState(false)
 
-  // Pega dinamicamente o domínio atual (funciona tanto local quanto na Vercel)
   const [baseUrl, setBaseUrl] = useState('')
 
   useEffect(() => {
@@ -253,10 +251,13 @@ export default function PetProfilePage() {
   const especieAtual = (pet.species || '').toLowerCase()
   const fotoExibicao = pet.foto_url || (especieAtual.includes('gato') ? 'https://cdn-icons-png.flaticon.com/512/616/616554.png' : 'https://cdn-icons-png.flaticon.com/512/616/616408.png')
 
+  const pagamentoAprovado = pet.status === 'aprovado' || pet.pago === true
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-6">
         
+        {/* Cabeçalho */}
         <div className="text-center">
           <div className="inline-block bg-indigo-950 border border-indigo-800 text-indigo-400 text-xs font-semibold px-3 py-1 rounded-full mb-3">
             {isDono ? '🛡️ PAINEL DO DONO (GERENCIAMENTO)' : '🐾 PERFIL DE EMERGÊNCIA / PET'}
@@ -272,6 +273,7 @@ export default function PetProfilePage() {
           <p className="text-sm text-slate-400 capitalize mt-1">{pet.species} {pet.breed ? `• ${pet.breed}` : ''}</p>
         </div>
 
+        {/* SE FOR O DONO E ESTIVER EDITANDO OS DADOS */}
         {isDono && editando ? (
           <form onSubmit={handleSalvarAlteracoes} className="space-y-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
             <h2 className="text-xs font-bold uppercase text-indigo-400 mb-2">Editar Dados do Pet</h2>
@@ -338,6 +340,7 @@ export default function PetProfilePage() {
             </div>
           </form>
         ) : (
+          /* Informações do Pet (Visíveis tanto para o dono quanto para quem achar) */
           <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3 text-sm">
             <div className="flex justify-between border-b border-slate-800 pb-2">
               <span className="text-slate-400 font-semibold uppercase text-xs">Dono:</span>
@@ -356,7 +359,9 @@ export default function PetProfilePage() {
           </div>
         )}
 
+        {/* CONTROLE DE EXIBIÇÃO: DONO X QUEM ACHOU */}
         {isDono ? (
+          /* SE FOR O DONO */
           <div className="space-y-4 pt-2">
             {!editando && (
               <button
@@ -367,41 +372,57 @@ export default function PetProfilePage() {
               </button>
             )}
 
-            <button
-              onClick={() => gerarPdfTag(pet)}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2"
-            >
-              🛠️ Baixar Molde PDF (CNC / Impressão)
-            </button>
+            {/* SE O PAGAMENTO ESTIVER APROVADO, LIBERA O QR CODE E O PDF */}
+            {pagamentoAprovado ? (
+              <div className="space-y-4">
+                <button
+                  onClick={() => gerarPdfTag(pet)}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2"
+                >
+                  🛠️ Baixar Molde PDF (CNC / Impressão)
+                </button>
 
-            <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
-              <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta:</p>
-              <div className="flex justify-center">
-                <img 
-                  src={urlQrCodeImg} 
-                  alt="QR Code da Dog Tag" 
-                  className="w-32 h-32 border-4 border-white rounded-lg shadow-md" 
-                />
+                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
+                  <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta:</p>
+                  <div className="flex justify-center">
+                    <img 
+                      src={urlQrCodeImg} 
+                      alt="QR Code da Dog Tag" 
+                      className="w-32 h-32 border-4 border-white rounded-lg shadow-md" 
+                    />
+                  </div>
+                  <div className="flex gap-2 pt-1">
+                    <a 
+                      href={urlQrCodeImg} 
+                      download={`qrcode-${pet.name}.png`}
+                      target="_blank"
+                      className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 rounded-lg text-center transition"
+                    >
+                      Baixar PNG
+                    </a>
+                    <a 
+                      href="/dashboard"
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-lg text-center transition"
+                    >
+                      Painel Geral
+                    </a>
+                  </div>
+                </div>
               </div>
-              <div className="flex gap-2 pt-1">
-                <a 
-                  href={urlQrCodeImg} 
-                  download={`qrcode-${pet.name}.png`}
-                  target="_blank"
-                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 rounded-lg text-center transition"
-                >
-                  Baixar PNG
-                </a>
-                <a 
-                  href="/dashboard"
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-lg text-center transition"
-                >
-                  Painel Geral
-                </a>
+            ) : (
+              /* SE O PAGAMENTO ESTIVER PENDENTE */
+              <div className="bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl text-center space-y-2">
+                <span className="text-2xl">⏳</span>
+                <h3 className="font-bold text-amber-400 text-sm">Pagamento Pendente</h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  O acesso ao QR Code e ao molde PDF será liberado automaticamente assim que o pagamento for confirmado.
+                </p>
               </div>
-            </div>
+            )}
+
           </div>
         ) : (
+          /* SE FOR UM ESTRANHO (QUEM LEU A PLACA NA RUA): Apenas o botão de enviar localização */
           <button
             onClick={handleEnviarLocalizacao}
             className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-red-600/20 transition flex items-center justify-center gap-2"
