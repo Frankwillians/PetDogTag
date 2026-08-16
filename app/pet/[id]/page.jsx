@@ -79,6 +79,8 @@ export default function PetProfilePage() {
   }
 
   // Função para gerar o PDF da Dog Tag para CNC / Impressão (Frente e Verso lado a lado para dobra)
+
+  // Função corrigida para gerar o PDF da Dog Tag sem erro de emojis
   const gerarPdfTag = async (petData) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -94,16 +96,18 @@ export default function PetProfilePage() {
     doc.setFont("helvetica", "normal")
     doc.text(`Contato: ${petData.phone} | Link: https://pet-dog-tag-pzem.vercel.app/pet/${petData.id}`, 15, 21)
 
-    // LADO 1: FRENTE (Contorno + Ícone + Nome do Pet)
+    // LADO 1: FRENTE (Contorno + Rótulo + Nome do Pet)
     doc.setLineWidth(0.4)
     doc.rect(15, 30, 60, 60) // Quadrado da Frente
 
     doc.setFont("helvetica", "bold")
-    doc.setFontSize(26)
-    doc.text(petData.icone || '🐾', 45, 53, { align: 'center' }) // Ícone escolhido
+    doc.setFontSize(16)
+    // Usamos um rótulo em texto limpo em vez de emoji para a CNC não bugar
+    const rotuloIcone = petData.icone === '🐱' ? '[ GATO ]' : petData.icone === '🐶' ? '[ CÃO ]' : petData.icone === '🦴' ? '[ OSSO ]' : '[ PET ]'
+    doc.text(rotuloIcone, 45, 50, { align: 'center' })
 
     doc.setFontSize(14)
-    doc.text(petData.name, 45, 72, { align: 'center' }) // Nome do pet
+    doc.text(petData.name, 45, 68, { align: 'center' }) // Nome do pet
 
     doc.setFontSize(8)
     doc.setFont("helvetica", "italic")
@@ -128,7 +132,6 @@ export default function PetProfilePage() {
       reader.readAsDataURL(blob)
       reader.onloadend = () => {
         const base64data = reader.result
-        // Insere o QR Code centralizado no quadrado do verso
         doc.addImage(base64data, 'PNG', 103, 35, 34, 34)
         
         doc.setFont("helvetica", "bold")
