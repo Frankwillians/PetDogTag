@@ -237,7 +237,7 @@ export default function Dashboard() {
                           Ver / Baixar QR Code
                         </a>
                         <a
-                          href={`/pet/${pet.id}`}
+                          href={`/pet/${pet.id}?public=true`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="block w-full text-center bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium py-2 rounded-xl transition"
@@ -254,7 +254,7 @@ export default function Dashboard() {
                           Pagar Ativação (R$ 10,00)
                         </button>
                         <a
-                          href={`/pet/${pet.id}`}
+                          href={`/pet/${pet.id}?public=true`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="block w-full text-center bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium py-2 rounded-xl transition"
@@ -273,4 +273,4 @@ export default function Dashboard() {
       </div>
     </div>
   )
-}<a href={`/pet/${pet.id}?public=true`}>Ver Página Pública</a>
+}
