@@ -23,6 +23,7 @@ export default function PetProfilePage() {
   const [telefone, setTelefone] = useState('')
   const [notes, setNotes] = useState('')
   const [icone, setIcone] = useState('🐾')
+  const [fotoUrl, setFotoUrl] = useState('')
 
   useEffect(() => {
     async function fetchPetAndUser() {
@@ -46,6 +47,7 @@ export default function PetProfilePage() {
       setTelefone(petData.phone || '')
       setNotes(petData.notes || '')
       setIcone(petData.icone || '🐾')
+      setFotoUrl(petData.foto_url || '')
 
       // 2. Verifica se existe um usuário logado no momento
       const { data: { user } } = await supabase.auth.getUser()
@@ -66,21 +68,19 @@ export default function PetProfilePage() {
     e.preventDefault()
     const { error } = await supabase
       .from('pets')
-      .update({ name: nome, phone: telefone, notes: notes, icone: icone })
+      .update({ name: nome, phone: telefone, notes: notes, icone: icone, foto_url: fotoUrl })
       .eq('id', petId)
 
     if (error) {
       alert('Erro ao atualizar os dados do pet.')
     } else {
       alert('Dados atualizados com sucesso!')
-      setPet({ ...pet, name: nome, phone: telefone, notes: notes, icone: icone })
+      setPet({ ...pet, name: nome, phone: telefone, notes: notes, icone: icone, foto_url: fotoUrl })
       setEditando(false)
     }
   }
 
-  // Função para gerar o PDF da Dog Tag para CNC / Impressão (Frente e Verso lado a lado para dobra)
-
-  // Função corrigida para gerar o PDF da Dog Tag sem erro de emojis
+  // Função para gerar o PDF da Dog Tag para CNC / Impressão (Usa foto ou patinha padrão)
   const gerarPdfTag = async (petData) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -96,18 +96,35 @@ export default function PetProfilePage() {
     doc.setFont("helvetica", "normal")
     doc.text(`Contato: ${petData.phone} | Link: https://pet-dog-tag-pzem.vercel.app/pet/${petData.id}`, 15, 21)
 
-    // LADO 1: FRENTE (Contorno + Rótulo + Nome do Pet)
+    // LADO 1: FRENTE (Contorno + Foto/Patinha + Nome do Pet)
     doc.setLineWidth(0.4)
     doc.rect(15, 30, 60, 60) // Quadrado da Frente
 
-    doc.setFont("helvetica", "bold")
-    doc.setFontSize(16)
-    // Usamos um rótulo em texto limpo em vez de emoji para a CNC não bugar
-    const rotuloIcone = petData.icone === '🐱' ? '[ GATO ]' : petData.icone === '🐶' ? '[ CÃO ]' : petData.icone === '🦴' ? '[ OSSO ]' : '[ PET ]'
-    doc.text(rotuloIcone, 45, 50, { align: 'center' })
+    const imgPadraoCao = 'https://cdn-icons-png.flaticon.com/512/616/616408.png'
+    const imgPadraoGato = 'https://cdn-icons-png.flaticon.com/512/616/616554.png'
+    
+    let imagemParaUsar = petData.foto_url
+    if (!imagemParaUsar) {
+      const especie = (petData.species || '').toLowerCase()
+      imagemParaUsar = especie.includes('gato') ? imgPadraoGato : imgPadraoCao
+    }
 
+    try {
+      const img = new Image()
+      img.crossOrigin = 'Anonymous'
+      img.src = imagemParaUsar
+      await new Promise((resolve, reject) => {
+        img.onload = resolve
+        img.onerror = reject
+      })
+      doc.addImage(img, 'PNG', 30, 35, 30, 30)
+    } catch (err) {
+      console.warn('Não foi possível carregar a imagem no PDF.', err)
+    }
+
+    doc.setFont("helvetica", "bold")
     doc.setFontSize(14)
-    doc.text(petData.name, 45, 68, { align: 'center' }) // Nome do pet
+    doc.text(petData.name, 45, 72, { align: 'center' })
 
     doc.setFontSize(8)
     doc.setFont("helvetica", "italic")
@@ -118,8 +135,8 @@ export default function PetProfilePage() {
     doc.line(80, 25, 80, 95)
     doc.setLineDash([], 0)
 
-    // LADO 2: VERSO (Contorno + QR Code + Alerta)
-    doc.rect(90, 30, 60, 60) // Quadrado do Verso
+    // LADO 2: VERSO (Contorno + QR Code)
+    doc.rect(90, 30, 60, 60)
 
     const linkPublico = `https://pet-dog-tag-pzem.vercel.app/pet/${petData.id}`
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkPublico)}`
@@ -197,6 +214,9 @@ export default function PetProfilePage() {
 
   const linkPublicoPet = `https://pet-dog-tag-pzem.vercel.app/pet/${pet.id}`
   const urlQrCodeImg = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(linkPublicoPet)}`
+  
+  const especieAtual = (pet.species || '').toLowerCase()
+  const fotoExibicao = pet.foto_url || (especieAtual.includes('gato') ? 'https://cdn-icons-png.flaticon.com/512/616/616554.png' : 'https://cdn-icons-png.flaticon.com/512/616/616408.png')
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
@@ -207,6 +227,12 @@ export default function PetProfilePage() {
           <div className="inline-block bg-indigo-950 border border-indigo-800 text-indigo-400 text-xs font-semibold px-3 py-1 rounded-full mb-3">
             {isDono ? '🛡️ PAINEL DO DONO (GERENCIAMENTO)' : '🐾 PERFIL DE EMERGÊNCIA / PET'}
           </div>
+
+          <div className="flex justify-center mb-3">
+            <img src={fotoExibicao} alt={pet.name} className="w-24 h-24 object-cover rounded-full border-2 border-indigo-500 shadow-md bg-slate-950 p-1" />
+          </div>
+
+          {/* Ícone escolhido exibido apenas ao lado do nome do pet */}
           <h1 className="text-3xl font-extrabold text-white flex items-center justify-center gap-2">
             <span>{pet.icone || '🐾'}</span> {pet.name}
           </h1>
@@ -228,18 +254,28 @@ export default function PetProfilePage() {
               />
             </div>
             <div>
-              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Ícone da Plaqueta</label>
+              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Ícone ao Lado do Nome</label>
               <select 
                 value={icone} 
                 onChange={(e) => setIcone(e.target.value)}
                 className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
               >
-                <option value="🐾">🐾 Patas (Padrão)</option>
+                <option value="🐾">🐾 Patas</option>
                 <option value="🐱">🐱 Gato</option>
                 <option value="🐶">🐶 Cachorro</option>
                 <option value="🦴">🦴 Osso</option>
                 <option value="❤️">❤️ Coração</option>
               </select>
+            </div>
+            <div>
+              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Link da Foto (Opcional - Para a CNC)</label>
+              <input 
+                type="url" 
+                value={fotoUrl} 
+                onChange={(e) => setFotoUrl(e.target.value)} 
+                placeholder="https://exemplo.com/foto.jpg"
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+              />
             </div>
             <div>
               <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">WhatsApp de Contato</label>
@@ -291,14 +327,13 @@ export default function PetProfilePage() {
 
         {/* CONDICIONAL DE AÇÕES */}
         {isDono ? (
-          /* SE FOR O DONO: Editar, Baixar Molde PDF CNC e ver QR Code */
           <div className="space-y-4 pt-2">
             {!editando && (
               <button
                 onClick={() => setEditando(true)}
                 className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-xl text-sm transition"
               >
-                ✏️ Alterar Dados do Pet
+                ✏️ Alterar Dados / Ícone
               </button>
             )}
 
@@ -306,7 +341,7 @@ export default function PetProfilePage() {
               onClick={() => gerarPdfTag(pet)}
               className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2"
             >
-              🛠️ Baixar Molde PDF (CNC / Impressão)
+              🛠️ Baixar Molde PDF para CNC
             </button>
 
             <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
@@ -337,7 +372,6 @@ export default function PetProfilePage() {
             </div>
           </div>
         ) : (
-          /* SE FOR ESTRANHO (RUA): Apenas o botão de GPS */
           <button
             onClick={handleEnviarLocalizacao}
             className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-red-600/20 transition flex items-center justify-center gap-2"
