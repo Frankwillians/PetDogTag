@@ -5,19 +5,17 @@ import { useParams, useSearchParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import { jsPDF } from 'jspdf'
 
-
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '')
 
 export default function PetProfilePage() {
   const params = useParams()
-  const petId = params?.id
   const searchParams = useSearchParams()
+  
+  const petId = params?.id
   const modoPublicoForcado = searchParams.get('public') === 'true'
 
-  const isDono = isDonoReal && !visualizarComoPublico && !modoPublicoForcado
-  
   const [pet, setPet] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isDonoReal, setIsDonoReal] = useState(false)
@@ -258,7 +256,7 @@ export default function PetProfilePage() {
   const fotoExibicao = pet.foto_url || (especieAtual.includes('gato') ? 'https://cdn-icons-png.flaticon.com/512/616/616554.png' : 'https://cdn-icons-png.flaticon.com/512/616/616408.png')
 
   const pagamentoAprovado = pet.is_active === true
-  const isDono = isDonoReal && !visualizarComoPublico
+  const isDono = isDonoReal && !visualizarComoPublico && !modoPublicoForcado
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4">
