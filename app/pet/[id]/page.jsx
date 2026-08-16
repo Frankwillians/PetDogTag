@@ -19,7 +19,6 @@ export default function PetProfilePage() {
   const [pet, setPet] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isDonoReal, setIsDonoReal] = useState(false)
-  const [visualizarComoPublico, setVisualizarComoPublico] = useState(false)
 
   const [editando, setEditando] = useState(false)
   const [nome, setNome] = useState('')
@@ -256,24 +255,10 @@ export default function PetProfilePage() {
   const fotoExibicao = pet.foto_url || (especieAtual.includes('gato') ? 'https://cdn-icons-png.flaticon.com/512/616/616554.png' : 'https://cdn-icons-png.flaticon.com/512/616/616408.png')
 
   const pagamentoAprovado = pet.is_active === true
-  const isDono = isDonoReal && !visualizarComoPublico && !modoPublicoForcado
+  const isDono = isDonoReal && !modoPublicoForcado
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4">
-      
-      {/* BARRA DE CONTROLE PARA O DONO ALTERNAR A VISÃO */}
-      {isDonoReal && (
-        <div className="mb-4 w-full max-w-md bg-slate-900 border border-slate-800 p-2 rounded-xl flex items-center justify-between text-xs">
-          <span className="text-slate-400 pl-2">Modo Dono Ativo</span>
-          <button 
-            onClick={() => setVisualizarComoPublico(!visualizarComoPublico)}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-1.5 rounded-lg transition"
-          >
-            {visualizarComoPublico ? '⚙️ Voltar ao Painel' : '👁️ Ver Página Pública'}
-          </button>
-        </div>
-      )}
-
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-6">
         
         {/* Cabeçalho */}
@@ -434,20 +419,33 @@ export default function PetProfilePage() {
                 <span className="text-2xl">⏳</span>
                 <h3 className="font-bold text-amber-400 text-sm">Pagamento Pendente</h3>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  O acesso ao QR Code e ao molde PDF será liberado automaticamente assim que o pagamento for confirmado.
+                  O acesso ao QR Code e ao molde PDF será liberado automaticamente assim que o pagamento de ativação for confirmado.
                 </p>
               </div>
             )}
 
           </div>
-        ) : (
-          /* SE FOR UM ESTRANHO OU MODO PÚBLICO: Apenas o botão de enviar localização */
-          <button
-            onClick={handleEnviarLocalizacao}
-            className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-red-600/20 transition flex items-center justify-center gap-2"
-          >
-            📍 Enviar Minha Localização
-          </button>
+        ) : null}
+
+        {/* SE FOR QUEM ACHOU O PET */}
+        {!isDono && (
+          <div>
+            {pagamentoAprovado ? (
+              <button
+                onClick={handleEnviarLocalizacao}
+                className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-red-600/20 transition flex items-center justify-center gap-2"
+              >
+                📍 Enviar Minha Localização
+              </button>
+            ) : (
+              <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-2">
+                <span className="text-xl">⚠️</span>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Esta plaqueta ainda não foi ativada pelo dono. O resgate via QR Code estará disponível assim que a taxa de cadastro for confirmada.
+                </p>
+              </div>
+            )}
+          </div>
         )}
 
       </div>
