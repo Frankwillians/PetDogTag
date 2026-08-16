@@ -34,7 +34,7 @@ export default function LandingPage() {
         </h1>
 
         <p className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          Crie uma plaqueta inteligente com QR Code em segundos. Quem achar o seu animal esaneia com a câmera do celular e envia a <strong>localização exata do GPS direto no seu WhatsApp</strong>.
+          Crie uma plaqueta inteligente com QR Code em segundos. Quem achar o seu animal escaneia com a câmera do celular e envia a <strong>localização exata do GPS direto no seu WhatsApp</strong>.
         </p>
 
         {/* BOTÕES DE AÇÃO */}
