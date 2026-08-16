@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import { jsPDF } from 'jspdf'
 
@@ -12,6 +12,7 @@ const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '')
 export default function PetProfilePage() {
   const params = useParams()
   const searchParams = useSearchParams()
+  const router = useRouter()
   
   const petId = params?.id
   const modoPublicoForcado = searchParams.get('public') === 'true'
@@ -259,6 +260,17 @@ export default function PetProfilePage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
+      
+      {/* Botão Voltar Fixo */}
+      <div className="fixed top-4 left-4 z-50">
+        <button
+          onClick={() => isDonoReal ? router.push('/dashboard') : window.history.back()}
+          className="bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-lg"
+        >
+          ⬅️ {isDonoReal ? 'Painel' : 'Voltar'}
+        </button>
+      </div>
+
       <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-6">
         
         {/* Cabeçalho */}
