@@ -259,7 +259,7 @@ export default function PetProfilePage() {
   const isDono = isDonoReal && !modoPublicoForcado
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 py-12">
       
       {/* Botão Voltar Fixo */}
       <div className="fixed top-4 left-4 z-50">
@@ -460,27 +460,22 @@ export default function PetProfilePage() {
           </div>
         )}
 
-      </div>
-
-        {/* Banner de Autopromoção (Só aparece para quem não é o dono) */}
+        {/* Banner de Autopromoção Sutil (Apenas para visitantes) */}
         {!isDono && (
-          <div className="mt-8 border-t border-slate-800 pt-6 text-center">
-            <div className="bg-slate-950 p-4 rounded-xl border border-indigo-900/50">
-              <p className="text-xs text-indigo-300 font-bold uppercase tracking-widest mb-2">Proteja quem você ama</p>
-              <h4 className="text-sm font-semibold text-white mb-3">Gostou dessa tecnologia?</h4>
-              <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-                Tenha uma plaqueta inteligente para o seu pet também. Cadastro simples e segurança total.
-              </p>
-              <a 
-                href="/register" 
-                className="block w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg text-xs transition"
-              >
-                Criar Minha Plaqueta
-              </a>
-            </div>
+          <div className="border-t border-slate-800/80 pt-4 mt-4 text-center">
+            <p className="text-[11px] text-slate-400 mb-1">
+              Gostou da plaqueta inteligente?
+            </p>
+            <a 
+              href="/register" 
+              className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition underline underline-offset-2"
+            >
+              Proteja seu pet também com a DarkStar Pets 🐾
+            </a>
           </div>
         )}
 
+      </div>
     </div>
   )
 }
