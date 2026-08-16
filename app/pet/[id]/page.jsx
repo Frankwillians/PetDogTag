@@ -22,6 +22,7 @@ export default function PetProfilePage() {
   const [nome, setNome] = useState('')
   const [telefone, setTelefone] = useState('')
   const [notes, setNotes] = useState('')
+  const [icone, setIcone] = useState('🐾')
 
   useEffect(() => {
     async function fetchPetAndUser() {
@@ -44,6 +45,7 @@ export default function PetProfilePage() {
       setNome(petData.name || '')
       setTelefone(petData.phone || '')
       setNotes(petData.notes || '')
+      setIcone(petData.icone || '🐾')
 
       // 2. Verifica se existe um usuário logado no momento
       const { data: { user } } = await supabase.auth.getUser()
@@ -64,55 +66,56 @@ export default function PetProfilePage() {
     e.preventDefault()
     const { error } = await supabase
       .from('pets')
-      .update({ name: nome, phone: telefone, notes: notes })
+      .update({ name: nome, phone: telefone, notes: notes, icone: icone })
       .eq('id', petId)
 
     if (error) {
       alert('Erro ao atualizar os dados do pet.')
     } else {
       alert('Dados atualizados com sucesso!')
-      setPet({ ...pet, name: nome, phone: telefone, notes: notes })
+      setPet({ ...pet, name: nome, phone: telefone, notes: notes, icone: icone })
       setEditando(false)
     }
   }
 
-  // Função para gerar o PDF da Dog Tag para CNC / Impressão
+  // Função para gerar o PDF da Dog Tag para CNC / Impressão (Frente e Verso lado a lado para dobra)
   const gerarPdfTag = async (petData) => {
     const doc = new jsPDF({
-      orientation: 'portrait',
+      orientation: 'landscape',
       unit: 'mm',
       format: 'a4'
     })
 
     doc.setFont("helvetica", "bold")
-    doc.setFontSize(16)
-    doc.text(`Moldes para Plaqueta CNC - ${petData.name}`, 20, 20)
+    doc.setFontSize(14)
+    doc.text(`Molde CNC / Dobrável - Plaqueta: ${petData.name}`, 15, 15)
 
-    doc.setFontSize(10)
+    doc.setFontSize(9)
     doc.setFont("helvetica", "normal")
-    doc.text(`Espécie: ${petData.species.toUpperCase()} | Contato: ${petData.phone}`, 20, 26)
-    doc.text(`Link do QR Code: https://pet-dog-tag-pzem.vercel.app/pet/${petData.id}`, 20, 32)
+    doc.text(`Contato: ${petData.phone} | Link: https://pet-dog-tag-pzem.vercel.app/pet/${petData.id}`, 15, 21)
 
-    // PARTE 1: FRENTE (Contorno + Ícone + Nome)
-    doc.setLineWidth(0.5)
-    doc.rect(20, 45, 60, 80) // Contorno da plaqueta (60x80mm)
-    
-    // Linha tracejada de dobra
-    doc.setLineDash([2, 2], 0)
-    doc.line(20, 85, 80, 85)
-    doc.setLineDash([], 0)
+    // LADO 1: FRENTE (Contorno + Ícone + Nome do Pet)
+    doc.setLineWidth(0.4)
+    doc.rect(15, 30, 60, 60) // Quadrado da Frente
 
     doc.setFont("helvetica", "bold")
+    doc.setFontSize(26)
+    doc.text(petData.icone || '🐾', 45, 53, { align: 'center' }) // Ícone escolhido
+
     doc.setFontSize(14)
-    doc.text(petData.name, 50, 65, { align: 'center' })
+    doc.text(petData.name, 45, 72, { align: 'center' }) // Nome do pet
 
-    const iconeTexto = petData.species.toLowerCase() === 'gato' ? '🐾 [GATO]' : '🐾 [CÃO]'
-    doc.setFontSize(10)
-    doc.text(iconeTexto, 50, 75, { align: 'center' })
-    doc.text('(Lado Frontal / Dobra)', 50, 115, { align: 'center' })
+    doc.setFontSize(8)
+    doc.setFont("helvetica", "italic")
+    doc.text('[ Lado Frontal ]', 45, 84, { align: 'center' })
 
-    // PARTE 2: VERSO (QR Code para CNC)
-    doc.rect(90, 45, 60, 80) // Contorno do verso
+    // LINHA DE DOBRA CENTRALIZADA
+    doc.setLineDash([1.5, 1.5], 0)
+    doc.line(80, 25, 80, 95)
+    doc.setLineDash([], 0)
+
+    // LADO 2: VERSO (Contorno + QR Code + Alerta)
+    doc.rect(90, 30, 60, 60) // Quadrado do Verso
 
     const linkPublico = `https://pet-dog-tag-pzem.vercel.app/pet/${petData.id}`
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkPublico)}`
@@ -125,12 +128,16 @@ export default function PetProfilePage() {
       reader.readAsDataURL(blob)
       reader.onloadend = () => {
         const base64data = reader.result
-        doc.addImage(base64data, 'PNG', 105, 55, 30, 30)
+        // Insere o QR Code centralizado no quadrado do verso
+        doc.addImage(base64data, 'PNG', 103, 35, 34, 34)
         
         doc.setFont("helvetica", "bold")
-        doc.setFontSize(9)
-        doc.text('LEIA O QR CODE', 120, 95, { align: 'center' })
-        doc.text('(Verso da Plaqueta)', 120, 115, { align: 'center' })
+        doc.setFontSize(8)
+        doc.text('LEIA O QR CODE', 120, 76, { align: 'center' })
+        
+        doc.setFont("helvetica", "italic")
+        doc.setFontSize(8)
+        doc.text('[ Lado Traseiro / Verso ]', 120, 84, { align: 'center' })
 
         doc.save(`dog-tag-${petData.name.toLowerCase()}.pdf`)
       }
@@ -197,7 +204,9 @@ export default function PetProfilePage() {
           <div className="inline-block bg-indigo-950 border border-indigo-800 text-indigo-400 text-xs font-semibold px-3 py-1 rounded-full mb-3">
             {isDono ? '🛡️ PAINEL DO DONO (GERENCIAMENTO)' : '🐾 PERFIL DE EMERGÊNCIA / PET'}
           </div>
-          <h1 className="text-3xl font-extrabold text-white">{pet.name}</h1>
+          <h1 className="text-3xl font-extrabold text-white flex items-center justify-center gap-2">
+            <span>{pet.icone || '🐾'}</span> {pet.name}
+          </h1>
           <p className="text-sm text-slate-400 capitalize mt-1">{pet.species} {pet.breed ? `• ${pet.breed}` : ''}</p>
         </div>
 
@@ -214,6 +223,20 @@ export default function PetProfilePage() {
                 className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
                 required
               />
+            </div>
+            <div>
+              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Ícone da Plaqueta</label>
+              <select 
+                value={icone} 
+                onChange={(e) => setIcone(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+              >
+                <option value="🐾">🐾 Patas (Padrão)</option>
+                <option value="🐱">🐱 Gato</option>
+                <option value="🐶">🐶 Cachorro</option>
+                <option value="🦴">🦴 Osso</option>
+                <option value="❤️">❤️ Coração</option>
+              </select>
             </div>
             <div>
               <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">WhatsApp de Contato</label>
