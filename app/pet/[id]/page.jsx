@@ -399,8 +399,9 @@ export default function PetProfilePage() {
                 </button>
 
                 <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
-                  <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta (Vetor):</p>
+                  <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta:</p>
                   
+                  {/* Container invisível ou visível do QR Code SVG que serve de base */}
                   <div id="qr-code-svg-container" className="flex justify-center bg-white p-3 rounded-xl inline-block shadow-md">
                     <QRCodeSVG 
                       value={linkPublicoPet} 
@@ -409,7 +410,9 @@ export default function PetProfilePage() {
                     />
                   </div>
 
-                  <div className="flex gap-2 pt-1">
+                  {/* Botões de Ação */}
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    {/* Botão de Download SVG */}
                     <button 
                       onClick={() => {
                         const container = document.getElementById('qr-code-svg-container')
@@ -433,14 +436,50 @@ export default function PetProfilePage() {
                         link.click()
                         document.body.removeChild(link)
                       }}
-                      className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 rounded-lg text-center transition shadow"
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-2 rounded-lg text-center transition shadow"
                     >
                       Baixar SVG
                     </button>
 
+                    {/* Botão de Download PNG */}
+                    <button 
+                      onClick={() => {
+                        const container = document.getElementById('qr-code-svg-container')
+                        const svgElement = container.querySelector('svg')
+                        if (!svgElement) return
+
+                        const svgData = new XMLSerializer().serializeToString(svgElement)
+                        const canvas = document.createElement('canvas')
+                        const ctx = canvas.getContext('2d')
+                        const img = new Image()
+
+                        img.onload = () => {
+                          canvas.width = 500 // Alta resolução para o PNG
+                          canvas.height = 500
+                          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+                          
+                          const pngUrl = canvas.toDataURL('image/png')
+                          const link = document.createElement('a')
+                          link.href = pngUrl
+                          link.download = `qrcode-${pet.name.toLowerCase()}.png`
+                          document.body.appendChild(link)
+                          link.click()
+                          document.body.removeChild(link)
+                        }
+
+                        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
+                      }}
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-2 rounded-lg text-center transition shadow"
+                    >
+                      Baixar PNG
+                    </button>
+                  </div>
+
+                  {/* Botão para voltar ao Painel Geral */}
+                  <div>
                     <a 
                       href="/dashboard"
-                      className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-lg text-center transition flex items-center justify-center"
+                      className="block w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-lg text-center transition"
                     >
                       Painel Geral
                     </a>
