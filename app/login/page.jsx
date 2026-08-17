@@ -65,12 +65,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label className="block text-xs uppercase font-semibold text-slate-400">Senha</label>
-              <Link href="/recuperar-senha" className="text-xs text-indigo-400 hover:underline">
-                Esqueceu a senha?
-              </Link>
-            </div>
+            <label className="block text-xs uppercase font-semibold text-slate-400 mb-1.5">Senha</label>
             <input
               type="password"
               value={password}
@@ -91,7 +86,12 @@ export default function LoginPage() {
         </form>
 
         {/* Rodapé do Card */}
-        <div className="text-center mt-6">
+        <div className="text-center mt-6 space-y-2">
+          <div>
+            <Link href="/recuperar-senha" className="text-xs text-indigo-400 hover:underline">
+              Esqueceu sua senha?
+            </Link>
+          </div>
           <p className="text-xs text-slate-400">
             Não tem uma conta?{' '}
             <a href="/register" className="text-indigo-400 font-semibold hover:underline">
