@@ -249,6 +249,19 @@ export default function Dashboard() {
                         >
                           Pagar Ativação (R$ 10,00)
                         </button>
+
+                        // Adicione este botão dentro do map de pets, junto com os outros botões:
+<button
+  onClick={async () => {
+    const novoStatus = pet.status === 'lost' ? 'safe' : 'lost';
+    await supabase.from('pets').update({ status: novoStatus }).eq('id', pet.id);
+    window.location.reload(); // Recarrega para atualizar o status
+  }}
+  className={`w-full text-xs font-bold py-2 rounded-xl transition ${pet.status === 'lost' ? 'bg-red-600 text-white' : 'bg-slate-700 text-slate-300'}`}
+>
+  {pet.status === 'lost' ? '🚨 MARCAR COMO ENCONTRADO' : '🔍 MARCAR COMO PERDIDO'}
+</button>
+
                         <a
                           href={`/pet/${pet.id}?public=true`}
                           className="block w-full text-center bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium py-2 rounded-xl transition"

@@ -58,6 +58,8 @@ export default function PetProfilePage() {
       setIcone(petData.icone || '🐾')
       setFotoUrl(petData.foto_url || '')
 
+      supabase.from('pet_scans').insert([{ pet_id: petId }]).then()
+
       const { data: { user } } = await supabase.auth.getUser()
 
       if (user && petData.user_id && user.id === petData.user_id) {
@@ -259,17 +261,14 @@ export default function PetProfilePage() {
   const isDono = isDonoReal && !modoPublicoForcado
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 py-12">
+    <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 py-12 ${pet.status === 'lost' ? 'border-t-8 border-red-500' : ''}`}>
       
-      {/* Botão Voltar Fixo */}
-      <div className="fixed top-4 left-4 z-50">
-        <button
-          onClick={() => isDonoReal ? router.push('/dashboard') : window.history.back()}
-          className="bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-lg"
-        >
-          ⬅️ {isDonoReal ? 'Painel' : 'Voltar'}
-        </button>
-      </div>
+      {/* ALERTA VISUAL DE PET PERDIDO */}
+      {pet.status === 'lost' && (
+        <div className="fixed top-0 w-full bg-red-600 text-white font-bold py-3 text-center animate-pulse z-50 shadow-lg">
+          🚨 ESTE PET ESTÁ PERDIDO! SE VOCÊ O ENCONTROU, ENTRE EM CONTATO IMEDIATAMENTE.
+        </div>
+      )}
 
       <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-6">
         
