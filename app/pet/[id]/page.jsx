@@ -265,10 +265,10 @@ export default function PetProfilePage() {
       
       {/* ALERTA VISUAL DE PET PERDIDO */}
       {pet.status === 'lost' && (
-        <div className="fixed top-0 w-full bg-red-600 text-white font-bold py-3 text-center animate-pulse z-50 shadow-lg">
-          🚨 ESTE PET ESTÁ PERDIDO! SE VOCÊ O ENCONTROU, ENTRE EM CONTATO IMEDIATAMENTE.
-        </div>
-      )}
+  <div className="fixed top-0 w-full bg-red-600 border-b border-red-500 text-white font-bold py-3 text-center z-50 shadow-xl tracking-wide text-sm">
+    🚨 ATENÇÃO: ESTE PET ESTÁ PERDIDO! SE VOCÊ O ENCONTROU, ENTRE EM CONTATO COM O DONO.
+  </div>
+)}
 
       <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-6">
         
