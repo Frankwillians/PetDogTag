@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import { jsPDF } from 'jspdf'
+import { QRCodeSVG } from 'qrcode.react'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -394,30 +395,52 @@ export default function PetProfilePage() {
                   onClick={() => gerarPdfTag(pet)}
                   className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2"
                 >
-                  🛠️ Baixar Molde PDF (CNC / Impressão)
+                  🛠️ Baixar Tag (PDF)
                 </button>
 
                 <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
-                  <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta:</p>
-                  <div className="flex justify-center">
-                    <img 
-                      src={urlQrCodeImg} 
-                      alt="QR Code da Dog Tag" 
-                      className="w-32 h-32 border-4 border-white rounded-lg shadow-md" 
+                  <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta (Vetor):</p>
+                  
+                  <div id="qr-code-svg-container" className="flex justify-center bg-white p-3 rounded-xl inline-block shadow-md">
+                    <QRCodeSVG 
+                      value={linkPublicoPet} 
+                      size={140}
+                      level="H"
                     />
                   </div>
+
                   <div className="flex gap-2 pt-1">
-                    <a 
-                      href={urlQrCodeImg} 
-                      download={`qrcode-${pet.name}.png`}
-                      target="_blank"
-                      className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 rounded-lg text-center transition"
+                    <button 
+                      onClick={() => {
+                        const container = document.getElementById('qr-code-svg-container')
+                        const svgElement = container.querySelector('svg')
+                        if (!svgElement) return
+
+                        const serializer = new XMLSerializer()
+                        let source = serializer.serializeToString(svgElement)
+
+                        if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+                          source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"')
+                        }
+
+                        const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' })
+                        const url = URL.createObjectURL(blob)
+                        
+                        const link = document.createElement('a')
+                        link.href = url
+                        link.download = `qrcode-${pet.name.toLowerCase()}.svg`
+                        document.body.appendChild(link)
+                        link.click()
+                        document.body.removeChild(link)
+                      }}
+                      className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 rounded-lg text-center transition shadow"
                     >
-                      Baixar PNG
-                    </a>
+                      Baixar SVG
+                    </button>
+
                     <a 
                       href="/dashboard"
-                      className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-lg text-center transition"
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-lg text-center transition flex items-center justify-center"
                     >
                       Painel Geral
                     </a>
