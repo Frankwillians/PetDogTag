@@ -91,18 +91,18 @@ export default function LoginPage() {
             <a href="/register" className="text-indigo-400 font-semibold hover:underline">
               Cadastre-se
             </a>
+
+            <Link href="/recuperar-senha" className="text-xs text-indigo-400 hover:underline">
+    Esqueceu sua senha?
+  </Link>
           </p>
 
           
         </div>
 
-        <div className="flex justify-end mt-1 mb-4">
-          <Link href="/recuperar-senha" className="text-xs text-indigo-400 hover:underline">
-            Esqueceu sua senha?
-          </Link>
-        </div>
-
       </div>
+
+
     </div>
   )
 }
