@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -64,7 +65,12 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-semibold text-slate-400 mb-1.5">Senha</label>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="block text-xs uppercase font-semibold text-slate-400">Senha</label>
+              <Link href="/recuperar-senha" className="text-xs text-indigo-400 hover:underline">
+                Esqueceu a senha?
+              </Link>
+            </div>
             <input
               type="password"
               value={password}
@@ -91,18 +97,10 @@ export default function LoginPage() {
             <a href="/register" className="text-indigo-400 font-semibold hover:underline">
               Cadastre-se
             </a>
-
-            <Link href="/recuperar-senha" className="text-xs text-indigo-400 hover:underline">
-    Esqueceu sua senha?
-  </Link>
           </p>
-
-          
         </div>
 
       </div>
-
-
     </div>
   )
 }
