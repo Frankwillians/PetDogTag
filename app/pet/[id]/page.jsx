@@ -172,7 +172,7 @@ export default function PetProfilePage() {
     try {
       const base64Molde = await toBase64(imagemMoldeUrl)
       if (base64Molde) {
-        doc.addImage(base64Molde, 'PNG', xFrente, yFrente, tamanhoTag, tamanhoTag)
+        doc.addImage(base64Molde, 'JPG', xFrente, yFrente, tamanhoTag, tamanhoTag)
       }
     } catch (e) {
       console.warn('Erro ao carregar imagem de molde para a frente', e)
