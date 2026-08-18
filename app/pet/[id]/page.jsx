@@ -32,6 +32,10 @@ export default function PetProfilePage() {
   const [enviandoFoto, setEnviandoFoto] = useState(false)
   
   const [formatoPdf, setFormatoPdf] = useState('circular')
+  
+  // Estado para escolher a cor da plaqueta
+  const [corTag, setCorTag] = useState('#4f46e5') // Padrão Índigo
+  
   const [whatsappLink, setWhatsappLink] = useState('')
   const [baseUrl, setBaseUrl] = useState('')
 
@@ -77,37 +81,18 @@ export default function PetProfilePage() {
     fetchPetAndUser()
   }, [petId])
 
-  // FUNÇÕES DE FORMATAÇÃO AUTOMÁTICA
-  const formatarPeso = (val) => {
-    const apenasNumeros = val.replace(/[^\d.,]/g, '')
-    if (!apenasNumeros) return ''
-    return `${apenasNumeros} kg`
-  }
-
-  const formatarIdade = (val) => {
-    const apenasNumeros = val.replace(/\D/g, '')
-    if (!apenasNumeros) return ''
-    const num = parseInt(apenasNumeros, 10)
-    if (num === 1) return '1 ano'
-    return `${num} anos`
-  }
-
   const handleSalvarAlteracoes = async (e) => {
     e.preventDefault()
-    
-    const pesoFormatado = formatarPeso(peso)
-    const idadeFormatada = formatarIdade(idade)
-
     const { error } = await supabase
       .from('pets')
-      .update({ name: nome, phone: telefone, peso: pesoFormatado, idade: idadeFormatada, notes: notes, foto_url: fotoUrl })
+      .update({ name: nome, phone: telefone, peso: peso, idade: idade, notes: notes, foto_url: fotoUrl })
       .eq('id', petId)
 
     if (error) {
       alert('Erro ao atualizar os dados do pet.')
     } else {
       alert('Dados atualizados com sucesso!')
-      setPet({ ...pet, name: nome, phone: telefone, peso: pesoFormatado, idade: idadeFormatada, notes: notes, foto_url: fotoUrl })
+      setPet({ ...pet, name: nome, phone: telefone, peso, idade, notes: notes, foto_url: fotoUrl })
       setEditando(false)
     }
   }
@@ -140,7 +125,7 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  // GERADOR DE PDF SEM O TEXTO DARKSTAR NA FRENTE E APONTANDO PARA A PÁGINA PÚBLICA
+  // GERADOR DE PDF USANDO A COR ESCOLHIDA
   const gerarPdfTag = async (petData, formato) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -159,13 +144,20 @@ export default function PetProfilePage() {
     doc.setFont("helvetica", "normal")
     doc.text(`Contato: ${petData.phone} | Escaneie para ver o perfil de emergência`, 15, 21)
 
-    doc.setLineWidth(0.4)
-    doc.setDrawColor(40, 40, 40)
+    // Converte a cor hexadecimal escolhida para RGB para o jsPDF
+    const hexToRgb = (hex) => {
+      const bigint = parseInt(hex.replace('#', ''), 16)
+      return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255]
+    }
+    const [r, g, b] = hexToRgb(corTag)
+
+    doc.setLineWidth(0.6)
+    doc.setDrawColor(r, g, b)
 
     if (formato === 'circular') {
       doc.circle(48, 57, 13)
       doc.circle(48, 57, 11.5) 
-      doc.circle(48, 43, 1)    
+      doc.circle(48, 43, 1)  
 
       doc.circle(122, 57, 13)
       doc.circle(122, 57, 11.5)
@@ -180,25 +172,26 @@ export default function PetProfilePage() {
       doc.circle(122, 41.5, 1) 
     }
 
-    // ================= FRENTE (Apenas Nome do Pet Centralizado) =================
+    // ================= FRENTE (Nome do Pet com a Cor Escolhida) =================
     const xFrenteCentro = 48
     const yFrenteCentro = 57
 
     doc.setFont("helvetica", "bold")
     doc.setFontSize(formato === 'circular' ? 11 : 12)
-    doc.setTextColor(20, 20, 20)
+    doc.setTextColor(r, g, b) // Aplica a cor no nome
     doc.text(petData.name, xFrenteCentro, yFrenteCentro + 1, { align: 'center' })
 
     doc.setFont("helvetica", "italic")
     doc.setFontSize(8)
+    doc.setTextColor(40, 40, 40)
     doc.text('[ Lado Frontal ]', 48, 87, { align: 'center' })
 
-    // Linha pontilhada divisória central
+    // Linha pontilhada divisória
     doc.setLineDash([1.5, 1.5], 0)
     doc.line(85, 25, 85, 95)
     doc.setLineDash([], 0)
 
-    // ================= VERSO (QR Code Centralizado) =================
+    // ================= VERSO (QR Code) =================
     const xVersoCentro = 122
     const yVersoCentro = 57
 
@@ -339,23 +332,23 @@ export default function PetProfilePage() {
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Peso (digite só o número)</label>
+                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Peso</label>
                 <input 
                   type="text" 
                   value={peso} 
                   onChange={(e) => setPeso(e.target.value)} 
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-                  placeholder="Ex: 4.5"
+                  placeholder="Ex: 4.5kg"
                 />
               </div>
               <div>
-                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Idade (digite só o número)</label>
+                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Idade</label>
                 <input 
                   type="text" 
                   value={idade} 
                   onChange={(e) => setIdade(e.target.value)} 
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-                  placeholder="Ex: 2"
+                  placeholder="Ex: 2 anos"
                 />
               </div>
             </div>
@@ -402,7 +395,7 @@ export default function PetProfilePage() {
             </div>
           </form>
         ) : (
-          /* BLOCO DE INFORMAÇÕES ESTILO PINNPET (VISÍVEL PARA TODOS) */
+          /* BLOCO DE INFORMAÇÕES */
           <div className="space-y-3">
             <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 space-y-3 text-sm shadow-inner">
               <div className="flex justify-between border-b border-slate-800/60 pb-2.5">
@@ -414,7 +407,6 @@ export default function PetProfilePage() {
                 <span className="text-slate-100 font-bold">{pet.phone || 'Não informado'}</span>
               </div>
 
-              {/* CARDS DE PESO E IDADE */}
               {(pet.peso || pet.idade) && (
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   {pet.peso && (
@@ -457,9 +449,9 @@ export default function PetProfilePage() {
             {pagamentoAprovado ? (
               <div className="space-y-4">
                 
-                {/* SELETOR DE FORMATO DO MOLDE PDF */}
+                {/* SELETOR DE FORMATO E COR DA PLAQUETA */}
                 <div className="bg-slate-950/60 border border-slate-800/80 p-4 rounded-2xl text-center space-y-3">
-                  <label className="block text-xs font-semibold text-slate-400">Escolha o formato do Molde PDF:</label>
+                  <label className="block text-xs font-semibold text-slate-400">Personalizar Plaqueta:</label>
                   
                   <div className="flex gap-2">
                     <select
@@ -467,17 +459,29 @@ export default function PetProfilePage() {
                       onChange={(e) => setFormatoPdf(e.target.value)}
                       className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-medium"
                     >
-                      <option value="circular">🪙 Circular (26mm - Moeda 1 Real)</option>
+                      <option value="circular">🪙 Circular (26mm)</option>
                       <option value="retangular">🪪 Retangular</option>
                     </select>
 
-                    <button
-                      onClick={() => gerarPdfTag(pet, formatoPdf)}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-1.5"
-                    >
-                      🛠️ Baixar PDF
-                    </button>
+                    {/* SELETOR DE COR */}
+                    <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
+                      <span className="text-[10px] text-slate-400 font-semibold uppercase">Cor:</span>
+                      <input 
+                        type="color" 
+                        value={corTag} 
+                        onChange={(e) => setCorTag(e.target.value)}
+                        className="w-6 h-6 rounded-lg border-0 cursor-pointer bg-transparent"
+                        title="Escolha a cor do nome e da borda"
+                      />
+                    </div>
                   </div>
+
+                  <button
+                    onClick={() => gerarPdfTag(pet, formatoPdf)}
+                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-1.5"
+                  >
+                    🛠️ Baixar PDF Personalizado
+                  </button>
                 </div>
 
                 {/* QR CODE DA PLAQUETA + BOTÕES SVG E PNG */}
