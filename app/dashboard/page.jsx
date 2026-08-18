@@ -58,7 +58,7 @@ export default function Dashboard() {
       .from('pets')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: true }) // Mantém ordenado para que o 1º criado seja sempre o índice 0 (Grátis)
 
     if (!error && data) {
       setPets(data)
@@ -179,7 +179,7 @@ export default function Dashboard() {
               </span>
             )}
 
-            {/* BOTÃO ADICIONADO PARA IR AO PERFIL */}
+            {/* BOTÃO PARA IR AO PERFIL */}
             <a
               href="/perfil"
               className="bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/50 text-indigo-300 text-sm px-4 py-2 rounded-xl transition font-medium"
@@ -261,21 +261,20 @@ export default function Dashboard() {
             <p className="text-slate-500 text-sm">Nenhum pet cadastrado ainda. Cadastre acima para gerar sua Dog Tag!</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {pets.map((pet) => (
+              {pets.map((pet, index) => (
                 <div key={pet.id} className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="text-lg font-bold text-white">{pet.name}</h3>
-                      {/* Substitua o trecho antigo do selo por este */}
-<span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-  pet.is_active 
-    ? (index === pets.length - 1 ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-indigo-950 text-indigo-400 border border-indigo-800')
-    : 'bg-amber-950 text-amber-400 border border-amber-800'
-}`}>
-  {pet.is_active 
-    ? (index === pets.length - 1 ? 'Ativo (Grátis)' : 'Ativo (Pago)') 
-    : 'Pendente (R$ 10,00)'}
-</span>
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                        pet.is_active 
+                          ? (index === 0 ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-indigo-950 text-indigo-400 border border-indigo-800')
+                          : 'bg-amber-950 text-amber-400 border border-amber-800'
+                      }`}>
+                        {pet.is_active 
+                          ? (index === 0 ? 'Ativo (Grátis)' : 'Ativo (Pago)') 
+                          : 'Pendente (R$ 10,00)'}
+                      </span>
                     </div>
                     <p className="text-sm text-slate-400 mb-4">{pet.species} {pet.breed ? `• ${pet.breed}` : ''}</p>
                   </div>
