@@ -25,16 +25,16 @@ export default function PetProfilePage() {
   const [editando, setEditando] = useState(false)
   const [nome, setNome] = useState('')
   const [telefone, setTelefone] = useState('')
-  const [peso, setPeso] = useState('')
-  const [idade, setIdade] = useState('')
   const [notes, setNotes] = useState('')
   const [fotoUrl, setFotoUrl] = useState('')
   const [enviandoFoto, setEnviandoFoto] = useState(false)
   
-  // Apenas dois formatos simplificados: circular (26mm) e retangular
-  const [formatoPdf, setFormatoPdf] = useState('circular')
+  // Estado para o formato selecionado no select do PDF
+  const [formatoPdf, setFormatoPdf] = useState('osso')
   
+  // Estado para armazenar o link de fallback do WhatsApp
   const [whatsappLink, setWhatsappLink] = useState('')
+
   const [baseUrl, setBaseUrl] = useState('')
 
   useEffect(() => {
@@ -60,8 +60,6 @@ export default function PetProfilePage() {
       setPet(petData)
       setNome(petData.name || '')
       setTelefone(petData.phone || '')
-      setPeso(petData.peso || '')
-      setIdade(petData.idade || '')
       setNotes(petData.notes || '')
       setFotoUrl(petData.foto_url || '')
 
@@ -83,14 +81,14 @@ export default function PetProfilePage() {
     e.preventDefault()
     const { error } = await supabase
       .from('pets')
-      .update({ name: nome, phone: telefone, peso: peso, idade: idade, notes: notes, foto_url: fotoUrl })
+      .update({ name: nome, phone: telefone, notes: notes, foto_url: fotoUrl })
       .eq('id', petId)
 
     if (error) {
       alert('Erro ao atualizar os dados do pet.')
     } else {
       alert('Dados atualizados com sucesso!')
-      setPet({ ...pet, name: nome, phone: telefone, peso, idade, notes: notes, foto_url: fotoUrl })
+      setPet({ ...pet, name: nome, phone: telefone, notes: notes, foto_url: fotoUrl })
       setEditando(false)
     }
   }
@@ -123,7 +121,7 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  // GERADOR DE PDF SIMPLIFICADO: CIRCULAR (26mm - Moeda 1 Real) OU RETANGULAR
+  // GERADOR DE PDF USANDO IMAGENS REAIS DA PASTA PUBLIC/MOLDES
   const gerarPdfTag = async (petData, formato) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -142,61 +140,19 @@ export default function PetProfilePage() {
     doc.setFont("helvetica", "normal")
     doc.text(`Contato: ${petData.phone} | Escaneie para ver o perfil de emergência`, 15, 21)
 
-    doc.setLineWidth(0.4)
-    doc.setDrawColor(40, 40, 40)
-
-    if (formato === 'circular') {
-      // Frente: Círculo de 26mm de diâmetro (Raio 13mm)
-      doc.circle(45, 55, 13)
-      doc.circle(45, 55, 11) // Borda interna
-      doc.circle(45, 41, 1)  // Furo da argola
-
-      // Verso: Círculo de 26mm
-      doc.circle(120, 55, 13)
-      doc.circle(120, 55, 11)
-      doc.circle(120, 41, 1)  // Furo da argola
-    } else {
-      // Frente: Retangular
-      doc.roundedRect(28, 42, 35, 25, 3, 3)
-      doc.roundedRect(30, 44, 31, 21, 2, 2)
-      doc.circle(45, 39, 1) // Furo
-
-      // Verso: Retangular
-      doc.roundedRect(103, 42, 35, 25, 3, 3)
-      doc.roundedRect(105, 44, 31, 21, 2, 2)
-      doc.circle(120, 39, 1) // Furo
+    // Mapeamento completo apontando para a pasta public/moldes
+    const moldesImagens = {
+      osso: `${currentDomain}/moldes/osso.png`,
+      patinha: `${currentDomain}/moldes/patinha.png`,
+      circulo: `${currentDomain}/moldes/circulo.png`
     }
 
-    // ================= FRENTE (Nome do Pet) =================
-    const xFrenteCentro = formato === 'circular' ? 45 : 45.5
-    const yFrenteCentro = formato === 'circular' ? 56 : 55
-
-    doc.setFont("helvetica", "bold")
-    doc.setFontSize(formato === 'circular' ? 10 : 11)
-    doc.setTextColor(20, 20, 20)
-    doc.text(petData.name, xFrenteCentro, yFrenteCentro, { align: 'center' })
-    
-    doc.setFontSize(5)
-    doc.setTextColor(100, 100, 100)
-    doc.text('DARKSTAR', xFrenteCentro, yFrenteCentro + 4.5, { align: 'center' })
-
-    doc.setFont("helvetica", "italic")
-    doc.setFontSize(8)
-    doc.text('[ Lado Frontal ]', 45, 85, { align: 'center' })
-
-    // Linha pontilhada divisória
-    doc.setLineDash([1.5, 1.5], 0)
-    doc.line(82, 25, 82, 95)
-    doc.setLineDash([], 0)
-
-    // ================= VERSO (QR Code) =================
-    const xVersoCentro = formato === 'circular' ? 120 : 120.5
-    const yVersoCentro = formato === 'circular' ? 55 : 54.5
+    const imagemMoldeUrl = moldesImagens[formato] || moldesImagens.osso
 
     const toBase64 = async (url) => {
       try {
         const response = await fetch(url, { mode: 'cors' })
-        if (!response.ok) throw new Error()
+        if (!response.ok) throw new Error('Falha ao buscar imagem do molde')
         const blob = await response.blob()
         return new Promise((resolve) => {
           const reader = new FileReader()
@@ -204,8 +160,57 @@ export default function PetProfilePage() {
           reader.readAsDataURL(blob)
         })
       } catch (e) {
+        console.warn('Não foi possível carregar o molde:', url)
         return null
       }
+    }
+
+    // ================= FRENTE (Molde de Fundo + Nome do Pet) =================
+    const xFrente = 20
+    const yFrente = 32
+    const tamanhoTag = 50
+
+    try {
+      const base64Molde = await toBase64(imagemMoldeUrl)
+      if (base64Molde) {
+        doc.addImage(base64Molde, 'PNG', xFrente, yFrente, tamanhoTag, tamanhoTag)
+      }
+    } catch (e) {
+      console.warn('Erro ao inserir imagem de molde na frente', e)
+    }
+
+    // Nome centralizado por cima da imagem de fundo
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(13)
+    doc.setTextColor(20, 20, 20)
+    doc.text(petData.name, xFrente + (tamanhoTag / 2), yFrente + (tamanhoTag / 2) - 2, { align: 'center' })
+    
+    doc.setFontSize(6.5)
+    doc.setFont("helvetica", "bold")
+    doc.setTextColor(80, 80, 80)
+    doc.text('DARKSTAR PETS', xFrente + (tamanhoTag / 2), yFrente + (tamanhoTag / 2) + 5, { align: 'center' })
+
+    doc.setFont("helvetica", "italic")
+    doc.setFontSize(8)
+    doc.setTextColor(0, 0, 0)
+    doc.text('[ Lado Frontal ]', xFrente + (tamanhoTag / 2), yFrente + tamanhoTag + 8, { align: 'center' })
+
+    // Linha pontilhada de divisão
+    doc.setLineDash([1.5, 1.5], 0)
+    doc.line(82, 25, 82, 95)
+    doc.setLineDash([], 0)
+
+    // ================= VERSO (Molde de Fundo + QR Code) =================
+    const xVerso = 95
+    const yVerso = 32
+
+    try {
+      const base64Molde = await toBase64(imagemMoldeUrl)
+      if (base64Molde) {
+        doc.addImage(base64Molde, 'PNG', xVerso, yVerso, tamanhoTag, tamanhoTag)
+      }
+    } catch (e) {
+      console.warn('Erro ao inserir imagem de molde no verso', e)
     }
 
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkDinamico)}`
@@ -213,13 +218,19 @@ export default function PetProfilePage() {
     try {
       const base64Qr = await toBase64(qrUrl)
       if (base64Qr) {
-        const tamanhoQr = formato === 'circular' ? 16 : 17
-        doc.addImage(base64Qr, 'PNG', xVersoCentro - (tamanhoQr / 2), yVersoCentro - (tamanhoQr / 2), tamanhoQr, tamanhoQr)
+        const tamanhoQr = 24
+        const offsetX = xVerso + (tamanhoTag - tamanhoQr) / 2
+        const offsetY = yVerso + (tamanhoTag - tamanhoQr) / 2 - 2
+        doc.addImage(base64Qr, 'PNG', offsetX, offsetY, tamanhoQr, tamanhoQr)
       }
+      
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(6.5)
+      doc.text('ESCANEIE-ME', xVerso + (tamanhoTag / 2), yVerso + tamanhoTag - 4, { align: 'center' })
 
       doc.setFont("helvetica", "italic")
       doc.setFontSize(8)
-      doc.text('[ Lado Traseiro / Verso ]', 120, 85, { align: 'center' })
+      doc.text('[ Lado Traseiro / Verso ]', xVerso + (tamanhoTag / 2), yVerso + tamanhoTag + 8, { align: 'center' })
 
       doc.save(`dog-tag-${petData.name.toLowerCase()}-${formato}.pdf`)
     } catch (error) {
@@ -287,6 +298,7 @@ export default function PetProfilePage() {
   return (
     <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 py-12 ${pet.status === 'lost' ? 'border-t-8 border-red-500' : ''}`}>
       
+      {/* ALERTA VISUAL DE PET PERDIDO */}
       {pet.status === 'lost' && (
         <div className="fixed top-0 w-full bg-red-600 border-b border-red-500 text-white font-bold py-3 text-center z-50 shadow-xl tracking-wide text-sm">
           🚨 ATENÇÃO: ESTE PET ESTÁ PERDIDO! SE VOCÊ O ENCONTROU, ENTRE EM CONTATO COM O DONO.
@@ -308,9 +320,7 @@ export default function PetProfilePage() {
           <h1 className="text-3xl font-extrabold text-white flex items-center justify-center gap-2">
             {pet.name}
           </h1>
-          <p className="text-sm text-slate-400 capitalize mt-1">
-            {pet.species} {pet.breed ? `• ${pet.breed}` : ''}
-          </p>
+          <p className="text-sm text-slate-400 capitalize mt-1">{pet.species} {pet.breed ? `• ${pet.breed}` : ''}</p>
         </div>
 
         {/* SE FOR O DONO E ESTIVER EDITANDO OS DADOS */}
@@ -327,32 +337,9 @@ export default function PetProfilePage() {
                 required
               />
             </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Peso</label>
-                <input 
-                  type="text" 
-                  value={peso} 
-                  onChange={(e) => setPeso(e.target.value)} 
-                  className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-                  placeholder="Ex: 4.5kg"
-                />
-              </div>
-              <div>
-                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Idade</label>
-                <input 
-                  type="text" 
-                  value={idade} 
-                  onChange={(e) => setIdade(e.target.value)} 
-                  className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-                  placeholder="Ex: 2 anos"
-                />
-              </div>
-            </div>
-
             <div>
               <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Foto do Pet</label>
+              {/* Suporta JPG, JPEG e PNG */}
               <input 
                 type="file" 
                 accept="image/jpeg, image/jpg, image/png"
@@ -367,7 +354,7 @@ export default function PetProfilePage() {
                 value={notes} 
                 onChange={(e) => setNotes(e.target.value)} 
                 className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-                rows="2"
+                rows="3"
               />
             </div>
             <div className="flex gap-2 pt-2">
@@ -390,24 +377,6 @@ export default function PetProfilePage() {
               <span className="text-slate-400 font-semibold uppercase text-xs">WhatsApp:</span>
               <span className="text-slate-200 font-medium">{pet.phone || 'Não informado'}</span>
             </div>
-
-            {(pet.peso || pet.idade) && (
-              <div className="grid grid-cols-2 gap-2 border-b border-slate-800 pb-2">
-                {pet.peso && (
-                  <div>
-                    <span className="text-slate-400 font-semibold uppercase text-xs block">Peso:</span>
-                    <span className="text-slate-200 font-medium">{pet.peso}</span>
-                  </div>
-                )}
-                {pet.idade && (
-                  <div>
-                    <span className="text-slate-400 font-semibold uppercase text-xs block">Idade:</span>
-                    <span className="text-slate-200 font-medium">{pet.idade}</span>
-                  </div>
-                )}
-              </div>
-            )}
-
             {pet.notes && (
               <div>
                 <span className="text-slate-400 font-semibold uppercase text-xs block mb-1">Cuidados / Alergias:</span>
@@ -419,6 +388,7 @@ export default function PetProfilePage() {
 
         {/* CONTROLE DE EXIBIÇÃO: DONO X QUEM ACHOU */}
         {isDono ? (
+          /* SE FOR O DONO */
           <div className="space-y-4 pt-2">
             {!editando && (
               <button
@@ -429,10 +399,11 @@ export default function PetProfilePage() {
               </button>
             )}
 
+            {/* SE O PAGAMENTO ESTIVER APROVADO */}
             {pagamentoAprovado ? (
               <div className="space-y-4">
                 
-                {/* SELETOR DE FORMATO SIMPLIFICADO */}
+                {/* SELETOR DE FORMATO DO MOLDE PDF (SELECT) */}
                 <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
                   <label className="block text-xs font-semibold text-slate-400">Escolha o formato do Molde PDF:</label>
                   
@@ -440,39 +411,93 @@ export default function PetProfilePage() {
                     <select
                       value={formatoPdf}
                       onChange={(e) => setFormatoPdf(e.target.value)}
-                      className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-medium"
+                      className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
                     >
-                      <option value="circular">🪙 Circular (26mm - Moeda 1 Real)</option>
-                      <option value="retangular">🪪 Retangular</option>
+                      <option value="osso">🦴 Formato Osso</option>
+                      <option value="patinha">🐾 Formato Patinha</option>
+                      <option value="circulo">⭕ Formato Círculo</option>
                     </select>
 
                     <button
                       onClick={() => gerarPdfTag(pet, formatoPdf)}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-xs transition shadow flex items-center justify-center gap-1.5"
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5"
                     >
                       🛠️ Baixar PDF
                     </button>
                   </div>
                 </div>
 
-                {/* QR CODE COM ESTRELA ESCURA DARKSTAR NO CENTRO */}
                 <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
                   <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta:</p>
                   
-                  <div className="flex justify-center">
-                    <div className="relative inline-block bg-white p-3 rounded-xl shadow-md">
-                      <QRCodeSVG 
-                        value={linkPublicoPet} 
-                        size={140}
-                        level="H"
-                      />
-                      {/* Logo centralizada no QR Code: Estrela Escura DarkStar */}
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-8 h-8 bg-slate-950 rounded-full border-2 border-white flex items-center justify-center shadow-md">
-                          <span className="text-indigo-400 text-sm font-bold">★</span>
-                        </div>
-                      </div>
-                    </div>
+                  <div id="qr-code-svg-container" className="flex justify-center bg-white p-3 rounded-xl inline-block shadow-md">
+                    <QRCodeSVG 
+                      value={linkPublicoPet} 
+                      size={140}
+                      level="H"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <button 
+                      onClick={() => {
+                        const container = document.getElementById('qr-code-svg-container')
+                        const svgElement = container.querySelector('svg')
+                        if (!svgElement) return
+
+                        const serializer = new XMLSerializer()
+                        let source = serializer.serializeToString(svgElement)
+
+                        if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+                          source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"')
+                        }
+
+                        const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' })
+                        const url = URL.createObjectURL(blob)
+                        
+                        const link = document.createElement('a')
+                        link.href = url
+                        link.download = `qrcode-${pet.name.toLowerCase()}.svg`
+                        document.body.appendChild(link)
+                        link.click()
+                        document.body.removeChild(link)
+                      }}
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-2 rounded-lg text-center transition shadow"
+                    >
+                      Baixar SVG
+                    </button>
+
+                    <button 
+                      onClick={() => {
+                        const container = document.getElementById('qr-code-svg-container')
+                        const svgElement = container.querySelector('svg')
+                        if (!svgElement) return
+
+                        const svgData = new XMLSerializer().serializeToString(svgElement)
+                        const canvas = document.createElement('canvas')
+                        const ctx = canvas.getContext('2d')
+                        const img = new Image()
+
+                        img.onload = () => {
+                          canvas.width = 500
+                          canvas.height = 500
+                          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+                          
+                          const pngUrl = canvas.toDataURL('image/png')
+                          const link = document.createElement('a')
+                          link.href = pngUrl
+                          link.download = `qrcode-${pet.name.toLowerCase()}.png`
+                          document.body.appendChild(link)
+                          link.click()
+                          document.body.removeChild(link)
+                        }
+
+                        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
+                      }}
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-2 rounded-lg text-center transition shadow"
+                    >
+                      Baixar PNG
+                    </button>
                   </div>
 
                   <div>
@@ -529,6 +554,21 @@ export default function PetProfilePage() {
                 </p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Banner de Autopromoção Sutil */}
+        {!isDono && (
+          <div className="border-t border-slate-800/80 pt-4 mt-4 text-center">
+            <p className="text-[11px] text-slate-400 mb-1">
+              Gostou da plaqueta inteligente?
+            </p>
+            <a 
+              href="/register" 
+              className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition underline underline-offset-2"
+            >
+              Proteja seu pet também com a DarkStar Pets 🐾
+            </a>
           </div>
         )}
 
