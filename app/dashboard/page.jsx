@@ -16,10 +16,12 @@ export default function Dashboard() {
   const [pets, setPets] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Estados do formulário de cadastro de pet (Apenas dados do animal agora)
+  // Estados do formulário de cadastro de pet (incluindo Peso e Idade)
   const [nome, setNome] = useState('')
   const [especie, setEspecie] = useState('')
   const [raca, setRaca] = useState('')
+  const [peso, setPeso] = useState('')
+  const [idade, setIdade] = useState('')
   const [observacoes, setObservacoes] = useState('')
   const [erroForm, setErroForm] = useState('')
   const [sucessoForm, setSucessoForm] = useState('')
@@ -58,14 +60,29 @@ export default function Dashboard() {
       .from('pets')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: true }) // Mantém ordenado para que o 1º criado seja sempre o índice 0 (Grátis)
+      .order('created_at', { ascending: true })
 
     if (!error && data) {
       setPets(data)
     }
   }
 
-  // Função para cadastrar novo pet (Modelo Freemium + Dados do Perfil Automáticos)
+  // Funções de formatação automática para peso e idade
+  const formatarPeso = (val) => {
+    const apenasNumeros = val.replace(/[^\d.,]/g, '')
+    if (!apenasNumeros) return ''
+    return `${apenasNumeros} kg`
+  }
+
+  const formatarIdade = (val) => {
+    const apenasNumeros = val.replace(/\D/g, '')
+    if (!apenasNumeros) return ''
+    const num = parseInt(apenasNumeros, 10)
+    if (num === 1) return '1 ano'
+    return `${num} anos`
+  }
+
+  // Função para cadastrar novo pet
   async function handleCadastrarPet(e) {
     e.preventDefault()
     setErroForm('')
@@ -96,6 +113,10 @@ export default function Dashboard() {
     // 2. Se count for 0, este é o 1º pet (Gratuito e Ativo). Se for >= 1, os próximos nascem pendentes.
     const isPrimeiroPet = count === 0
 
+    // Formata o peso e a idade automaticamente
+    const pesoFormatado = formatarPeso(peso)
+    const idadeFormatada = formatarIdade(idade)
+
     // 3. Insere o pet no Supabase puxando os dados do dono direto do perfil
     const { error } = await supabase.from('pets').insert([
       {
@@ -103,6 +124,8 @@ export default function Dashboard() {
         name: nome,
         species: especie,
         breed: raca,
+        peso: pesoFormatado,
+        idade: idadeFormatada,
         owner_name: userProfile.full_name, // Puxado automaticamente do perfil
         phone: userProfile.phone,             // Puxado automaticamente do perfil
         notes: observacoes,
@@ -122,6 +145,8 @@ export default function Dashboard() {
       setNome('')
       setEspecie('')
       setRaca('')
+      setPeso('')
+      setIdade('')
       setObservacoes('')
       fetchPets(user.id)
     }
@@ -139,7 +164,7 @@ export default function Dashboard() {
       const data = await res.json()
 
       if (data.url) {
-        window.location.href = data.url // Redireciona para o ambiente seguro do Mercado Pago
+        window.location.href = data.url
       } else {
         alert('Erro ao gerar link de pagamento: ' + (data.error || 'Erro desconhecido'))
       }
@@ -179,7 +204,6 @@ export default function Dashboard() {
               </span>
             )}
 
-            {/* BOTÃO PARA IR AO PERFIL */}
             <a
               href="/perfil"
               className="bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/50 text-indigo-300 text-sm px-4 py-2 rounded-xl transition font-medium"
@@ -196,7 +220,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Formulário de Cadastro Simplificado (Apenas Dados do Pet) */}
+        {/* Formulário de Cadastro com Peso e Idade */}
         <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl mb-10">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold text-indigo-300">🐾 Cadastrar Novo Pet</h2>
@@ -236,6 +260,23 @@ export default function Dashboard() {
               onChange={(e) => setRaca(e.target.value)}
               className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm md:col-span-2 focus:outline-none focus:border-indigo-500"
             />
+            
+            {/* Campos de Peso e Idade */}
+            <input
+              type="text"
+              placeholder="Peso (ex: 4.5)"
+              value={peso}
+              onChange={(e) => setPeso(e.target.value)}
+              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
+            />
+            <input
+              type="text"
+              placeholder="Idade (ex: 2)"
+              value={idade}
+              onChange={(e) => setIdade(e.target.value)}
+              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
+            />
+
             <textarea
               placeholder="Informações extras (alergias, cuidados...)"
               value={observacoes}
