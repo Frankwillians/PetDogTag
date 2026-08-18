@@ -37,8 +37,24 @@ export default function LandingPage() {
           Um portão aberto, um susto com fogos de artifício, um descuido de segundos... O medo de não saber onde ele está aperta o coração de qualquer um. Com a DarkStar Pets, se alguém encontrar o seu companheiro, basta escanear a coleira para que a <strong>localização exata do GPS chegue direto no seu WhatsApp</strong>.
         </p>
 
+        {/* BOTÕES DE AÇÃO (LOGO APÓS A CHAMADA PRINCIPAL) */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+          <Link 
+            href="/register" 
+            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg px-8 py-4 rounded-2xl shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5"
+          >
+            Proteger Meu Pet Gratuitamente 🚀
+          </Link>
+          <Link 
+            href="/login" 
+            className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-semibold text-lg px-8 py-4 rounded-2xl transition"
+          >
+            Acessar Minha Conta
+          </Link>
+        </div>
+
         {/* ========================================== */}
-        {/* COMO FUNCIONA (LOGO APÓS A CHAMADA PRINCIPAL) */}
+        {/* COMO FUNCIONA (LOGO ABAIXO DOS BOTÕES) */}
         {/* ========================================== */}
         <div className="pt-8 pb-6 border-y border-slate-900 my-6">
           <div className="text-center space-y-2 mb-10">
@@ -89,39 +105,15 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* BOTÕES DE AÇÃO (LOGO ABAIXO DA PARTE DOS VALORES) */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Link 
-            href="/register" 
-            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg px-8 py-4 rounded-2xl shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5"
-          >
-            Proteger Meu Pet Gratuitamente 🚀
-          </Link>
-          <Link 
-            href="/login" 
-            className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-semibold text-lg px-8 py-4 rounded-2xl transition"
-          >
-            Acessar Minha Conta
-          </Link>
-        </div>
-
-        {/* SEÇÃO DE CHAMADA FINAL (CTA) */}
+        {/* SEÇÃO DE CHAMADA FINAL (CTA) - SEM BOTÃO DUPLICADO */}
         <div className="pt-10 pb-8">
-          <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 border border-indigo-800/50 p-8 sm:p-12 rounded-3xl space-y-6 shadow-2xl">
+          <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 border border-indigo-800/50 p-8 sm:p-12 rounded-3xl space-y-4 shadow-2xl">
             <h2 className="text-2xl sm:text-4xl font-extrabold text-white">
               Não espere o susto acontecer para se prevenir.
             </h2>
             <p className="text-slate-300 text-sm sm:text-base max-w-xl mx-auto">
               Dê ao seu fiel companheiro a segurança de voltar para casa caso ele se aventure longe demais.
             </p>
-            <div>
-              <Link 
-                href="/register" 
-                className="inline-block bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-base px-8 py-4 rounded-2xl shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5"
-              >
-                Proteger Meu Pet Agora 🐾
-              </Link>
-            </div>
           </div>
         </div>
 
