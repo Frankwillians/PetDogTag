@@ -166,7 +166,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6">
       <div className="max-w-4xl mx-auto">
         
-        {/* Cabeçalho */}
+       {/* Cabeçalho */}
         <div className="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
           <div>
             <h1 className="text-2xl font-bold text-indigo-400">DarkStar Pets</h1>
@@ -178,6 +178,15 @@ export default function Dashboard() {
                 Olá, <strong className="text-indigo-300">{userProfile.full_name}</strong>
               </span>
             )}
+
+            {/* BOTÃO ADICIONADO PARA IR AO PERFIL */}
+            <a
+              href="/perfil"
+              className="bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/50 text-indigo-300 text-sm px-4 py-2 rounded-xl transition font-medium"
+            >
+              ⚙️ Meu Perfil
+            </a>
+
             <button
               onClick={handleLogout}
               className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm px-4 py-2 rounded-xl transition font-medium"
