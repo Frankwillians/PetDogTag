@@ -33,8 +33,10 @@ export default function PetProfilePage() {
   
   const [formatoPdf, setFormatoPdf] = useState('circular')
   
-  // Estado para escolher a cor da plaqueta
-  const [corTag, setCorTag] = useState('#4f46e5') // Padrão Índigo
+  // Cores personalizáveis para o preenchimento, bordas e texto
+  const [corExterna, setCorExterna] = useState('#4f46e5') // Cor da linha externa/borda
+  const [corInterna, setCorInterna] = useState('#ffffff') // Cor do fundo/preenchimento interno
+  const [corTexto, setCorTexto] = useState('#1e293b')     // Cor da letra do nome
   
   const [whatsappLink, setWhatsappLink] = useState('')
   const [baseUrl, setBaseUrl] = useState('')
@@ -125,7 +127,7 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  // GERADOR DE PDF USANDO A COR ESCOLHIDA
+  // GERADOR DE PDF PREENCHENDO PARTE INTERNA, EXTERNA E COR DO TEXTO
   const gerarPdfTag = async (petData, formato) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -144,41 +146,46 @@ export default function PetProfilePage() {
     doc.setFont("helvetica", "normal")
     doc.text(`Contato: ${petData.phone} | Escaneie para ver o perfil de emergência`, 15, 21)
 
-    // Converte a cor hexadecimal escolhida para RGB para o jsPDF
     const hexToRgb = (hex) => {
       const bigint = parseInt(hex.replace('#', ''), 16)
       return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255]
     }
-    const [r, g, b] = hexToRgb(corTag)
+
+    const [rExt, gExt, bExt] = hexToRgb(corExterna)
+    const [rInt, gInt, bInt] = hexToRgb(corInterna)
+    const [rTxt, gTxt, bTxt] = hexToRgb(corTexto)
 
     doc.setLineWidth(0.6)
-    doc.setDrawColor(r, g, b)
+    doc.setDrawColor(rExt, gExt, bExt)
+    doc.setFillColor(rInt, gInt, bInt)
 
     if (formato === 'circular') {
-      doc.circle(48, 57, 13)
-      doc.circle(48, 57, 11.5) 
-      doc.circle(48, 43, 1)  
+      // Frente com preenchimento (FD = Fill & Draw)
+      doc.circle(48, 57, 13, 'FD')
+      doc.circle(48, 57, 11.5, 'S') 
+      doc.circle(48, 43, 1, 'FD')  
 
-      doc.circle(122, 57, 13)
-      doc.circle(122, 57, 11.5)
-      doc.circle(122, 43, 1)  
+      // Verso com preenchimento
+      doc.circle(122, 57, 13, 'FD')
+      doc.circle(122, 57, 11.5, 'S')
+      doc.circle(122, 43, 1, 'FD')  
     } else {
-      doc.roundedRect(30.5, 44.5, 35, 25, 3, 3)
-      doc.roundedRect(32.5, 46.5, 31, 21, 2, 2)
-      doc.circle(48, 41.5, 1) 
+      doc.roundedRect(30.5, 44.5, 35, 25, 3, 3, 'FD')
+      doc.roundedRect(32.5, 46.5, 31, 21, 2, 2, 'S')
+      doc.circle(48, 41.5, 1, 'FD') 
 
-      doc.roundedRect(104.5, 44.5, 35, 25, 3, 3)
-      doc.roundedRect(106.5, 46.5, 31, 21, 2, 2)
-      doc.circle(122, 41.5, 1) 
+      doc.roundedRect(104.5, 44.5, 35, 25, 3, 3, 'FD')
+      doc.roundedRect(106.5, 46.5, 31, 21, 2, 2, 'S')
+      doc.circle(122, 41.5, 1, 'FD') 
     }
 
-    // ================= FRENTE (Nome do Pet com a Cor Escolhida) =================
+    // ================= FRENTE (Nome do Pet com cor personalizada) =================
     const xFrenteCentro = 48
     const yFrenteCentro = 57
 
     doc.setFont("helvetica", "bold")
     doc.setFontSize(formato === 'circular' ? 11 : 12)
-    doc.setTextColor(r, g, b) // Aplica a cor no nome
+    doc.setTextColor(rTxt, gTxt, bTxt) 
     doc.text(petData.name, xFrenteCentro, yFrenteCentro + 1, { align: 'center' })
 
     doc.setFont("helvetica", "italic")
@@ -359,7 +366,7 @@ export default function PetProfilePage() {
                 type="text" 
                 value={telefone} 
                 onChange={(e) => setTelefone(e.target.value)} 
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
                 required
               />
             </div>
@@ -449,30 +456,60 @@ export default function PetProfilePage() {
             {pagamentoAprovado ? (
               <div className="space-y-4">
                 
-                {/* SELETOR DE FORMATO E COR DA PLAQUETA */}
-                <div className="bg-slate-950/60 border border-slate-800/80 p-4 rounded-2xl text-center space-y-3">
-                  <label className="block text-xs font-semibold text-slate-400">Personalizar Plaqueta:</label>
+                {/* SELETOR DE FORMATO E PERSONALIZAÇÃO DE CORES COM PREVIEW AO VIVO */}
+                <div className="bg-slate-950/60 border border-slate-800/80 p-4 rounded-2xl text-center space-y-4">
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Personalize sua Plaqueta:</label>
                   
                   <div className="flex gap-2">
                     <select
                       value={formatoPdf}
                       onChange={(e) => setFormatoPdf(e.target.value)}
-                      className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-medium"
+                      className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-medium"
                     >
                       <option value="circular">🪙 Circular (26mm)</option>
                       <option value="retangular">🪪 Retangular</option>
                     </select>
+                  </div>
 
-                    {/* SELETOR DE COR */}
-                    <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
-                      <span className="text-[10px] text-slate-400 font-semibold uppercase">Cor:</span>
-                      <input 
-                        type="color" 
-                        value={corTag} 
-                        onChange={(e) => setCorTag(e.target.value)}
-                        className="w-6 h-6 rounded-lg border-0 cursor-pointer bg-transparent"
-                        title="Escolha a cor do nome e da borda"
-                      />
+                  {/* PAINEL DE SELEÇÃO DE CORES (PARTE EXTERNA, INTERNA E LETRA) */}
+                  <div className="grid grid-cols-3 gap-2 bg-slate-900/90 p-3 rounded-xl border border-slate-800 text-left">
+                    <div>
+                      <span className="text-[9px] uppercase font-semibold text-slate-400 block mb-1">Borda/Linha</span>
+                      <div className="flex items-center gap-1.5">
+                        <input type="color" value={corExterna} onChange={(e) => setCorExterna(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0" />
+                        <span className="text-[10px] font-mono text-slate-300">{corExterna}</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[9px] uppercase font-semibold text-slate-400 block mb-1">Fundo/Interno</span>
+                      <div className="flex items-center gap-1.5">
+                        <input type="color" value={corInterna} onChange={(e) => setCorInterna(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0" />
+                        <span className="text-[10px] font-mono text-slate-300">{corInterna}</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[9px] uppercase font-semibold text-slate-400 block mb-1">Cor da Letra</span>
+                      <div className="flex items-center gap-1.5">
+                        <input type="color" value={corTexto} onChange={(e) => setCorTexto(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0" />
+                        <span className="text-[10px] font-mono text-slate-300">{corTexto}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* PREVIEW AO VIVO DA FRENTE DA TAG */}
+                  <div className="space-y-1.5 pt-1">
+                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Preview ao Vivo (Frente)</span>
+                    <div className="w-32 h-32 mx-auto rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center p-2 shadow-inner">
+                      <div 
+                        className={`w-24 h-24 flex flex-col items-center justify-center shadow-md transition-all ${formatoPdf === 'circular' ? 'rounded-full' : 'rounded-lg'}`}
+                        style={{ backgroundColor: corInterna, border: `3px solid ${corExterna}` }}
+                      >
+                        <span className="text-xs font-black truncate max-w-[70px]" style={{ color: corTexto }}>
+                          {pet.name}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
