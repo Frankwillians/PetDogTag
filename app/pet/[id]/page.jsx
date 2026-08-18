@@ -143,7 +143,8 @@ export default function PetProfilePage() {
     // Mapeamento das imagens de moldes inseridas na pasta moldes
     const moldesImagens = {
       osso: `${currentDomain}/moldes/osso.png`,
-      patinha: `${currentDomain}/moldes/patinha.png`
+      patinha: `${currentDomain}/moldes/patinha.png`,
+      circulo: `${currentDomain}/moldes/circulo.png`,
     }
 
     const imagemMoldeUrl = moldesImagens[formato] || moldesImagens.osso
@@ -412,6 +413,7 @@ export default function PetProfilePage() {
                     >
                       <option value="osso">🦴 Formato Osso</option>
                       <option value="patinha">🐾 Formato Patinha</option>
+                      <option value="circulo">⭕ Formato Círculo</option>
                     </select>
 
                     <button
