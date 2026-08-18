@@ -33,10 +33,10 @@ export default function PetProfilePage() {
   
   const [formatoPdf, setFormatoPdf] = useState('circular')
   
-  // Cores personalizáveis para o preenchimento, bordas e texto
-  const [corExterna, setCorExterna] = useState('#4f46e5') // Cor da linha externa/borda
-  const [corInterna, setCorInterna] = useState('#ffffff') // Cor do fundo/preenchimento interno
-  const [corTexto, setCorTexto] = useState('#1e293b')     // Cor da letra do nome
+  // Cores personalizáveis: Borda externa preenchida, Fundo interno e Letra do nome
+  const [corBorda, setCorBorda] = useState('#dc2626')       // Cor da borda externa (ex: Vermelho)
+  const [corInterna, setCorInterna] = useState('#facc15')   // Cor do preenchimento interno (ex: Amarelo)
+  const [corTexto, setCorTexto] = useState('#1d4ed8')       // Cor da letra do nome (ex: Azul)
   
   const [whatsappLink, setWhatsappLink] = useState('')
   const [baseUrl, setBaseUrl] = useState('')
@@ -127,7 +127,7 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  // GERADOR DE PDF PREENCHENDO PARTE INTERNA, EXTERNA E COR DO TEXTO
+  // GERADOR DE PDF COM BORDA EXTERNA PREENCHIDA
   const gerarPdfTag = async (petData, formato) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -151,40 +151,47 @@ export default function PetProfilePage() {
       return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255]
     }
 
-    const [rExt, gExt, bExt] = hexToRgb(corExterna)
+    const [rBorda, gBorda, bBorda] = hexToRgb(corBorda)
     const [rInt, gInt, bInt] = hexToRgb(corInterna)
     const [rTxt, gTxt, bTxt] = hexToRgb(corTexto)
 
-    doc.setLineWidth(0.6)
-    doc.setDrawColor(rExt, gExt, bExt)
-    doc.setFillColor(rInt, gInt, bInt)
-
     if (formato === 'circular') {
-      // Frente com preenchimento (FD = Fill & Draw)
-      doc.circle(48, 57, 13, 'FD')
-      doc.circle(48, 57, 11.5, 'S') 
-      doc.circle(48, 43, 1, 'FD')  
+      // 1. Círculo externo preenchido (Borda colorida)
+      doc.setFillColor(rBorda, gBorda, bBorda)
+      doc.circle(48, 57, 13, 'F')
+      doc.circle(122, 57, 13, 'F')
 
-      // Verso com preenchimento
-      doc.circle(122, 57, 13, 'FD')
-      doc.circle(122, 57, 11.5, 'S')
-      doc.circle(122, 43, 1, 'FD')  
+      // 2. Círculo interno preenchido (Fundo da tag)
+      doc.setFillColor(rInt, gInt, bInt)
+      doc.circle(48, 57, 10.5, 'F')
+      doc.circle(122, 57, 10.5, 'F')
+
+      // Furo da argola (Preenchido com a cor interna ou branco para destacar)
+      doc.setFillColor(255, 255, 255)
+      doc.circle(48, 43, 1, 'FD')
+      doc.circle(122, 43, 1, 'FD')
     } else {
-      doc.roundedRect(30.5, 44.5, 35, 25, 3, 3, 'FD')
-      doc.roundedRect(32.5, 46.5, 31, 21, 2, 2, 'S')
-      doc.circle(48, 41.5, 1, 'FD') 
+      // Retangular Externo
+      doc.setFillColor(rBorda, gBorda, bBorda)
+      doc.roundedRect(30.5, 44.5, 35, 25, 3, 3, 'F')
+      doc.roundedRect(104.5, 44.5, 35, 25, 3, 3, 'F')
 
-      doc.roundedRect(104.5, 44.5, 35, 25, 3, 3, 'FD')
-      doc.roundedRect(106.5, 46.5, 31, 21, 2, 2, 'S')
-      doc.circle(122, 41.5, 1, 'FD') 
+      // Retangular Interno
+      doc.setFillColor(rInt, gInt, bInt)
+      doc.roundedRect(32.5, 46.5, 31, 21, 2, 2, 'F')
+      doc.roundedRect(106.5, 46.5, 31, 21, 2, 2, 'F')
+
+      doc.setFillColor(255, 255, 255)
+      doc.circle(48, 41.5, 1, 'FD')
+      doc.circle(122, 41.5, 1, 'FD')
     }
 
-    // ================= FRENTE (Nome do Pet com cor personalizada) =================
+    // ================= FRENTE (Nome do Pet) =================
     const xFrenteCentro = 48
     const yFrenteCentro = 57
 
     doc.setFont("helvetica", "bold")
-    doc.setFontSize(formato === 'circular' ? 11 : 12)
+    doc.setFontSize(formato === 'circular' ? 10 : 11)
     doc.setTextColor(rTxt, gTxt, bTxt) 
     doc.text(petData.name, xFrenteCentro, yFrenteCentro + 1, { align: 'center' })
 
@@ -222,12 +229,13 @@ export default function PetProfilePage() {
     try {
       const base64Qr = await toBase64(qrUrl)
       if (base64Qr) {
-        const tamanhoQr = formato === 'circular' ? 17 : 18
+        const tamanhoQr = formato === 'circular' ? 15 : 16
         doc.addImage(base64Qr, 'PNG', xVersoCentro - (tamanhoQr / 2), yVersoCentro - (tamanhoQr / 2), tamanhoQr, tamanhoQr)
       }
 
       doc.setFont("helvetica", "italic")
       doc.setFontSize(8)
+      doc.setTextColor(40, 40, 40)
       doc.text('[ Lado Traseiro / Verso ]', 122, 87, { align: 'center' })
 
       doc.save(`dog-tag-${petData.name.toLowerCase()}-${formato}.pdf`)
@@ -456,7 +464,7 @@ export default function PetProfilePage() {
             {pagamentoAprovado ? (
               <div className="space-y-4">
                 
-                {/* SELETOR DE FORMATO E PERSONALIZAÇÃO DE CORES COM PREVIEW AO VIVO */}
+                {/* PERSONALIZAÇÃO DE CORES COM BORDA PREENCHIDA E PREVIEW AO VIVO */}
                 <div className="bg-slate-950/60 border border-slate-800/80 p-4 rounded-2xl text-center space-y-4">
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Personalize sua Plaqueta:</label>
                   
@@ -471,18 +479,18 @@ export default function PetProfilePage() {
                     </select>
                   </div>
 
-                  {/* PAINEL DE SELEÇÃO DE CORES (PARTE EXTERNA, INTERNA E LETRA) */}
+                  {/* PAINEL DE SELEÇÃO DE CORES (BORDA EXTERNA, INTERNO E TEXTO) */}
                   <div className="grid grid-cols-3 gap-2 bg-slate-900/90 p-3 rounded-xl border border-slate-800 text-left">
                     <div>
-                      <span className="text-[9px] uppercase font-semibold text-slate-400 block mb-1">Borda/Linha</span>
+                      <span className="text-[9px] uppercase font-semibold text-slate-400 block mb-1">Borda Externa</span>
                       <div className="flex items-center gap-1.5">
-                        <input type="color" value={corExterna} onChange={(e) => setCorExterna(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0" />
-                        <span className="text-[10px] font-mono text-slate-300">{corExterna}</span>
+                        <input type="color" value={corBorda} onChange={(e) => setCorBorda(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0" />
+                        <span className="text-[10px] font-mono text-slate-300">{corBorda}</span>
                       </div>
                     </div>
 
                     <div>
-                      <span className="text-[9px] uppercase font-semibold text-slate-400 block mb-1">Fundo/Interno</span>
+                      <span className="text-[9px] uppercase font-semibold text-slate-400 block mb-1">Fundo Interno</span>
                       <div className="flex items-center gap-1.5">
                         <input type="color" value={corInterna} onChange={(e) => setCorInterna(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0" />
                         <span className="text-[10px] font-mono text-slate-300">{corInterna}</span>
@@ -490,7 +498,7 @@ export default function PetProfilePage() {
                     </div>
 
                     <div>
-                      <span className="text-[9px] uppercase font-semibold text-slate-400 block mb-1">Cor da Letra</span>
+                      <span className="text-[9px] uppercase font-semibold text-slate-400 block mb-1">Cor do Nome</span>
                       <div className="flex items-center gap-1.5">
                         <input type="color" value={corTexto} onChange={(e) => setCorTexto(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0" />
                         <span className="text-[10px] font-mono text-slate-300">{corTexto}</span>
@@ -498,17 +506,22 @@ export default function PetProfilePage() {
                     </div>
                   </div>
 
-                  {/* PREVIEW AO VIVO DA FRENTE DA TAG */}
+                  {/* PREVIEW AO VIVO DA FRENTE DA TAG COM A BORDA PREENCHIDA */}
                   <div className="space-y-1.5 pt-1">
                     <span className="text-[10px] text-slate-400 uppercase font-semibold block">Preview ao Vivo (Frente)</span>
                     <div className="w-32 h-32 mx-auto rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center p-2 shadow-inner">
                       <div 
                         className={`w-24 h-24 flex flex-col items-center justify-center shadow-md transition-all ${formatoPdf === 'circular' ? 'rounded-full' : 'rounded-lg'}`}
-                        style={{ backgroundColor: corInterna, border: `3px solid ${corExterna}` }}
+                        style={{ backgroundColor: corBorda }}
                       >
-                        <span className="text-xs font-black truncate max-w-[70px]" style={{ color: corTexto }}>
-                          {pet.name}
-                        </span>
+                        <div 
+                          className={`w-18 h-18 w-[80%] h-[80%] flex items-center justify-center ${formatoPdf === 'circular' ? 'rounded-full' : 'rounded-md'}`}
+                          style={{ backgroundColor: corInterna }}
+                        >
+                          <span className="text-xs font-black truncate max-w-[60px]" style={{ color: corTexto }}>
+                            {pet.name}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
