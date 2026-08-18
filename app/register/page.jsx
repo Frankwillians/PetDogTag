@@ -10,6 +10,7 @@ const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '')
 
 export default function RegisterPage() {
   const [nome, setNome] = useState('')
+  const [telefone, setTelefone] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -22,21 +23,39 @@ export default function RegisterPage() {
     setErrorMsg('')
 
     // 1. Cria a conta no Supabase Auth
-    const { data, error } = await supabase.auth.signUp({
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: nome }
+        data: { full_name: nome, phone: telefone }
       }
     })
 
-    if (error) {
-      setErrorMsg(error.message)
+    if (authError) {
+      setErrorMsg(authError.message)
       setLoading(false)
       return
     }
 
-    // 2. Dispara o e-mail de boas-vindas personalizado via Resend
+    // 2. Insere/atualiza explicitamente na tabela profiles para garantir o vínculo imediato
+    if (authData.user) {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert([
+          {
+            id: authData.user.id,
+            full_name: nome,
+            phone: telefone,
+            updated_at: new Date()
+          }
+        ])
+
+      if (profileError) {
+        console.error('Erro ao salvar perfil:', profileError.message)
+      }
+    }
+
+    // 3. Dispara o e-mail de boas-vindas personalizado via Resend
     try {
       await fetch('/api/boas-vindas', {
         method: 'POST',
@@ -78,6 +97,18 @@ export default function RegisterPage() {
               required
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 text-sm focus:outline-none focus:border-indigo-500 transition"
               placeholder="Seu nome"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs uppercase font-semibold text-slate-400 mb-1.5">Telefone / WhatsApp</label>
+            <input
+              type="text"
+              value={telefone}
+              onChange={(e) => setTelefone(e.target.value)}
+              required
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 text-sm focus:outline-none focus:border-indigo-500 transition"
+              placeholder="(83) 98667-0602"
             />
           </div>
 
