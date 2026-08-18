@@ -53,12 +53,12 @@ export default function Perfil() {
     setErro('')
 
     if (!fullName || !phone) {
-      setErroError('Por favor, preencha o nome e o telefone.')
+      setErro('Por favor, preencha o nome e o telefone.')
       return
     }
 
-    // Atualiza ou insere o perfil no Supabase
-    const { error } = await supabase
+    // 1. Atualiza o perfil principal do usuário
+    const { error: profileError } = await supabase
       .from('profiles')
       .update({
         full_name: fullName,
@@ -67,10 +67,24 @@ export default function Perfil() {
       })
       .eq('id', user.id)
 
-    if (error) {
-      setErro('Erro ao atualizar perfil: ' + error.message)
+    if (profileError) {
+      setErro('Erro ao atualizar perfil: ' + profileError.message)
+      return
+    }
+
+    // 2. Atualiza automaticamente o nome e o telefone em TODOS os pets já cadastrados por este usuário
+    const { error: petsError } = await supabase
+      .from('pets')
+      .update({
+        owner_name: fullName,
+        phone: phone
+      })
+      .eq('user_id', user.id)
+
+    if (petsError) {
+      setErro('Perfil salvo, mas houve um erro ao atualizar os pets antigos: ' + petsError.message)
     } else {
-      setMensagem('Perfil atualizado com sucesso!')
+      setMensagem('Perfil e tags de pets atualizados com sucesso!')
     }
   }
 
