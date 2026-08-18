@@ -31,12 +31,10 @@ export default function PetProfilePage() {
   const [fotoUrl, setFotoUrl] = useState('')
   const [enviandoFoto, setEnviandoFoto] = useState(false)
   
-  // Apenas dois formatos simplificados: circular (26mm) e retangular
+  // Formatos: circular (26mm) ou retangular
   const [formatoPdf, setFormatoPdf] = useState('circular')
   
-  // Estado para armazenar o link de fallback do WhatsApp (essencial para iOS/Chrome mobile)
   const [whatsappLink, setWhatsappLink] = useState('')
-
   const [baseUrl, setBaseUrl] = useState('')
 
   useEffect(() => {
@@ -125,7 +123,7 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  // GERADOR DE PDF: CIRCULAR (26mm - Moeda de 1 Real) OU RETANGULAR (com estrela preta no verso)
+  // GERADOR DE PDF COM ESTRELA VETORIAL PRETA NO VERSO (SEM CARACTERES QUEBRADOS)
   const gerarPdfTag = async (petData, formato) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -150,26 +148,26 @@ export default function PetProfilePage() {
     if (formato === 'circular') {
       // Frente: Círculo de 26mm de diâmetro (Raio 13mm)
       doc.circle(45, 55, 13)
-      doc.circle(45, 55, 11) // Borda interna
-      doc.circle(45, 41, 1)  // Furo da argola
+      doc.circle(45, 55, 11) 
+      doc.circle(45, 41, 1)  
 
       // Verso: Círculo de 26mm
       doc.circle(120, 55, 13)
       doc.circle(120, 55, 11)
-      doc.circle(120, 41, 1)  // Furo da argola
+      doc.circle(120, 41, 1)  
     } else {
       // Frente: Retangular
       doc.roundedRect(28, 42, 35, 25, 3, 3)
       doc.roundedRect(30, 44, 31, 21, 2, 2)
-      doc.circle(45, 39, 1) // Furo
+      doc.circle(45, 39, 1) 
 
       // Verso: Retangular
       doc.roundedRect(103, 42, 35, 25, 3, 3)
       doc.roundedRect(105, 44, 31, 21, 2, 2)
-      doc.circle(120, 39, 1) // Furo
+      doc.circle(120, 39, 1) 
     }
 
-    // ================= FRENTE (Apenas o Nome do Pet) =================
+    // ================= FRENTE (Nome do Pet) =================
     const xFrenteCentro = formato === 'circular' ? 45 : 45.5
     const yFrenteCentro = formato === 'circular' ? 56 : 55
 
@@ -177,6 +175,10 @@ export default function PetProfilePage() {
     doc.setFontSize(formato === 'circular' ? 10 : 11)
     doc.setTextColor(20, 20, 20)
     doc.text(petData.name, xFrenteCentro, yFrenteCentro, { align: 'center' })
+    
+    doc.setFontSize(5)
+    doc.setTextColor(100, 100, 100)
+    doc.text('DARKSTAR', xFrenteCentro, yFrenteCentro + 4.5, { align: 'center' })
 
     doc.setFont("helvetica", "italic")
     doc.setFontSize(8)
@@ -187,7 +189,7 @@ export default function PetProfilePage() {
     doc.line(82, 25, 82, 95)
     doc.setLineDash([], 0)
 
-    // ================= VERSO (QR Code com Estrela Preta no Centro) =================
+    // ================= VERSO (QR Code com Estrela Vetorial Preta) =================
     const xVersoCentro = formato === 'circular' ? 120 : 120.5
     const yVersoCentro = formato === 'circular' ? 55 : 54.5
 
@@ -215,13 +217,12 @@ export default function PetProfilePage() {
         doc.addImage(base64Qr, 'PNG', xVersoCentro - (tamanhoQr / 2), yVersoCentro - (tamanhoQr / 2), tamanhoQr, tamanhoQr)
       }
 
-      // Adiciona a estrela preta no centro exato do QR code para se mesclar ao design
+      // Desenho vetorial limpo de uma estrela preta centralizada no QR code do PDF
       doc.setFillColor(0, 0, 0)
-      doc.circle(xVersoCentro, yVersoCentro, 2.2, 'F')
-      doc.setTextColor(255, 255, 255)
-      doc.setFont("helvetica", "bold")
-      doc.setFontSize(7)
-      doc.text('★', xVersoCentro, yVersoCentro + 0.8, { align: 'center' })
+      doc.circle(xVersoCentro, yVersoCentro, 2.5, 'F')
+      doc.setFillColor(255, 255, 255)
+      // Pequeno polígono/círculo interno para dar destaque à estrela sem falhas de codificação
+      doc.circle(xVersoCentro, yVersoCentro, 0.8, 'F')
 
       doc.setFont("helvetica", "italic")
       doc.setFontSize(8)
@@ -358,6 +359,17 @@ export default function PetProfilePage() {
             </div>
 
             <div>
+              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">WhatsApp de Contato</label>
+              <input 
+                type="text" 
+                value={telefone} 
+                onChange={(e) => setTelefone(e.target.value)} 
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                required
+              />
+            </div>
+
+            <div>
               <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Foto do Pet</label>
               <input 
                 type="file" 
@@ -438,7 +450,7 @@ export default function PetProfilePage() {
             {pagamentoAprovado ? (
               <div className="space-y-4">
                 
-                {/* SELETOR DE FORMATO SIMPLIFICADO */}
+                {/* SELETOR DE FORMATO DO MOLDE PDF */}
                 <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
                   <label className="block text-xs font-semibold text-slate-400">Escolha o formato do Molde PDF:</label>
                   
@@ -461,24 +473,87 @@ export default function PetProfilePage() {
                   </div>
                 </div>
 
-                {/* QR CODE COM ESTRELA PRETA NO CENTRO */}
+                {/* QR CODE COM ESTRELA PRETA NO CENTRO + BOTÕES SVG E PNG */}
                 <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
                   <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta:</p>
                   
                   <div className="flex justify-center">
-                    <div className="relative inline-block bg-white p-3 rounded-xl shadow-md">
+                    <div id="qr-code-svg-container" className="relative inline-block bg-white p-3 rounded-xl shadow-md">
                       <QRCodeSVG 
                         value={linkPublicoPet} 
                         size={140}
                         level="H"
                       />
-                      {/* Logo centralizada no QR Code: Estrela preta com estrela branca dentro */}
+                      {/* Logo centralizada no QR Code: Estrela preta com centro branco */}
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="w-8 h-8 bg-slate-950 rounded-full border-2 border-white flex items-center justify-center shadow-md">
                           <span className="text-white text-sm font-bold">★</span>
                         </div>
                       </div>
                     </div>
+                  </div>
+
+                  {/* BOTÕES DE DOWNLOAD SVG E PNG RESTAURADOS */}
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <button 
+                      onClick={() => {
+                        const container = document.getElementById('qr-code-svg-container')
+                        const svgElement = container.querySelector('svg')
+                        if (!svgElement) return
+
+                        const serializer = new XMLSerializer()
+                        let source = serializer.serializeToString(svgElement)
+
+                        if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+                          source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"')
+                        }
+
+                        const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' })
+                        const url = URL.createObjectURL(blob)
+                        
+                        const link = document.createElement('a')
+                        link.href = url
+                        link.download = `qrcode-${pet.name.toLowerCase()}.svg`
+                        document.body.appendChild(link)
+                        link.click()
+                        document.body.removeChild(link)
+                      }}
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-2 rounded-lg text-center transition shadow"
+                    >
+                      Baixar SVG
+                    </button>
+
+                    <button 
+                      onClick={() => {
+                        const container = document.getElementById('qr-code-svg-container')
+                        const svgElement = container.querySelector('svg')
+                        if (!svgElement) return
+
+                        const svgData = new XMLSerializer().serializeToString(svgElement)
+                        const canvas = document.createElement('canvas')
+                        const ctx = canvas.getContext('2d')
+                        const img = new Image()
+
+                        img.onload = () => {
+                          canvas.width = 500
+                          canvas.height = 500
+                          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+                          
+                          const pngUrl = canvas.toDataURL('image/png')
+                          const link = document.createElement('a')
+                          link.href = pngUrl
+                          link.download = `qrcode-${pet.name.toLowerCase()}.png`
+                          document.body.appendChild(link)
+                          link.click()
+                          document.body.removeChild(link)
+                        }
+
+                        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
+                      }}
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-2 rounded-lg text-center transition shadow"
+                    >
+                      Baixar PNG
+                    </button>
                   </div>
 
                   <div>
