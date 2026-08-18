@@ -121,7 +121,7 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  // GERADOR DE PDF COM FORMATOS PRECISOS (CÍRCULO E OSSO REAL) E SEM FOTO DO PET
+  // GERADOR DE PDF USANDO IMAGENS REAIS DE MOLDES (OSSO.PNG / PATINHA.PNG OU CÍRCULO)
   const gerarPdfTag = async (petData, formato) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -140,74 +140,15 @@ export default function PetProfilePage() {
     doc.setFont("helvetica", "normal")
     doc.text(`Contato: ${petData.phone} | Escaneie para ver o perfil de emergência`, 15, 21)
 
-    // FRENTE (Nome do Pet + Logo limpa, sem foto do pet)
-    const centroFrenteX = 45
-    const centroFrenteY = 60
-    const raioTag = 28
-
-    doc.setLineWidth(0.5)
-    doc.setDrawColor(60, 60, 60)
-
-    if (formato === 'circulo') {
-      doc.circle(centroFrenteX, centroFrenteY, raioTag)
-      doc.setLineWidth(0.2)
-      doc.circle(centroFrenteX, centroFrenteY, raioTag - 3)
-      doc.circle(centroFrenteX, centroFrenteY - raioTag + 4, 1.5) // Furo
-    } else if (formato === 'osso') {
-      // Desenho Geométrico do Formato Osso Real
-      // Corpo central
-      doc.roundedRect(25, 45, 40, 30, 4, 4)
-      // Arredondamentos das pontas do osso (bolinhas nas 4 extremidades)
-      doc.circle(25, 52, 6)
-      doc.circle(25, 68, 6)
-      doc.circle(65, 52, 6)
-      doc.circle(65, 68, 6)
-      // Furo da coleira
-      doc.circle(45, 38, 1.5)
+    // Mapeamento das imagens de moldes inseridas na pasta app/moldes
+    const moldesImagens = {
+      osso: `${currentDomain}/moldes/osso.png`,
+      patinha: `${currentDomain}/moldes/patinha.png`,
+      circulo: `${currentDomain}/moldes/patinha.png` // Fallback caso selecione círculo ou ajuste para URL padrão
     }
 
-    // Nome grande e limpo na frente
-    doc.setFont("helvetica", "bold")
-    doc.setFontSize(16)
-    doc.text(petData.name, centroFrenteX, centroFrenteY - 2, { align: 'center' })
-    
-    doc.setFontSize(8)
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(100, 100, 100)
-    doc.text('DARKSTAR PETS', centroFrenteX, centroFrenteY + 8, { align: 'center' })
-    
-    doc.setFontSize(7)
-    doc.setFont("helvetica", "italic")
-    doc.setTextColor(0, 0, 0)
-    doc.text('ME PROCURE NO QR CODE', centroFrenteX, centroFrenteY + 16, { align: 'center' })
-
-    doc.setFont("helvetica", "italic")
-    doc.setFontSize(8)
-    doc.text('[ Lado Frontal ]', centroFrenteX, 94, { align: 'center' })
-
-    // Linha pontilhada de divisão
-    doc.setLineDash([1.5, 1.5], 0)
-    doc.line(82, 25, 82, 95)
-    doc.setLineDash([], 0)
-
-    // VERSO (Com o QR Code)
-    const centroVersoX = 120
-    const centroVersoY = 60
-
-    if (formato === 'circulo') {
-      doc.setLineWidth(0.5)
-      doc.circle(centroVersoX, centroVersoY, raioTag)
-      doc.setLineWidth(0.2)
-      doc.circle(centroVersoX, centroVersoY, raioTag - 3)
-      doc.circle(centroVersoX, centroVersoY - raioTag + 4, 1.5)
-    } else if (formato === 'osso') {
-      doc.roundedRect(100, 45, 40, 30, 4, 4)
-      doc.circle(100, 52, 6)
-      doc.circle(100, 68, 6)
-      doc.circle(140, 52, 6)
-      doc.circle(140, 68, 6)
-      doc.circle(120, 38, 1.5)
-    }
+    // Seleciona a imagem com base no formato escolhido
+    const imagemMoldeUrl = moldesImagens[formato] || moldesImagens.osso
 
     const toBase64 = async (url) => {
       try {
@@ -223,21 +164,73 @@ export default function PetProfilePage() {
       }
     }
 
+    // ================= FRENTE (Molde de Fundo + Nome do Pet) =================
+    const xFrente = 20
+    const yFrente = 32
+    const tamanhoTag = 50
+
+    try {
+      const base64Molde = await toBase64(imagemMoldeUrl)
+      if (base64Molde) {
+        doc.addImage(base64Molde, 'PNG', xFrente, yFrente, tamanhoTag, tamanhoTag)
+      }
+    } catch (e) {
+      console.warn('Erro ao carregar imagem de molde para a frente', e)
+    }
+
+    // Nome centralizado por cima da imagem de fundo
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(13)
+    doc.setTextColor(20, 20, 20)
+    doc.text(petData.name, xFrente + (tamanhoTag / 2), yFrente + (tamanhoTag / 2) - 2, { align: 'center' })
+    
+    doc.setFontSize(6.5)
+    doc.setFont("helvetica", "bold")
+    doc.setTextColor(80, 80, 80)
+    doc.text('DARKSTAR PETS', xFrente + (tamanhoTag / 2), yFrente + (tamanhoTag / 2) + 5, { align: 'center' })
+
+    doc.setFont("helvetica", "italic")
+    doc.setFontSize(8)
+    doc.setTextColor(0, 0, 0)
+    doc.text('[ Lado Frontal ]', xFrente + (tamanhoTag / 2), yFrente + tamanhoTag + 8, { align: 'center' })
+
+    // Linha pontilhada de divisão
+    doc.setLineDash([1.5, 1.5], 0)
+    doc.line(82, 25, 82, 95)
+    doc.setLineDash([], 0)
+
+    // ================= VERSO (Molde de Fundo + QR Code) =================
+    const xVerso = 95
+    const yVerso = 32
+
+    try {
+      const base64Molde = await toBase64(imagemMoldeUrl)
+      if (base64Molde) {
+        doc.addImage(base64Molde, 'PNG', xVerso, yVerso, tamanhoTag, tamanhoTag)
+      }
+    } catch (e) {
+      console.warn('Erro ao carregar imagem de molde para o verso', e)
+    }
+
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkDinamico)}`
 
     try {
       const base64Qr = await toBase64(qrUrl)
       if (base64Qr) {
-        doc.addImage(base64Qr, 'PNG', centroVersoX - 14, centroVersoY - 18, 28, 28)
+        // Posiciona o QR Code de forma compacta e centralizada dentro do molde do verso
+        const tamanhoQr = 24
+        const offsetX = xVerso + (tamanhoTag - tamanhoQr) / 2
+        const offsetY = yVerso + (tamanhoTag - tamanhoQr) / 2 - 2
+        doc.addImage(base64Qr, 'PNG', offsetX, offsetY, tamanhoQr, tamanhoQr)
       }
       
       doc.setFont("helvetica", "bold")
-      doc.setFontSize(7)
-      doc.text('ESCANEIE-ME', centroVersoX, centroVersoY + 14, { align: 'center' })
-      
+      doc.setFontSize(6.5)
+      doc.text('ESCANEIE-ME', xVerso + (tamanhoTag / 2), yVerso + tamanhoTag - 4, { align: 'center' })
+
       doc.setFont("helvetica", "italic")
       doc.setFontSize(8)
-      doc.text('[ Lado Traseiro / Verso ]', centroVersoX, 94, { align: 'center' })
+      doc.text('[ Lado Traseiro / Verso ]', xVerso + (tamanhoTag / 2), yVerso + tamanhoTag + 8, { align: 'center' })
 
       doc.save(`dog-tag-${petData.name.toLowerCase()}-${formato}.pdf`)
     } catch (error) {
@@ -419,8 +412,8 @@ export default function PetProfilePage() {
                       onChange={(e) => setFormatoPdf(e.target.value)}
                       className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
                     >
-                      <option value="circulo">⭕ Formato Círculo</option>
                       <option value="osso">🦴 Formato Osso</option>
+                      <option value="patinha">🐾 Formato Patinha</option>
                     </select>
 
                     <button
