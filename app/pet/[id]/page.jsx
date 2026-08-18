@@ -31,9 +31,7 @@ export default function PetProfilePage() {
   const [fotoUrl, setFotoUrl] = useState('')
   const [enviandoFoto, setEnviandoFoto] = useState(false)
   
-  // Formatos: circular (26mm) ou retangular
   const [formatoPdf, setFormatoPdf] = useState('circular')
-  
   const [whatsappLink, setWhatsappLink] = useState('')
   const [baseUrl, setBaseUrl] = useState('')
 
@@ -123,7 +121,7 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  // GERADOR DE PDF COM ESTRELA VETORIAL PRETA NO VERSO (SEM CARACTERES QUEBRADOS)
+  // GERADOR DE PDF LIMPO (SEM SÍMBOLO NO QR CODE)
   const gerarPdfTag = async (petData, formato) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -146,22 +144,18 @@ export default function PetProfilePage() {
     doc.setDrawColor(40, 40, 40)
 
     if (formato === 'circular') {
-      // Frente: Círculo de 26mm de diâmetro (Raio 13mm)
       doc.circle(45, 55, 13)
       doc.circle(45, 55, 11) 
       doc.circle(45, 41, 1)  
 
-      // Verso: Círculo de 26mm
       doc.circle(120, 55, 13)
       doc.circle(120, 55, 11)
       doc.circle(120, 41, 1)  
     } else {
-      // Frente: Retangular
       doc.roundedRect(28, 42, 35, 25, 3, 3)
       doc.roundedRect(30, 44, 31, 21, 2, 2)
       doc.circle(45, 39, 1) 
 
-      // Verso: Retangular
       doc.roundedRect(103, 42, 35, 25, 3, 3)
       doc.roundedRect(105, 44, 31, 21, 2, 2)
       doc.circle(120, 39, 1) 
@@ -189,7 +183,7 @@ export default function PetProfilePage() {
     doc.line(82, 25, 82, 95)
     doc.setLineDash([], 0)
 
-    // ================= VERSO (QR Code com Estrela Vetorial Preta) =================
+    // ================= VERSO (QR Code Limpo, sem símbolo) =================
     const xVersoCentro = formato === 'circular' ? 120 : 120.5
     const yVersoCentro = formato === 'circular' ? 55 : 54.5
 
@@ -213,16 +207,9 @@ export default function PetProfilePage() {
     try {
       const base64Qr = await toBase64(qrUrl)
       if (base64Qr) {
-        const tamanhoQr = formato === 'circular' ? 16 : 17
+        const tamanhoQr = formato === 'circular' ? 18 : 19
         doc.addImage(base64Qr, 'PNG', xVersoCentro - (tamanhoQr / 2), yVersoCentro - (tamanhoQr / 2), tamanhoQr, tamanhoQr)
       }
-
-      // Desenho vetorial limpo de uma estrela preta centralizada no QR code do PDF
-      doc.setFillColor(0, 0, 0)
-      doc.circle(xVersoCentro, yVersoCentro, 2.5, 'F')
-      doc.setFillColor(255, 255, 255)
-      // Pequeno polígono/círculo interno para dar destaque à estrela sem falhas de codificação
-      doc.circle(xVersoCentro, yVersoCentro, 0.8, 'F')
 
       doc.setFont("helvetica", "italic")
       doc.setFontSize(8)
@@ -473,7 +460,7 @@ export default function PetProfilePage() {
                   </div>
                 </div>
 
-                {/* QR CODE COM ESTRELA PRETA NO CENTRO + BOTÕES SVG E PNG */}
+                {/* QR CODE LIMPO (SEM SÍMBOLO NO CENTRO) + BOTÕES SVG E PNG */}
                 <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
                   <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta:</p>
                   
@@ -484,16 +471,10 @@ export default function PetProfilePage() {
                         size={140}
                         level="H"
                       />
-                      {/* Logo centralizada no QR Code: Estrela preta com centro branco */}
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-8 h-8 bg-slate-950 rounded-full border-2 border-white flex items-center justify-center shadow-md">
-                          <span className="text-white text-sm font-bold">★</span>
-                        </div>
-                      </div>
                     </div>
                   </div>
 
-                  {/* BOTÕES DE DOWNLOAD SVG E PNG RESTAURADOS */}
+                  {/* BOTÕES DE DOWNLOAD SVG E PNG */}
                   <div className="grid grid-cols-2 gap-2 pt-1">
                     <button 
                       onClick={() => {
