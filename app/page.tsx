@@ -10,7 +10,7 @@ export default function LandingPage() {
       <header className="max-w-6xl w-full mx-auto px-6 py-6 flex items-center justify-between border-b border-slate-900/50 backdrop-blur-md sticky top-0 z-50 bg-slate-950/80">
         <div className="flex items-center gap-2">
           <span className="text-2xl">🐾</span>
-          <span className="font-extrabold text-xl text-white tracking-wide">DarkStar Dog Tags</span>
+          <span className="font-extrabold text-xl text-white tracking-wide">DarkStar Pets</span>
         </div>
         <div className="flex items-center gap-4">
           <Link href="/login" className="text-sm font-semibold text-slate-300 hover:text-white transition">
@@ -25,16 +25,16 @@ export default function LandingPage() {
       {/* HERO SECTION (DESTAQUE PRINCIPAL) */}
       <main className="max-w-5xl w-full mx-auto px-6 py-16 text-center space-y-10">
         
-        <div className="inline-flex items-center gap-2 bg-indigo-950/80 border border-indigo-800/60 text-indigo-400 text-xs font-semibold px-4 py-1.5 rounded-full shadow-inner animate-pulse">
-          🛡️ Prevenção e Segurança Inteligente para Pets
+        <div className="inline-flex items-center gap-2 bg-indigo-950/80 border border-indigo-800/60 text-indigo-400 text-xs font-semibold px-4 py-1.5 rounded-full shadow-inner">
+          ❤️ Porque todo membro da família merece voltar para casa em segurança.
         </div>
 
         <h1 className="text-4xl sm:text-7xl font-black text-white tracking-tight leading-[1.1]">
-          Proteja o seu pet com uma <span className="text-indigo-500 underline decoration-indigo-500/30">plaqueta inteligente.</span>
+          O pior pesadelo de todo tutor é ver o seu melhor amigo <span className="text-indigo-500 underline decoration-indigo-500/30">perdido na rua.</span>
         </h1>
 
         <p className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          Evite sustos. Crie uma tag com QR Code em segundos e imprima em casa. Se ele escapar, quem o encontrar escaneia a coleira e envia a <strong>localização exata do GPS direto no seu WhatsApp</strong>.
+          Um portão aberto, um susto com fogos de artifício, um descuido de segundos... O medo de não saber onde ele está aperta o coração de qualquer um. Com a DarkStar Pets, se alguém encontrar o seu companheiro, basta escanear a coleira para que a <strong>localização exata do GPS chegue direto no seu WhatsApp</strong>.
         </p>
 
         {/* BOTÕES DE AÇÃO */}
@@ -43,7 +43,7 @@ export default function LandingPage() {
             href="/register" 
             className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg px-8 py-4 rounded-2xl shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5"
           >
-            Proteger Meu Pet Agora 🚀
+            Proteger Meu Pet Gratuitamente 🚀
           </Link>
           <Link 
             href="/login" 
@@ -56,24 +56,24 @@ export default function LandingPage() {
         {/* ESTATÍSTICAS RÁPIDAS / CONFIANÇA */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-6 max-w-3xl mx-auto text-center">
           <div className="bg-slate-900/50 border border-slate-900 p-4 rounded-xl">
-            <p className="text-2xl sm:text-3xl font-extrabold text-white">100%</p>
-            <p className="text-xs text-slate-400">Prático e Preventivo</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-emerald-400">R$ 0,00</p>
+            <p className="text-xs text-slate-400">Ativação gratuita para o 1º pet</p>
           </div>
           <div className="bg-slate-900/50 border border-slate-900 p-4 rounded-xl">
-            <p className="text-2xl sm:text-3xl font-extrabold text-white">Zero</p>
-            <p className="text-xs text-slate-400">Custo de Frete (Imprima em Casa)</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-white">R$ 10,00</p>
+            <p className="text-xs text-slate-400">Taxa única para pets adicionais</p>
           </div>
           <div className="col-span-2 sm:col-span-1 bg-slate-900/50 border border-slate-900 p-4 rounded-xl">
-            <p className="text-2xl sm:text-3xl font-extrabold text-indigo-400">24/7</p>
-            <p className="text-xs text-slate-400">Proteção Ativa na Coleira</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-indigo-400">Paz Mental</p>
+            <p className="text-xs text-slate-400">Contato direto com quem achou</p>
           </div>
         </div>
 
         {/* COMO FUNCIONA (3 PASSOS) */}
         <div className="pt-16 space-y-12">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">Como funciona em 3 passos simples</h2>
-            <p className="text-sm text-slate-400">Tudo pronto em menos de 2 minutos.</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">Como cuidar de quem você ama em 3 passos</h2>
+            <p className="text-sm text-slate-400">Um gesto simples hoje pode salvar a vida do seu pet amanhã.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
@@ -81,22 +81,22 @@ export default function LandingPage() {
             <div className="bg-slate-900 border border-slate-800/80 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-indigo-500/50 transition">
               <div className="text-3xl font-black text-indigo-500/20 absolute top-4 right-4">01</div>
               <div className="text-2xl">📝</div>
-              <h3 className="font-bold text-white text-lg">Cadastre o Pet</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">Insira o nome, sua foto, o WhatsApp de contato e os cuidados essenciais de saúde.</p>
+              <h3 className="font-bold text-white text-lg">Cadastre com carinho</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">Insira o nome, a foto e os dados de contato. O primeiro pet da família tem ativação 100% gratuita. Para os demais, cobramos apenas uma taxa única de R$ 10,00.</p>
             </div>
 
             <div className="bg-slate-900 border border-slate-800/80 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-indigo-500/50 transition">
               <div className="text-3xl font-black text-indigo-500/20 absolute top-4 right-4">02</div>
               <div className="text-2xl">🖨️</div>
-              <h3 className="font-bold text-white text-lg">Baixe o Molde PDF</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">Gere o PDF dobrável com o QR Code e imprima na impressora de casa ou na gráfica rápida.</p>
+              <h3 className="font-bold text-white text-lg">Monte a plaqueta</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">Baixe o molde em PDF na hora, imprima em casa e coloque na coleira. Uma ponte direta entre o seu pet e o seu abraço.</p>
             </div>
 
             <div className="bg-slate-900 border border-slate-800/80 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-indigo-500/50 transition">
               <div className="text-3xl font-black text-indigo-500/20 absolute top-4 right-4">03</div>
               <div className="text-2xl">📍</div>
-              <h3 className="font-bold text-white text-lg">Segurança Ativa</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">Se alguém achar o animal, aponta a câmera, lê o QR code e o seu WhatsApp recebe a localização GPS instantânea.</p>
+              <h3 className="font-bold text-white text-lg">Resgate imediato</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">Se ele se perder, qualquer pessoa de bom coração que o encontrar poderá ler o QR Code e avisar onde ele está num piscar de olhos.</p>
             </div>
 
           </div>
@@ -106,17 +106,17 @@ export default function LandingPage() {
         <div className="pt-16 pb-8">
           <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 border border-indigo-800/50 p-8 sm:p-12 rounded-3xl space-y-6 shadow-2xl">
             <h2 className="text-2xl sm:text-4xl font-extrabold text-white">
-              Garanta a segurança do seu melhor amigo hoje mesmo.
+              Não espere o susto acontecer para se prevenir.
             </h2>
             <p className="text-slate-300 text-sm sm:text-base max-w-xl mx-auto">
-              Tenha tranquilidade sabendo que qualquer pessoa pode te contatar em segundos se houver um imprevisto.
+              Dê ao seu fiel companheiro a segurança de voltar para casa caso ele se aventure longe demais.
             </p>
             <div>
               <Link 
                 href="/register" 
                 className="inline-block bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-base px-8 py-4 rounded-2xl shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5"
               >
-                Cadastrar Meu Pet Agora 🐾
+                Proteger Meu Pet Agora 🐾
               </Link>
             </div>
           </div>
@@ -126,7 +126,7 @@ export default function LandingPage() {
 
       {/* RODAPÉ */}
       <footer className="max-w-6xl w-full mx-auto px-6 py-8 border-t border-slate-900 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p>© 2026 DarkStar Dog Tags Inteligentes. Todos os direitos reservados.</p>
+        <p>© 2026 DarkStar Pets. Todos os direitos reservados.</p>
         <div className="flex gap-4">
           <Link href="/login" className="hover:text-slate-400 transition">Entrar</Link>
           <Link href="/register" className="hover:text-slate-400 transition">Criar Conta</Link>
