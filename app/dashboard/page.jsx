@@ -55,6 +55,7 @@ export default function Dashboard() {
   }
 
   // Função para cadastrar novo pet
+// Função para cadastrar novo pet
   async function handleCadastrarPet(e) {
     e.preventDefault()
     setErroForm('')
@@ -65,6 +66,24 @@ export default function Dashboard() {
       return
     }
 
+    // 1. VERIFICAÇÃO DO LIMITE DO PLANO GRATUITO (1 Pet Grátis)
+    const { count, error: countError } = await supabase
+      .from('pets')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+
+    if (countError) {
+      setErroForm('Erro ao verificar limite de pets: ' + countError.message)
+      return
+    }
+
+    // Se o usuário já tiver 1 ou mais pets cadastrados, bloqueia
+    if (count >= 1) {
+      setErroForm('Você atingiu o limite do plano gratuito (1 pet grátis). Para cadastrar mais pets, entre em contato para fazer um upgrade!')
+      return
+    }
+
+    // 2. SE PASSOU DA VERIFICAÇÃO, CONTINUA COM O INSERT NORMAL
     const { error } = await supabase.from('pets').insert([
       {
         user_id: user.id,
@@ -92,7 +111,7 @@ export default function Dashboard() {
     }
   }
 
-  // Função para iniciar o pagamento via Checkout Pro do Mercado Pago
+  // Funçãoo para iniciar o pagamento via Checkout Pro do Mercado Pago
   async function handlePagar(petId) {
     try {
       const res = await fetch('/api/pagamento', {
