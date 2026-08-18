@@ -219,17 +219,21 @@ export default function PetProfilePage() {
         (position) => {
           const lat = position.coords.latitude
           const lng = position.coords.longitude
-          // CORRIGIDO: Link padrão funcional do Google Maps para celulares
           const mapsLink = `https://maps.google.com/?q=${lat},${lng}`
           
           const telefoneLimpo = pet.phone.replace(/\D/g, '')
           const mensagem = encodeURIComponent(`Olá! Encontrei seu pet ${pet.name}. Aqui está minha localização atual: ${mapsLink}`)
-          window.open(`https://wa.me/55${telefoneLimpo}?text=${mensagem}`, '_blank')
+          
+          // Usa o formato api.whatsapp.com que costuma ter melhor compatibilidade de abertura direta no app mobile
+          const urlWhatsApp = `https://api.whatsapp.com/send?phone=55${telefoneLimpo}&text=${mensagem}`
+          
+          // Abre diretamente na mesma aba ou força o redirecionamento mobile
+          window.location.href = urlWhatsApp
         },
         () => {
-          alert('Não foi possível obter sua localização. Verifique as permissões do navegador.')
+          alert('Não foi possível obter sua localização. Verifique as permissões do GPS.')
         },
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true, timeout: 10000 }
       )
     } else {
       alert('Seu navegador não suporta geolocalização.')
