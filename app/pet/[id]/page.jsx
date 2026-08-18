@@ -142,9 +142,9 @@ export default function PetProfilePage() {
 
     // Mapeamento das imagens de moldes inseridas na pasta app/moldes
     const moldesImagens = {
-      osso: `${currentDomain}/moldes/osso.png`,
-      patinha: `${currentDomain}/moldes/patinha.png`,
-      circulo: `${currentDomain}/moldes/patinha.png` // Fallback caso selecione círculo ou ajuste para URL padrão
+      osso: `${currentDomain}/moldes/osso.jpg`,
+      patinha: `${currentDomain}/moldes/patinha.jpg`,
+      circulo: `${currentDomain}/moldes/circulo.jpg` // Fallback caso selecione círculo ou ajuste para URL padrão
     }
 
     // Seleciona a imagem com base no formato escolhido
