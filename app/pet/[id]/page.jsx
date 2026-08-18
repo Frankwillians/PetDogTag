@@ -77,18 +77,38 @@ export default function PetProfilePage() {
     fetchPetAndUser()
   }, [petId])
 
+  // FUNÇÕES DE FORMATAÇÃO AUTOMÁTICA (Apenas digita o número)
+  const formatarPeso = (val) => {
+    const apenasNumeros = val.replace(/[^\d.,]/g, '')
+    if (!apenasNumeros) return ''
+    return `${apenasNumeros} kg`
+  }
+
+  const formatarIdade = (val) => {
+    const apenasNumeros = val.replace(/\D/g, '')
+    if (!apenasNumeros) return ''
+    const num = parseInt(apenasNumeros, 10)
+    if (num === 1) return '1 ano'
+    return `${num} anos`
+  }
+
   const handleSalvarAlteracoes = async (e) => {
     e.preventDefault()
+    
+    // Aplica a formatação automática antes de salvar no banco
+    const pesoFormatado = formatarPeso(peso)
+    const idadeFormatada = formatarIdade(idade)
+
     const { error } = await supabase
       .from('pets')
-      .update({ name: nome, phone: telefone, peso: peso, idade: idade, notes: notes, foto_url: fotoUrl })
+      .update({ name: nome, phone: telefone, peso: pesoFormatado, idade: idadeFormatada, notes: notes, foto_url: fotoUrl })
       .eq('id', petId)
 
     if (error) {
       alert('Erro ao atualizar os dados do pet.')
     } else {
       alert('Dados atualizados com sucesso!')
-      setPet({ ...pet, name: nome, phone: telefone, peso, idade, notes: notes, foto_url: fotoUrl })
+      setPet({ ...pet, name: nome, phone: telefone, peso: pesoFormatado, idade: idadeFormatada, notes: notes, foto_url: fotoUrl })
       setEditando(false)
     }
   }
@@ -121,7 +141,6 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  // GERADOR DE PDF APONTANDO DIRETAMENTE PARA A PÁGINA PÚBLICA (?public=true)
   const gerarPdfTag = async (petData, formato) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -130,7 +149,6 @@ export default function PetProfilePage() {
     })
 
     const currentDomain = window.location.origin
-    // Força o link público para que quem escanear caia direto na visão de resgate
     const linkDinamico = `${currentDomain}/pet/${petData.id}?public=true`
 
     doc.setFont("helvetica", "bold")
@@ -162,7 +180,6 @@ export default function PetProfilePage() {
       doc.circle(120, 39, 1) 
     }
 
-    // ================= FRENTE (Nome do Pet) =================
     const xFrenteCentro = formato === 'circular' ? 45 : 45.5
     const yFrenteCentro = formato === 'circular' ? 56 : 55
 
@@ -179,12 +196,10 @@ export default function PetProfilePage() {
     doc.setFontSize(8)
     doc.text('[ Lado Frontal ]', 45, 85, { align: 'center' })
 
-    // Linha pontilhada divisória
     doc.setLineDash([1.5, 1.5], 0)
     doc.line(82, 25, 82, 95)
     doc.setLineDash([], 0)
 
-    // ================= VERSO (QR Code apontando para o link público) =================
     const xVersoCentro = formato === 'circular' ? 120 : 120.5
     const yVersoCentro = formato === 'circular' ? 55 : 54.5
 
@@ -256,7 +271,7 @@ export default function PetProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
-        <p className="text-sm text-slate-400 animate-pulse">Carregando informações do pet...</p>
+        <p className="text-sm text-slate-400 animate-pulse">Carregando informações...</p>
       </div>
     )
   }
@@ -266,13 +281,12 @@ export default function PetProfilePage() {
       <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6 text-center">
         <div>
           <h1 className="text-xl font-bold text-red-400 mb-2">Pet não encontrado</h1>
-          <p className="text-sm text-slate-400">Verifique o link da plaqueta ou entre em contato com o suporte.</p>
+          <p className="text-sm text-slate-400">Verifique o link ou entre em contato com o suporte.</p>
         </div>
       </div>
     )
   }
 
-  // Garante que o QR code na tela também aponte para o link público de emergência (?public=true)
   const linkPublicoPet = `${baseUrl}/pet/${pet.id}?public=true`
   const especieAtual = (pet.species || '').toLowerCase()
   const fotoExibicao = pet.foto_url || (especieAtual.includes('gato') ? 'https://cdn-icons-png.flaticon.com/512/616/616554.png' : 'https://cdn-icons-png.flaticon.com/512/616/616408.png')
@@ -289,29 +303,29 @@ export default function PetProfilePage() {
         </div>
       )}
 
-      <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-6">
+      <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl space-y-6">
         
-        {/* Cabeçalho */}
-        <div className="text-center">
-          <div className="inline-block bg-indigo-950 border border-indigo-800 text-indigo-400 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-            {isDono ? '🛡️ PAINEL DO DONO (GERENCIAMENTO)' : '🐾 PERFIL DE EMERGÊNCIA / PET'}
+        {/* CABEÇALHO ESTILO PINNPET */}
+        <div className="text-center space-y-3">
+          <div className="inline-block bg-indigo-950/80 border border-indigo-800/60 text-indigo-400 text-xs font-semibold px-3.5 py-1 rounded-full">
+            {isDono ? '🛡️ PAINEL DO DONO' : '🐾 PERFIL DE EMERGÊNCIA'}
           </div>
 
-          <div className="flex justify-center mb-3">
-            <img src={fotoExibicao} alt={pet.name} className="w-24 h-24 object-cover rounded-full border-2 border-indigo-500 shadow-md bg-slate-950 p-1" />
+          <div className="flex justify-center">
+            <img src={fotoExibicao} alt={pet.name} className="w-28 h-28 object-cover rounded-full border-4 border-indigo-500/30 shadow-xl bg-slate-950 p-1" />
           </div>
 
-          <h1 className="text-3xl font-extrabold text-white flex items-center justify-center gap-2">
-            {pet.name}
-          </h1>
-          <p className="text-sm text-slate-400 capitalize mt-1">
-            {pet.species} {pet.breed ? `• ${pet.breed}` : ''}
-          </p>
+          <div>
+            <h1 className="text-3xl font-black text-white tracking-tight">{pet.name}</h1>
+            <p className="text-sm text-slate-400 capitalize mt-0.5">
+              {pet.species} {pet.breed ? `• ${pet.breed}` : ''}
+            </p>
+          </div>
         </div>
 
         {/* SE FOR O DONO E ESTIVER EDITANDO OS DADOS */}
         {isDono && editando ? (
-          <form onSubmit={handleSalvarAlteracoes} className="space-y-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <form onSubmit={handleSalvarAlteracoes} className="space-y-4 bg-slate-950/80 p-4 rounded-2xl border border-slate-800">
             <h2 className="text-xs font-bold uppercase text-indigo-400 mb-2">Editar Dados do Pet</h2>
             <div>
               <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Nome do Pet</label>
@@ -319,30 +333,30 @@ export default function PetProfilePage() {
                 type="text" 
                 value={nome} 
                 onChange={(e) => setNome(e.target.value)} 
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Peso</label>
+                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Peso (ex: 4.5)</label>
                 <input 
                   type="text" 
                   value={peso} 
                   onChange={(e) => setPeso(e.target.value)} 
-                  className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-                  placeholder="Ex: 4.5kg"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                  placeholder="Ex: 4.5"
                 />
               </div>
               <div>
-                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Idade</label>
+                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Idade (ex: 2)</label>
                 <input 
                   type="text" 
                   value={idade} 
                   onChange={(e) => setIdade(e.target.value)} 
-                  className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-                  placeholder="Ex: 2 anos"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                  placeholder="Ex: 2"
                 />
               </div>
             </div>
@@ -353,7 +367,7 @@ export default function PetProfilePage() {
                 type="text" 
                 value={telefone} 
                 onChange={(e) => setTelefone(e.target.value)} 
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
                 required
               />
             </div>
@@ -364,74 +378,78 @@ export default function PetProfilePage() {
                 type="file" 
                 accept="image/jpeg, image/jpg, image/png"
                 onChange={handleUploadFoto}
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
               />
               {enviandoFoto && <p className="text-[10px] text-indigo-400 mt-1 animate-pulse">Enviando foto...</p>}
             </div>
+
             <div>
               <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Cuidados / Alergias</label>
               <textarea 
                 value={notes} 
                 onChange={(e) => setNotes(e.target.value)} 
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
                 rows="2"
               />
             </div>
+
             <div className="flex gap-2 pt-2">
-              <button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-lg text-xs transition">
-                Salvar Alterações
+              <button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-xs transition">
+                Salvar
               </button>
-              <button type="button" onClick={() => setEditando(false)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-lg text-xs transition">
+              <button type="button" onClick={() => setEditando(false)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-xl text-xs transition">
                 Cancelar
               </button>
             </div>
           </form>
         ) : (
-          /* Informações do Pet (Visível tanto para o dono quanto na página pública) */
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3 text-sm">
-            <div className="flex justify-between border-b border-slate-800 pb-2">
-              <span className="text-slate-400 font-semibold uppercase text-xs">Dono:</span>
-              <span className="text-slate-200 font-medium">{pet.owner_name}</span>
-            </div>
-            <div className="flex justify-between border-b border-slate-800 pb-2">
-              <span className="text-slate-400 font-semibold uppercase text-xs">WhatsApp:</span>
-              <span className="text-slate-200 font-medium">{pet.phone || 'Não informado'}</span>
-            </div>
-
-            {/* PESO E IDADE EXIBIDOS NA PÁGINA PÚBLICA E DO PAINEL */}
-            {(pet.peso || pet.idade) && (
-              <div className="grid grid-cols-2 gap-2 border-b border-slate-800 pb-2">
-                {pet.peso && (
-                  <div>
-                    <span className="text-slate-400 font-semibold uppercase text-xs block">Peso:</span>
-                    <span className="text-slate-200 font-medium">{pet.peso}</span>
-                  </div>
-                )}
-                {pet.idade && (
-                  <div>
-                    <span className="text-slate-400 font-semibold uppercase text-xs block">Idade:</span>
-                    <span className="text-slate-200 font-medium">{pet.idade}</span>
-                  </div>
-                )}
+          /* BLOCO DE INFORMAÇÕES ESTILO CARDS PINNPET (VISÍVEL PARA TODOS) */
+          <div className="space-y-3">
+            <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 space-y-3 text-sm shadow-inner">
+              <div className="flex justify-between border-b border-slate-800/60 pb-2.5">
+                <span className="text-slate-400 font-medium text-xs">Tutor responsável:</span>
+                <span className="text-slate-100 font-bold">{pet.owner_name}</span>
               </div>
-            )}
-
-            {pet.notes && (
-              <div>
-                <span className="text-slate-400 font-semibold uppercase text-xs block mb-1">Cuidados / Alergias:</span>
-                <p className="text-slate-300 bg-slate-900 p-2 rounded-lg">{pet.notes}</p>
+              <div className="flex justify-between border-b border-slate-800/60 pb-2.5">
+                <span className="text-slate-400 font-medium text-xs">WhatsApp:</span>
+                <span className="text-slate-100 font-bold">{pet.phone || 'Não informado'}</span>
               </div>
-            )}
+
+              {/* CARDS DE PESO E IDADE ESTILO PINNPET */}
+              {(pet.peso || pet.idade) && (
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  {pet.peso && (
+                    <div className="bg-slate-900/80 border border-slate-800 p-2.5 rounded-xl text-center">
+                      <span className="text-[10px] uppercase font-semibold text-slate-400 block">Peso</span>
+                      <span className="text-sm font-extrabold text-indigo-400">{pet.peso}</span>
+                    </div>
+                  )}
+                  {pet.idade && (
+                    <div className="bg-slate-900/80 border border-slate-800 p-2.5 rounded-xl text-center">
+                      <span className="text-[10px] uppercase font-semibold text-slate-400 block">Idade</span>
+                      <span className="text-sm font-extrabold text-indigo-400">{pet.idade}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {pet.notes && (
+                <div className="pt-1">
+                  <span className="text-slate-400 font-medium text-xs block mb-1">Cuidados especiais / Alergias:</span>
+                  <p className="text-slate-300 bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl text-xs leading-relaxed">{pet.notes}</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* CONTROLE DE EXIBIÇÃO: DONO X QUEM ACHOU */}
         {isDono ? (
-          <div className="space-y-4 pt-2">
+          <div className="space-y-4 pt-1">
             {!editando && (
               <button
                 onClick={() => setEditando(true)}
-                className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-xl text-sm transition"
+                className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-sm transition shadow-md"
               >
                 ✏️ Alterar Dados / Foto
               </button>
@@ -441,14 +459,14 @@ export default function PetProfilePage() {
               <div className="space-y-4">
                 
                 {/* SELETOR DE FORMATO DO MOLDE PDF */}
-                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
+                <div className="bg-slate-950/60 border border-slate-800/80 p-4 rounded-2xl text-center space-y-3">
                   <label className="block text-xs font-semibold text-slate-400">Escolha o formato do Molde PDF:</label>
                   
                   <div className="flex gap-2">
                     <select
                       value={formatoPdf}
                       onChange={(e) => setFormatoPdf(e.target.value)}
-                      className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-medium"
+                      className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-medium"
                     >
                       <option value="circular">🪙 Circular (26mm - Moeda 1 Real)</option>
                       <option value="retangular">🪪 Retangular</option>
@@ -456,19 +474,19 @@ export default function PetProfilePage() {
 
                     <button
                       onClick={() => gerarPdfTag(pet, formatoPdf)}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-xs transition shadow flex items-center justify-center gap-1.5"
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-1.5"
                     >
                       🛠️ Baixar PDF
                     </button>
                   </div>
                 </div>
 
-                {/* QR CODE DA PLAQUETA (APONTANDO PARA A PÁGINA PÚBLICA) + BOTÕES SVG E PNG */}
-                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
+                {/* QR CODE DA PLAQUETA + BOTÕES SVG E PNG */}
+                <div className="bg-slate-950/60 border border-slate-800/80 p-4 rounded-2xl text-center space-y-3">
                   <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta:</p>
                   
                   <div className="flex justify-center">
-                    <div id="qr-code-svg-container" className="relative inline-block bg-white p-3 rounded-xl shadow-md">
+                    <div id="qr-code-svg-container" className="relative inline-block bg-white p-3 rounded-2xl shadow-lg">
                       <QRCodeSVG 
                         value={linkPublicoPet} 
                         size={140}
@@ -502,7 +520,7 @@ export default function PetProfilePage() {
                         link.click()
                         document.body.removeChild(link)
                       }}
-                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-2 rounded-lg text-center transition shadow"
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-2 rounded-xl text-center transition shadow"
                     >
                       Baixar SVG
                     </button>
@@ -534,7 +552,7 @@ export default function PetProfilePage() {
 
                         img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
                       }}
-                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-2 rounded-lg text-center transition shadow"
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-2 rounded-xl text-center transition shadow"
                     >
                       Baixar PNG
                     </button>
@@ -543,7 +561,7 @@ export default function PetProfilePage() {
                   <div>
                     <a 
                       href="/dashboard"
-                      className="block w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-lg text-center transition"
+                      className="block w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-xl text-center transition shadow-md shadow-indigo-600/20"
                     >
                       Painel Geral
                     </a>
@@ -551,11 +569,11 @@ export default function PetProfilePage() {
                 </div>
               </div>
             ) : (
-              <div className="bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl text-center space-y-2">
+              <div className="bg-amber-950/40 border border-amber-800/60 p-4 rounded-2xl text-center space-y-2">
                 <span className="text-2xl">⏳</span>
                 <h3 className="font-bold text-amber-400 text-sm">Pagamento Pendente</h3>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  O acesso ao QR Code e aos moldes PDF será liberado automaticamente assim que o pagamento de ativação for confirmado.
+                  O acesso ao QR Code e aos moldes PDF será liberado assim que o pagamento de ativação for confirmado.
                 </p>
               </div>
             )}
@@ -565,12 +583,12 @@ export default function PetProfilePage() {
 
         {/* SE FOR QUEM ACHOU O PET (PÁGINA PÚBLICA) */}
         {!isDono && (
-          <div className="space-y-3">
+          <div className="space-y-3 pt-2">
             {pagamentoAprovado ? (
               <>
                 <button
                   onClick={handleEnviarLocalizacao}
-                  className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-red-600/20 transition flex items-center justify-center gap-2"
+                  className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-2xl text-sm shadow-xl shadow-red-600/30 transition flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
                 >
                   📍 Enviar Minha Localização
                 </button>
@@ -580,14 +598,14 @@ export default function PetProfilePage() {
                     href={whatsappLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-full text-center bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-lg animate-bounce"
+                    className="block w-full text-center bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-2xl text-sm transition shadow-lg animate-bounce"
                   >
                     📲 Clique aqui para abrir o WhatsApp com a localização
                   </a>
                 )}
               </>
             ) : (
-              <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-2">
+              <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl text-center space-y-2">
                 <span className="text-xl">⚠️</span>
                 <p className="text-xs text-slate-400 leading-relaxed">
                   Esta plaqueta ainda não foi ativada pelo dono. O resgate via QR Code estará disponível assim que a taxa de cadastro for confirmada.
