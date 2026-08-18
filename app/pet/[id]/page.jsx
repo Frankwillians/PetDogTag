@@ -24,7 +24,6 @@ export default function PetProfilePage() {
 
   const [editando, setEditando] = useState(false)
   const [nome, setNome] = useState('')
-  const [telefone, setTelefone] = useState('')
   const [peso, setPeso] = useState('')
   const [idade, setIdade] = useState('')
   const [notes, setNotes] = useState('')
@@ -33,10 +32,10 @@ export default function PetProfilePage() {
   
   const [formatoPdf, setFormatoPdf] = useState('circular')
   
-  // Cores personalizáveis: Borda externa preenchida, Fundo interno e Letra do nome
-  const [corBorda, setCorBorda] = useState('#dc2626')       // Cor da borda externa (ex: Vermelho)
-  const [corInterna, setCorInterna] = useState('#facc15')   // Cor do preenchimento interno (ex: Amarelo)
-  const [corTexto, setCorTexto] = useState('#1d4ed8')       // Cor da letra do nome (ex: Azul)
+  // Cores personalizáveis para a plaqueta
+  const [corBorda, setCorBorda] = useState('#dc2626')       
+  const [corInterna, setCorInterna] = useState('#facc15')   
+  const [corTexto, setCorTexto] = useState('#1d4ed8')       
   
   const [whatsappLink, setWhatsappLink] = useState('')
   const [baseUrl, setBaseUrl] = useState('')
@@ -63,7 +62,6 @@ export default function PetProfilePage() {
 
       setPet(petData)
       setNome(petData.name || '')
-      setTelefone(petData.phone || '')
       setPeso(petData.peso || '')
       setIdade(petData.idade || '')
       setNotes(petData.notes || '')
@@ -85,16 +83,17 @@ export default function PetProfilePage() {
 
   const handleSalvarAlteracoes = async (e) => {
     e.preventDefault()
+    // Telefone removido da edição, pois pertence à conta do tutor
     const { error } = await supabase
       .from('pets')
-      .update({ name: nome, phone: telefone, peso: peso, idade: idade, notes: notes, foto_url: fotoUrl })
+      .update({ name: nome, peso: peso, idade: idade, notes: notes, foto_url: fotoUrl })
       .eq('id', petId)
 
     if (error) {
       alert('Erro ao atualizar os dados do pet.')
     } else {
       alert('Dados atualizados com sucesso!')
-      setPet({ ...pet, name: nome, phone: telefone, peso, idade, notes: notes, foto_url: fotoUrl })
+      setPet({ ...pet, name: nome, peso, idade, notes: notes, foto_url: fotoUrl })
       setEditando(false)
     }
   }
@@ -156,27 +155,22 @@ export default function PetProfilePage() {
     const [rTxt, gTxt, bTxt] = hexToRgb(corTexto)
 
     if (formato === 'circular') {
-      // 1. Círculo externo preenchido (Borda colorida)
       doc.setFillColor(rBorda, gBorda, bBorda)
       doc.circle(48, 57, 13, 'F')
       doc.circle(122, 57, 13, 'F')
 
-      // 2. Círculo interno preenchido (Fundo da tag)
       doc.setFillColor(rInt, gInt, bInt)
       doc.circle(48, 57, 10.5, 'F')
       doc.circle(122, 57, 10.5, 'F')
 
-      // Furo da argola (Preenchido com a cor interna ou branco para destacar)
       doc.setFillColor(255, 255, 255)
       doc.circle(48, 43, 1, 'FD')
       doc.circle(122, 43, 1, 'FD')
     } else {
-      // Retangular Externo
       doc.setFillColor(rBorda, gBorda, bBorda)
       doc.roundedRect(30.5, 44.5, 35, 25, 3, 3, 'F')
       doc.roundedRect(104.5, 44.5, 35, 25, 3, 3, 'F')
 
-      // Retangular Interno
       doc.setFillColor(rInt, gInt, bInt)
       doc.roundedRect(32.5, 46.5, 31, 21, 2, 2, 'F')
       doc.roundedRect(106.5, 46.5, 31, 21, 2, 2, 'F')
@@ -186,7 +180,6 @@ export default function PetProfilePage() {
       doc.circle(122, 41.5, 1, 'FD')
     }
 
-    // ================= FRENTE (Nome do Pet) =================
     const xFrenteCentro = 48
     const yFrenteCentro = 57
 
@@ -200,12 +193,10 @@ export default function PetProfilePage() {
     doc.setTextColor(40, 40, 40)
     doc.text('[ Lado Frontal ]', 48, 87, { align: 'center' })
 
-    // Linha pontilhada divisória
     doc.setLineDash([1.5, 1.5], 0)
     doc.line(85, 25, 85, 95)
     doc.setLineDash([], 0)
 
-    // ================= VERSO (QR Code) =================
     const xVersoCentro = 122
     const yVersoCentro = 57
 
@@ -330,7 +321,7 @@ export default function PetProfilePage() {
           </div>
         </div>
 
-        {/* SE FOR O DONO E ESTIVER EDITANDO OS DADOS */}
+        {/* SE FOR O DONO E ESTIVER EDITANDO OS DADOS (Telefone removido daqui) */}
         {isDono && editando ? (
           <form onSubmit={handleSalvarAlteracoes} className="space-y-4 bg-slate-950/80 p-4 rounded-2xl border border-slate-800">
             <h2 className="text-xs font-bold uppercase text-indigo-400 mb-2">Editar Dados do Pet</h2>
@@ -369,17 +360,6 @@ export default function PetProfilePage() {
             </div>
 
             <div>
-              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">WhatsApp de Contato</label>
-              <input 
-                type="text" 
-                value={telefone} 
-                onChange={(e) => setTelefone(e.target.value)} 
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-                required
-              />
-            </div>
-
-            <div>
               <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Foto do Pet</label>
               <input 
                 type="file" 
@@ -410,38 +390,35 @@ export default function PetProfilePage() {
             </div>
           </form>
         ) : (
-          /* BLOCO DE INFORMAÇÕES */
+          /* BLOCO DE INFORMAÇÕES COM LISTA EM LINHAS E ÍCONES */
           <div className="space-y-3">
             <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 space-y-3 text-sm shadow-inner">
-              <div className="flex justify-between border-b border-slate-800/60 pb-2.5">
-                <span className="text-slate-400 font-medium text-xs">Tutor responsável:</span>
+              <div className="flex justify-between items-center border-b border-slate-800/60 pb-2.5">
+                <span className="text-slate-400 font-medium text-xs flex items-center gap-1.5">👤 Tutor responsável:</span>
                 <span className="text-slate-100 font-bold">{pet.owner_name}</span>
               </div>
-              <div className="flex justify-between border-b border-slate-800/60 pb-2.5">
-                <span className="text-slate-400 font-medium text-xs">WhatsApp:</span>
+              <div className="flex justify-between items-center border-b border-slate-800/60 pb-2.5">
+                <span className="text-slate-400 font-medium text-xs flex items-center gap-1.5">📱 WhatsApp:</span>
                 <span className="text-slate-100 font-bold">{pet.phone || 'Não informado'}</span>
               </div>
 
-              {(pet.peso || pet.idade) && (
-                <div className="grid grid-cols-2 gap-3 pt-1">
-                  {pet.peso && (
-                    <div className="bg-slate-900/80 border border-slate-800 p-2.5 rounded-xl text-center">
-                      <span className="text-[10px] uppercase font-semibold text-slate-400 block">Peso</span>
-                      <span className="text-sm font-extrabold text-indigo-400">{pet.peso}</span>
-                    </div>
-                  )}
-                  {pet.idade && (
-                    <div className="bg-slate-900/80 border border-slate-800 p-2.5 rounded-xl text-center">
-                      <span className="text-[10px] uppercase font-semibold text-slate-400 block">Idade</span>
-                      <span className="text-sm font-extrabold text-indigo-400">{pet.idade}</span>
-                    </div>
-                  )}
+              {pet.peso && (
+                <div className="flex justify-between items-center border-b border-slate-800/60 pb-2.5">
+                  <span className="text-slate-400 font-medium text-xs flex items-center gap-1.5">⚖️ Peso:</span>
+                  <span className="text-indigo-400 font-bold">{pet.peso}</span>
+                </div>
+              )}
+
+              {pet.idade && (
+                <div className="flex justify-between items-center border-b border-slate-800/60 pb-2.5">
+                  <span className="text-slate-400 font-medium text-xs flex items-center gap-1.5">🎂 Idade:</span>
+                  <span className="text-indigo-400 font-bold">{pet.idade}</span>
                 </div>
               )}
 
               {pet.notes && (
                 <div className="pt-1">
-                  <span className="text-slate-400 font-medium text-xs block mb-1">Cuidados especiais / Alergias:</span>
+                  <span className="text-slate-400 font-medium text-xs block mb-1">⚠️ Cuidados especiais / Alergias:</span>
                   <p className="text-slate-300 bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl text-xs leading-relaxed">{pet.notes}</p>
                 </div>
               )}
@@ -479,7 +456,7 @@ export default function PetProfilePage() {
                     </select>
                   </div>
 
-                  {/* PAINEL DE SELEÇÃO DE CORES (BORDA EXTERNA, INTERNO E TEXTO) */}
+                  {/* PAINEL DE SELEÇÃO DE CORES */}
                   <div className="grid grid-cols-3 gap-2 bg-slate-900/90 p-3 rounded-xl border border-slate-800 text-left">
                     <div>
                       <span className="text-[9px] uppercase font-semibold text-slate-400 block mb-1">Borda Externa</span>
@@ -506,7 +483,7 @@ export default function PetProfilePage() {
                     </div>
                   </div>
 
-                  {/* PREVIEW AO VIVO DA FRENTE DA TAG COM A BORDA PREENCHIDA */}
+                  {/* PREVIEW AO VIVO DA FRENTE DA TAG */}
                   <div className="space-y-1.5 pt-1">
                     <span className="text-[10px] text-slate-400 uppercase font-semibold block">Preview ao Vivo (Frente)</span>
                     <div className="w-32 h-32 mx-auto rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center p-2 shadow-inner">
@@ -515,7 +492,7 @@ export default function PetProfilePage() {
                         style={{ backgroundColor: corBorda }}
                       >
                         <div 
-                          className={`w-18 h-18 w-[80%] h-[80%] flex items-center justify-center ${formatoPdf === 'circular' ? 'rounded-full' : 'rounded-md'}`}
+                          className={`w-[80%] h-[80%] flex items-center justify-center ${formatoPdf === 'circular' ? 'rounded-full' : 'rounded-md'}`}
                           style={{ backgroundColor: corInterna }}
                         >
                           <span className="text-xs font-black truncate max-w-[60px]" style={{ color: corTexto }}>
