@@ -31,6 +31,11 @@ export default function PetProfilePage() {
   
   // Estado para o formato selecionado no select do PDF
   const [formatoPdf, setFormatoPdf] = useState('osso')
+
+  // Estados de calibração para ajustar o posicionamento no preview e no PDF
+  const [offsetX, setOffsetX] = useState(0) // Ajuste horizontal
+  const [offsetY, setOffsetY] = useState(0) // Ajuste vertical
+  const [fontSize, setFontSize] = useState(12) // Tamanho da fonte
   
   // Estado para armazenar o link de fallback do WhatsApp
   const [whatsappLink, setWhatsappLink] = useState('')
@@ -121,7 +126,7 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  // GERADOR DE PDF COM POSICIONAMENTO CENTRALIZADO AJUSTADO
+  // GERADOR DE PDF USANDO OS AJUSTES DE CALIBRAÇÃO DA TELA
   const gerarPdfTag = async (petData, formato) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -164,6 +169,10 @@ export default function PetProfilePage() {
       }
     }
 
+    // FATOR DE CONVERSÃO DOS AJUSTES DA TELA PARA MILÍMETROS DO PDF
+    const mmOffsetX = offsetX * 0.1
+    const mmOffsetY = offsetY * 0.1
+
     // ================= FRENTE (Molde de Fundo + Nome do Pet) =================
     const xFrente = 20
     const yFrente = 32
@@ -178,24 +187,24 @@ export default function PetProfilePage() {
       console.warn('Erro ao inserir imagem de molde na frente', e)
     }
 
-    const centroTagX = xFrente + (tamanhoTag / 2)
-    const centroTagY = yFrente + (tamanhoTag / 2)
+    const centroTagX = xFrente + (tamanhoTag / 2) + mmOffsetX
+    const centroTagY = yFrente + (tamanhoTag / 2) + mmOffsetY
 
-    // Nome e subtítulo perfeitamente centralizados no meio da imagem
+    // Nome e subtítulo aplicando a calibração do usuário
     doc.setFont("helvetica", "bold")
-    doc.setFontSize(12)
+    doc.setFontSize(fontSize) // Usa o tamanho ajustado nos botões
     doc.setTextColor(20, 20, 20)
     doc.text(petData.name, centroTagX, centroTagY - 1, { align: 'center' })
     
     doc.setFontSize(6)
     doc.setFont("helvetica", "bold")
     doc.setTextColor(80, 80, 80)
-    doc.text('DARKSTAR PETS', centroTagX, centroTagY + 5, { align: 'center' })
+    doc.text('DARKSTAR PETS', centroTagX, centroTagY + (fontSize * 0.4) + 2, { align: 'center' })
 
     doc.setFont("helvetica", "italic")
     doc.setFontSize(8)
     doc.setTextColor(0, 0, 0)
-    doc.text('[ Lado Frontal ]', centroTagX, yFrente + tamanhoTag + 8, { align: 'center' })
+    doc.text('[ Lado Frontal ]', xFrente + (tamanhoTag / 2), yFrente + tamanhoTag + 8, { align: 'center' })
 
     // Linha pontilhada divisória central
     doc.setLineDash([1.5, 1.5], 0)
@@ -224,9 +233,9 @@ export default function PetProfilePage() {
       const base64Qr = await toBase64(qrUrl)
       if (base64Qr) {
         const tamanhoQr = 24
-        const offsetX = centroVersoX - (tamanhoQr / 2)
-        const offsetY = centroVersoY - (tamanhoQr / 2) - 2
-        doc.addImage(base64Qr, 'PNG', offsetX, offsetY, tamanhoQr, tamanhoQr)
+        const qrOffsetX = centroVersoX - (tamanhoQr / 2)
+        const qrOffsetY = centroVersoY - (tamanhoQr / 2) - 2
+        doc.addImage(base64Qr, 'PNG', qrOffsetX, qrOffsetY, tamanhoQr, tamanhoQr)
       }
       
       doc.setFont("helvetica", "bold")
@@ -344,7 +353,6 @@ export default function PetProfilePage() {
             </div>
             <div>
               <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Foto do Pet</label>
-              {/* Suporta JPG, JPEG e PNG */}
               <input 
                 type="file" 
                 accept="image/jpeg, image/jpg, image/png"
@@ -408,7 +416,7 @@ export default function PetProfilePage() {
             {pagamentoAprovado ? (
               <div className="space-y-4">
                 
-                {/* SELETOR DE FORMATO DO MOLDE PDF (SELECT) */}
+                {/* SELETOR DE FORMATO E PREVIEW COM CALIBRAÇÃO */}
                 <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
                   <label className="block text-xs font-semibold text-slate-400">Escolha o formato do Molde PDF:</label>
                   
@@ -416,7 +424,7 @@ export default function PetProfilePage() {
                     <select
                       value={formatoPdf}
                       onChange={(e) => setFormatoPdf(e.target.value)}
-                      className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                      className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
                     >
                       <option value="osso">🦴 Formato Osso</option>
                       <option value="patinha">🐾 Formato Patinha</option>
@@ -425,11 +433,64 @@ export default function PetProfilePage() {
 
                     <button
                       onClick={() => gerarPdfTag(pet, formatoPdf)}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5"
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-lg text-xs transition shadow flex items-center justify-center gap-1.5"
                     >
                       🛠️ Baixar PDF
                     </button>
                   </div>
+
+                  {/* PREVIEW VISUAL INTERATIVO */}
+                  <div className="pt-3 border-t border-slate-800 flex flex-col items-center space-y-2">
+                    <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Preview & Calibração (Frente)</span>
+                    
+                    <div className="relative w-36 h-36 bg-white border border-slate-700 rounded-xl flex items-center justify-center overflow-hidden shadow-inner p-2">
+                      <img 
+                        src={`/moldes/${formatoPdf}.png`} 
+                        alt="Molde Preview" 
+                        className="absolute inset-0 w-full h-full object-contain p-2 pointer-events-none opacity-90"
+                      />
+                      <div 
+                        className="relative z-10 flex flex-col items-center justify-center text-center transition-all"
+                        style={{ transform: `translate(${offsetX}px, ${offsetY}px)` }}
+                      >
+                        <span className="font-extrabold text-slate-900 truncate max-w-[80px]" style={{ fontSize: `${fontSize}px`, textShadow: '0 0 2px #fff' }}>
+                          {pet.name}
+                        </span>
+                        <span className="text-[6px] font-bold text-slate-700" style={{ textShadow: '0 0 2px #fff' }}>
+                          DARKSTAR
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* BOTÕES DE AJUSTE DIRETO NA TELA */}
+                    <div className="w-full space-y-1.5 pt-1 text-xs">
+                      <div className="flex items-center justify-between bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">
+                        <span className="text-slate-400 text-[11px]">Mover (Horizontal):</span>
+                        <div className="flex gap-1">
+                          <button onClick={() => setOffsetX(offsetX - 2)} className="bg-slate-800 px-2 py-0.5 rounded text-white hover:bg-slate-700">◀</button>
+                          <button onClick={() => setOffsetX(offsetX + 2)} className="bg-slate-800 px-2 py-0.5 rounded text-white hover:bg-slate-700">▶</button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">
+                        <span className="text-slate-400 text-[11px]">Mover (Vertical):</span>
+                        <div className="flex gap-1">
+                          <button onClick={() => setOffsetY(offsetY - 2)} className="bg-slate-800 px-2 py-0.5 rounded text-white hover:bg-slate-700">▲</button>
+                          <button onClick={() => setOffsetY(offsetY + 2)} className="bg-slate-800 px-2 py-0.5 rounded text-white hover:bg-slate-700">▼</button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">
+                        <span className="text-slate-400 text-[11px]">Tamanho da Fonte:</span>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => setFontSize(Math.max(8, fontSize - 1))} className="bg-slate-800 px-2 py-0.5 rounded text-white hover:bg-slate-700">-</button>
+                          <span className="text-slate-200 font-mono w-5 text-center">{fontSize}</span>
+                          <button onClick={() => setFontSize(fontSize + 1)} className="bg-slate-800 px-2 py-0.5 rounded text-white hover:bg-slate-700">+</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
 
                 <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
