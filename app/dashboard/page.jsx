@@ -57,6 +57,7 @@ export default function Dashboard() {
   // Função para cadastrar novo pet
 // Função para cadastrar novo pet
 // Função para cadastrar novo pet
+// Função para cadastrar novo pet (Modelo Freemium: 1º gratuito/ativo, demais pendentes)
   async function handleCadastrarPet(e) {
     e.preventDefault()
     setErroForm('')
@@ -67,27 +68,21 @@ export default function Dashboard() {
       return
     }
 
-    // 1. VERIFICAÇÃO DO LIMITE DO PLANO GRATUITO (1 Pet Grátis)
+    // 1. Conta quantos pets o usuário já possui no sistema
     const { count, error: countError } = await supabase
       .from('pets')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
 
-    console.log("Quantidade de pets encontrados para este usuário:", count) // <--- ADICIONE ISSO
-    console.log("Erro no count:", countError) // <--- ADICIONE ISSO 
-
     if (countError) {
-      setErroForm('Erro ao verificar limite de pets: ' + countError.message)
+      setErroForm('Erro ao verificar quantidade de pets: ' + countError.message)
       return
     }
 
-    // Se o usuário já tiver 1 ou mais pets cadastrados, bloqueia
-    if (count >= 1) {
-      setErroForm('Você atingiu o limite do plano gratuito (1 pet grátis). Para cadastrar mais pets, entre em contato para fazer um upgrade!')
-      return
-    }
+    // 2. Se count for 0, este é o 1º pet (Gratuito e Ativo). Se for >= 1, os próximos nascem bloqueados/pendentes.
+    const isPrimeiroPet = count === 0
 
-    // 2. SE PASSOU DA VERIFICAÇÃO, CONTINUA COM O INSERT NORMAL
+    // 3. Insere o pet no Supabase com o status correto baseado na regra
     const { error } = await supabase.from('pets').insert([
       {
         user_id: user.id,
@@ -97,14 +92,19 @@ export default function Dashboard() {
         owner_name: dono,
         phone: telefone,
         notes: observacoes,
-        is_active: false // Inicia pendente até o pagamento
+        is_active: isPrimeiroPet // true se for o primeiro (grátis), false se for o segundo em diante (pago)
       }
     ])
 
     if (error) {
       setErroForm('Erro ao cadastrar pet: ' + error.message)
     } else {
-      setSucessoForm('Pet cadastrado com sucesso!')
+      setSucessoForm(
+        isPrimeiroPet 
+          ? '🐾 Pet cadastrado com sucesso! Seu 1º pet é gratuito e já está ativo!' 
+          : '🐾 Pet cadastrado com sucesso! Realize o pagamento de ativação (R$ 10,00) para liberar a tag.'
+      )
+      // Limpa os campos do formulário
       setNome('')
       setEspecie('')
       setRaca('')
