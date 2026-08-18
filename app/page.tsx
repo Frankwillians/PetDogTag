@@ -55,21 +55,21 @@ export default function LandingPage() {
               <div className="text-3xl font-black text-indigo-500/20 absolute top-4 right-4">01</div>
               <div className="text-2xl">📝</div>
               <h3 className="font-bold text-white text-lg">Cadastre com carinho</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">Insira o nome, a foto e os dados de contato. O primeiro pet da família tem ativação 100% gratuita[cite: 5]. Para os demais, cobramos apenas uma taxa única de R$ 10,00[cite: 5].</p>
+              <p className="text-sm text-slate-400 leading-relaxed">Insira o nome, a foto e os dados de contato. O primeiro pet da família tem ativação 100% gratuita. Para os demais, cobramos apenas uma taxa única de R$ 10,00.</p>
             </div>
 
             <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-indigo-500/50 transition">
               <div className="text-3xl font-black text-indigo-500/20 absolute top-4 right-4">02</div>
               <div className="text-2xl">🖨️</div>
               <h3 className="font-bold text-white text-lg">Monte a plaqueta</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">Baixe o molde em PDF na hora, imprima em casa e coloque na coleira[cite: 5]. Uma ponte direta entre o seu pet e o seu abraço[cite: 5].</p>
+              <p className="text-sm text-slate-400 leading-relaxed">Baixe o molde em PDF na hora, imprima em casa e coloque na coleira. Uma ponte direta entre o seu pet e o seu abraço.</p>
             </div>
 
             <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-indigo-500/50 transition">
               <div className="text-3xl font-black text-indigo-500/20 absolute top-4 right-4">03</div>
               <div className="text-2xl">📍</div>
               <h3 className="font-bold text-white text-lg">Resgate imediato</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">Se ele se perder, qualquer pessoa de bom coração que o encontrar poderá ler o QR Code e avisar onde ele está num piscar de olhos[cite: 5].</p>
+              <p className="text-sm text-slate-400 leading-relaxed">Se ele se perder, qualquer pessoa de bom coração que o encontrar poderá ler o QR Code e avisar onde ele está num piscar de olhos.</p>
             </div>
 
           </div>
@@ -79,15 +79,15 @@ export default function LandingPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 max-w-3xl mx-auto text-center">
           <div className="bg-slate-900/50 border border-slate-900 p-4 rounded-xl">
             <p className="text-2xl sm:text-3xl font-extrabold text-emerald-400">R$ 0,00</p>
-            <p className="text-xs text-slate-400">Ativação gratuita para o 1º pet[cite: 5]</p>
+            <p className="text-xs text-slate-400">Ativação gratuita para o 1º pet</p>
           </div>
           <div className="bg-slate-900/50 border border-slate-900 p-4 rounded-xl">
             <p className="text-2xl sm:text-3xl font-extrabold text-white">R$ 10,00</p>
-            <p className="text-xs text-slate-400">Taxa única para pets adicionais[cite: 5]</p>
+            <p className="text-xs text-slate-400">Taxa única para pets adicionais</p>
           </div>
           <div className="col-span-2 sm:col-span-1 bg-slate-900/50 border border-slate-900 p-4 rounded-xl">
             <p className="text-2xl sm:text-3xl font-extrabold text-indigo-400">Paz Mental</p>
-            <p className="text-xs text-slate-400">Contato direto com quem achou[cite: 5]</p>
+            <p className="text-xs text-slate-400">Contato direto com quem achou</p>
           </div>
         </div>
 
@@ -123,7 +123,7 @@ export default function LandingPage() {
 
       {/* RODAPÉ */}
       <footer className="max-w-6xl w-full mx-auto px-6 py-8 border-t border-slate-900 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p>© 2026 DarkStar Pets. Todos os direitos reservados[cite: 5].</p>
+        <p>© 2026 DarkStar Pets. Todos os direitos reservados.</p>
         <div className="flex gap-4">
           <Link href="/login" className="hover:text-slate-400 transition">Entrar</Link>
           <Link href="/register" className="hover:text-slate-400 transition">Criar Conta</Link>
