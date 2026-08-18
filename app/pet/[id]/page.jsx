@@ -121,7 +121,7 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  // GERADOR DE PDF LIMPO (SEM SÍMBOLO NO QR CODE)
+  // GERADOR DE PDF APONTANDO DIRETAMENTE PARA A PÁGINA PÚBLICA (?public=true)
   const gerarPdfTag = async (petData, formato) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -130,7 +130,8 @@ export default function PetProfilePage() {
     })
 
     const currentDomain = window.location.origin
-    const linkDinamico = `${currentDomain}/pet/${petData.id}`
+    // Força o link público para que quem escanear caia direto na visão de resgate
+    const linkDinamico = `${currentDomain}/pet/${petData.id}?public=true`
 
     doc.setFont("helvetica", "bold")
     doc.setFontSize(14)
@@ -183,7 +184,7 @@ export default function PetProfilePage() {
     doc.line(82, 25, 82, 95)
     doc.setLineDash([], 0)
 
-    // ================= VERSO (QR Code Limpo, sem símbolo) =================
+    // ================= VERSO (QR Code apontando para o link público) =================
     const xVersoCentro = formato === 'circular' ? 120 : 120.5
     const yVersoCentro = formato === 'circular' ? 55 : 54.5
 
@@ -271,7 +272,8 @@ export default function PetProfilePage() {
     )
   }
 
-  const linkPublicoPet = `${baseUrl}/pet/${pet.id}`
+  // Garante que o QR code na tela também aponte para o link público de emergência (?public=true)
+  const linkPublicoPet = `${baseUrl}/pet/${pet.id}?public=true`
   const especieAtual = (pet.species || '').toLowerCase()
   const fotoExibicao = pet.foto_url || (especieAtual.includes('gato') ? 'https://cdn-icons-png.flaticon.com/512/616/616554.png' : 'https://cdn-icons-png.flaticon.com/512/616/616408.png')
 
@@ -385,7 +387,7 @@ export default function PetProfilePage() {
             </div>
           </form>
         ) : (
-          /* Informações do Pet */
+          /* Informações do Pet (Visível tanto para o dono quanto na página pública) */
           <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3 text-sm">
             <div className="flex justify-between border-b border-slate-800 pb-2">
               <span className="text-slate-400 font-semibold uppercase text-xs">Dono:</span>
@@ -396,6 +398,7 @@ export default function PetProfilePage() {
               <span className="text-slate-200 font-medium">{pet.phone || 'Não informado'}</span>
             </div>
 
+            {/* PESO E IDADE EXIBIDOS NA PÁGINA PÚBLICA E DO PAINEL */}
             {(pet.peso || pet.idade) && (
               <div className="grid grid-cols-2 gap-2 border-b border-slate-800 pb-2">
                 {pet.peso && (
@@ -460,7 +463,7 @@ export default function PetProfilePage() {
                   </div>
                 </div>
 
-                {/* QR CODE LIMPO (SEM SÍMBOLO NO CENTRO) + BOTÕES SVG E PNG */}
+                {/* QR CODE DA PLAQUETA (APONTANDO PARA A PÁGINA PÚBLICA) + BOTÕES SVG E PNG */}
                 <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
                   <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta:</p>
                   
@@ -560,7 +563,7 @@ export default function PetProfilePage() {
           </div>
         ) : null}
 
-        {/* SE FOR QUEM ACHOU O PET */}
+        {/* SE FOR QUEM ACHOU O PET (PÁGINA PÚBLICA) */}
         {!isDono && (
           <div className="space-y-3">
             {pagamentoAprovado ? (
