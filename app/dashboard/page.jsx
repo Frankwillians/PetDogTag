@@ -56,6 +56,7 @@ export default function Dashboard() {
 
   // Função para cadastrar novo pet
 // Função para cadastrar novo pet
+// Função para cadastrar novo pet
   async function handleCadastrarPet(e) {
     e.preventDefault()
     setErroForm('')
