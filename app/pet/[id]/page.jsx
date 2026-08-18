@@ -26,7 +26,6 @@ export default function PetProfilePage() {
   const [nome, setNome] = useState('')
   const [telefone, setTelefone] = useState('')
   const [notes, setNotes] = useState('')
-  const [icone, setIcone] = useState('🐾')
   const [fotoUrl, setFotoUrl] = useState('')
   const [enviandoFoto, setEnviandoFoto] = useState(false)
   
@@ -59,7 +58,6 @@ export default function PetProfilePage() {
       setNome(petData.name || '')
       setTelefone(petData.phone || '')
       setNotes(petData.notes || '')
-      setIcone(petData.icone || '🐾')
       setFotoUrl(petData.foto_url || '')
 
       supabase.from('pet_scans').insert([{ pet_id: petId }]).then()
@@ -80,14 +78,14 @@ export default function PetProfilePage() {
     e.preventDefault()
     const { error } = await supabase
       .from('pets')
-      .update({ name: nome, phone: telefone, notes: notes, icone: icone, foto_url: fotoUrl })
+      .update({ name: nome, phone: telefone, notes: notes, foto_url: fotoUrl })
       .eq('id', petId)
 
     if (error) {
       alert('Erro ao atualizar os dados do pet.')
     } else {
       alert('Dados atualizados com sucesso!')
-      setPet({ ...pet, name: nome, phone: telefone, notes: notes, icone: icone, foto_url: fotoUrl })
+      setPet({ ...pet, name: nome, phone: telefone, notes: notes, foto_url: fotoUrl })
       setEditando(false)
     }
   }
@@ -120,7 +118,7 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  const gerarPdfTag = async (petData) => {
+  const gerarPdfTag = async (petData, formato = 'circulo') => {
     const doc = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
@@ -132,18 +130,33 @@ export default function PetProfilePage() {
 
     doc.setFont("helvetica", "bold")
     doc.setFontSize(14)
-    doc.text(`Molde CNC / Dobrável - Plaqueta: ${petData.name}`, 15, 15)
+    doc.text(`Molde DarkStar Pets (${formato.toUpperCase()}) - ${petData.name}`, 15, 15)
 
     doc.setFontSize(9)
     doc.setFont("helvetica", "normal")
-    doc.text(`Contato: ${petData.phone} | Link: ${linkDinamico}`, 15, 21)
+    doc.text(`Contato: ${petData.phone} | Escaneie para ver o perfil de emergência`, 15, 21)
 
-    doc.setLineWidth(0.4)
-    doc.rect(15, 30, 60, 60)
+    // FRENTE (Com a foto e nome do pet)
+    const centroFrenteX = 45
+    const centroFrenteY = 60
+    const raioTag = 28
+
+    doc.setLineWidth(0.5)
+    doc.setDrawColor(80, 80, 80)
+
+    if (formato === 'circulo') {
+      doc.circle(centroFrenteX, centroFrenteY, raioTag)
+      doc.setLineWidth(0.2)
+      doc.circle(centroFrenteX, centroFrenteY, raioTag - 3)
+      doc.circle(centroFrenteX, centroFrenteY - raioTag + 4, 1.5)
+    } else {
+      doc.roundedRect(15, 32, 60, 56, 8, 8)
+      doc.roundedRect(17, 34, 56, 52, 6, 6)
+      doc.circle(45, 30, 1.5)
+    }
 
     const imgPadraoCao = 'https://cdn-icons-png.flaticon.com/512/616/616408.png'
     const imgPadraoGato = 'https://cdn-icons-png.flaticon.com/512/616/616554.png'
-    
     let imagemParaUsar = petData.foto_url
     if (!imagemParaUsar) {
       const especie = (petData.species || '').toLowerCase()
@@ -160,7 +173,6 @@ export default function PetProfilePage() {
           reader.readAsDataURL(blob)
         })
       } catch (e) {
-        console.warn('Falha ao converter imagem para base64:', e)
         return null
       }
     }
@@ -168,46 +180,65 @@ export default function PetProfilePage() {
     try {
       const base64Img = await toBase64(imagemParaUsar)
       if (base64Img) {
-        doc.addImage(base64Img, 'PNG', 30, 35, 30, 30)
+        doc.addImage(base64Img, 'PNG', centroFrenteX - 12, centroFrenteY - 18, 24, 24)
       }
     } catch (err) {
-      console.warn('Não foi possível carregar a imagem no PDF.', err)
+      console.warn('Erro ao carregar imagem', err)
     }
 
     doc.setFont("helvetica", "bold")
-    doc.setFontSize(14)
-    doc.text(petData.name, 45, 72, { align: 'center' })
-
-    doc.setFontSize(8)
+    doc.setFontSize(12)
+    doc.text(petData.name, centroFrenteX, centroFrenteY + 14, { align: 'center' })
+    
+    doc.setFontSize(7)
     doc.setFont("helvetica", "italic")
-    doc.text('[ Lado Frontal ]', 45, 84, { align: 'center' })
+    doc.text('ME PROCURE NO QR CODE', centroFrenteX, centroFrenteY + 19, { align: 'center' })
 
+    doc.setFont("helvetica", "italic")
+    doc.setFontSize(8)
+    doc.text('[ Lado Frontal ]', centroFrenteX, 94, { align: 'center' })
+
+    // Linha pontilhada de divisão
     doc.setLineDash([1.5, 1.5], 0)
-    doc.line(80, 25, 80, 95)
+    doc.line(82, 25, 82, 95)
     doc.setLineDash([], 0)
 
-    doc.rect(90, 30, 60, 60)
+    // VERSO (Com o QR Code)
+    const centroVersoX = 120
+    const centroVersoY = 60
+
+    if (formato === 'circulo') {
+      doc.setLineWidth(0.5)
+      doc.circle(centroVersoX, centroVersoY, raioTag)
+      doc.setLineWidth(0.2)
+      doc.circle(centroVersoX, centroVersoY, raioTag - 3)
+      doc.circle(centroVersoX, centroVersoY - raioTag + 4, 1.5)
+    } else {
+      doc.roundedRect(90, 32, 60, 56, 8, 8)
+      doc.roundedRect(92, 34, 56, 52, 6, 6)
+      doc.circle(120, 30, 1.5)
+    }
 
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkDinamico)}`
 
     try {
       const base64Qr = await toBase64(qrUrl)
       if (base64Qr) {
-        doc.addImage(base64Qr, 'PNG', 103, 35, 34, 34)
+        doc.addImage(base64Qr, 'PNG', centroVersoX - 14, centroVersoY - 18, 28, 28)
       }
       
       doc.setFont("helvetica", "bold")
-      doc.setFontSize(8)
-      doc.text('LEIA O QR CODE', 120, 76, { align: 'center' })
+      doc.setFontSize(7)
+      doc.text('ESCANEIE-ME', centroVersoX, centroVersoY + 14, { align: 'center' })
       
       doc.setFont("helvetica", "italic")
       doc.setFontSize(8)
-      doc.text('[ Lado Traseiro / Verso ]', 120, 84, { align: 'center' })
+      doc.text('[ Lado Traseiro / Verso ]', centroVersoX, 94, { align: 'center' })
 
-      doc.save(`dog-tag-${petData.name.toLowerCase()}.pdf`)
+      doc.save(`dog-tag-${petData.name.toLowerCase()}-${formato}.pdf`)
     } catch (error) {
-      console.error('Erro ao gerar QR Code no PDF:', error)
-      alert('Erro ao gerar o PDF. Tente novamente.')
+      console.error('Erro ao gerar PDF:', error)
+      alert('Erro ao gerar o PDF.')
     }
   }
 
@@ -228,10 +259,7 @@ export default function PetProfilePage() {
           const mensagem = encodeURIComponent(`Olá! Encontrei seu pet ${pet.name}. Aqui está minha localização atual: ${mapsLink}`)
           const urlWhatsApp = `https://api.whatsapp.com/send?phone=55${telefoneLimpo}&text=${mensagem}`
           
-          // Salva no estado para o caso do navegador bloquear o redirecionamento automático
           setWhatsappLink(urlWhatsApp)
-
-          // Tenta abrir direto
           window.location.href = urlWhatsApp
         },
         () => {
@@ -293,7 +321,7 @@ export default function PetProfilePage() {
           </div>
 
           <h1 className="text-3xl font-extrabold text-white flex items-center justify-center gap-2">
-            <span>{pet.icone || '🐾'}</span> {pet.name}
+            {pet.name}
           </h1>
           <p className="text-sm text-slate-400 capitalize mt-1">{pet.species} {pet.breed ? `• ${pet.breed}` : ''}</p>
         </div>
@@ -311,20 +339,6 @@ export default function PetProfilePage() {
                 className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
                 required
               />
-            </div>
-            <div>
-              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Ícone da Plaqueta</label>
-              <select 
-                value={icone} 
-                onChange={(e) => setIcone(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-              >
-                <option value="🐾">🐾 Patas</option>
-                <option value="🐱">🐱 Gato</option>
-                <option value="🐶">🐶 Cachorro</option>
-                <option value="🦴">🦴 Osso</option>
-                <option value="❤️">❤️ Coração</option>
-              </select>
             </div>
             <div>
               <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Foto do Pet</label>
@@ -400,12 +414,24 @@ export default function PetProfilePage() {
             {/* SE O PAGAMENTO ESTIVER APROVADO */}
             {pagamentoAprovado ? (
               <div className="space-y-4">
-                <button
-                  onClick={() => gerarPdfTag(pet)}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2"
-                >
-                  🛠️ Baixar Tag (PDF)
-                </button>
+                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
+                  <p className="text-xs font-semibold text-slate-400">Escolha o formato do Molde PDF:</p>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => gerarPdfTag(pet, 'circulo')}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5"
+                    >
+                      ⭕ Formato Círculo
+                    </button>
+                    <button
+                      onClick={() => gerarPdfTag(pet, 'osso')}
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5"
+                    >
+                      🦴 Formato Osso
+                    </button>
+                  </div>
+                </div>
 
                 <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
                   <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta:</p>
@@ -495,7 +521,7 @@ export default function PetProfilePage() {
                 <span className="text-2xl">⏳</span>
                 <h3 className="font-bold text-amber-400 text-sm">Pagamento Pendente</h3>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  O acesso ao QR Code e ao molde PDF será liberado automaticamente assim que o pagamento de ativação for confirmado.
+                  O acesso ao QR Code e aos moldes PDF será liberado automaticamente assim que o pagamento de ativação for confirmado.
                 </p>
               </div>
             )}
@@ -515,7 +541,6 @@ export default function PetProfilePage() {
                   📍 Enviar Minha Localização
                 </button>
 
-                {/* BOTÃO DE FALLBACK (Garante funcionamento no Safari e Chrome do iOS) */}
                 {whatsappLink && (
                   <a
                     href={whatsappLink}
