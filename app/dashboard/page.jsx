@@ -12,21 +12,20 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey)
 export default function Dashboard() {
   const router = useRouter()
   const [user, setUser] = useState(null)
+  const [userProfile, setUserProfile] = useState(null)
   const [pets, setPets] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Estados do formulário de cadastro de pet
+  // Estados do formulário de cadastro de pet (Apenas dados do animal agora)
   const [nome, setNome] = useState('')
   const [especie, setEspecie] = useState('')
   const [raca, setRaca] = useState('')
-  const [dono, setDono] = useState('')
-  const [telefone, setTelefone] = useState('')
   const [observacoes, setObservacoes] = useState('')
   const [erroForm, setErroForm] = useState('')
   const [sucessoForm, setSucessoForm] = useState('')
 
   useEffect(() => {
-    async function checkUserAndFetchPets() {
+    async function checkUserAndFetchData() {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session) {
@@ -35,11 +34,23 @@ export default function Dashboard() {
       }
 
       setUser(session.user)
+
+      // Busca o perfil do usuário (Nome e Telefone salvos na conta)
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single()
+
+      if (profileData) {
+        setUserProfile(profileData)
+      }
+
       await fetchPets(session.user.id)
       setLoading(false)
     }
 
-    checkUserAndFetchPets()
+    checkUserAndFetchData()
   }, [router])
 
   async function fetchPets(userId) {
@@ -54,10 +65,7 @@ export default function Dashboard() {
     }
   }
 
-  // Função para cadastrar novo pet
-// Função para cadastrar novo pet
-// Função para cadastrar novo pet
-// Função para cadastrar novo pet (Modelo Freemium: 1º gratuito/ativo, demais pendentes)
+  // Função para cadastrar novo pet (Modelo Freemium + Dados do Perfil Automáticos)
   async function handleCadastrarPet(e) {
     e.preventDefault()
     setErroForm('')
@@ -65,6 +73,12 @@ export default function Dashboard() {
 
     if (!nome || !especie) {
       setErroForm('Preencha pelo menos o Nome e a Espécie do pet.')
+      return
+    }
+
+    // Valida se o usuário preencheu o perfil com nome/telefone antes de cadastrar
+    if (!userProfile?.full_name || !userProfile?.phone) {
+      setErroForm('Por favor, configure seu Nome e Telefone no seu perfil antes de cadastrar um pet.')
       return
     }
 
@@ -79,18 +93,18 @@ export default function Dashboard() {
       return
     }
 
-    // 2. Se count for 0, este é o 1º pet (Gratuito e Ativo). Se for >= 1, os próximos nascem bloqueados/pendentes.
+    // 2. Se count for 0, este é o 1º pet (Gratuito e Ativo). Se for >= 1, os próximos nascem pendentes.
     const isPrimeiroPet = count === 0
 
-    // 3. Insere o pet no Supabase com o status correto baseado na regra
+    // 3. Insere o pet no Supabase puxando os dados do dono direto do perfil
     const { error } = await supabase.from('pets').insert([
       {
         user_id: user.id,
         name: nome,
         species: especie,
         breed: raca,
-        owner_name: dono,
-        phone: telefone,
+        owner_name: userProfile.full_name, // Puxado automaticamente do perfil
+        phone: userProfile.phone,             // Puxado automaticamente do perfil
         notes: observacoes,
         is_active: isPrimeiroPet // true se for o primeiro (grátis), false se for o segundo em diante (pago)
       }
@@ -104,18 +118,16 @@ export default function Dashboard() {
           ? '🐾 Pet cadastrado com sucesso! Seu 1º pet é gratuito e já está ativo!' 
           : '🐾 Pet cadastrado com sucesso! Realize o pagamento de ativação (R$ 10,00) para liberar a tag.'
       )
-      // Limpa os campos do formulário
+      // Limpa os campos do formulário do pet
       setNome('')
       setEspecie('')
       setRaca('')
-      setDono('')
-      setTelefone('')
       setObservacoes('')
       fetchPets(user.id)
     }
   }
 
-  // Funçãoo para iniciar o pagamento via Checkout Pro do Mercado Pago
+  // Função para iniciar o pagamento via Checkout Pro do Mercado Pago
   async function handlePagar(petId) {
     try {
       const res = await fetch('/api/pagamento', {
@@ -160,17 +172,35 @@ export default function Dashboard() {
             <h1 className="text-2xl font-bold text-indigo-400">DarkStar Pets</h1>
             <p className="text-sm text-slate-400">Painel de Gerenciamento de Dog Tags Inteligentes</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm px-4 py-2 rounded-xl transition font-medium"
-          >
-            Sair da Conta
-          </button>
+          <div className="flex items-center gap-3">
+            {userProfile?.full_name && (
+              <span className="text-xs text-slate-300 hidden md:inline">
+                Olá, <strong className="text-indigo-300">{userProfile.full_name}</strong>
+              </span>
+            )}
+            <button
+              onClick={handleLogout}
+              className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm px-4 py-2 rounded-xl transition font-medium"
+            >
+              Sair da Conta
+            </button>
+          </div>
         </div>
 
-        {/* Formulário de Cadastro */}
+        {/* Formulário de Cadastro Simplificado (Apenas Dados do Pet) */}
         <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl mb-10">
-          <h2 className="text-lg font-semibold mb-4 text-indigo-300">🐾 Cadastrar Novo Pet</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-indigo-300">🐾 Cadastrar Novo Pet</h2>
+            <span className="text-xs text-slate-400 bg-slate-950 px-3 py-1 rounded-full border border-slate-800">
+              Contato vinculado: <strong className="text-slate-200">{userProfile?.phone || 'Não cadastrado'}</strong>
+            </span>
+          </div>
+
+          {(!userProfile?.full_name || !userProfile?.phone) && (
+            <div className="bg-amber-950/50 border border-amber-700 text-amber-200 p-3 rounded-xl mb-4 text-sm">
+              ⚠️ Atenção: Você precisa cadastrar seu Nome e Telefone no seu perfil para poder gerar as tags corretamente.
+            </div>
+          )}
 
           {erroForm && <div className="bg-red-900/50 border border-red-700 text-red-200 p-3 rounded-xl mb-4 text-sm">{erroForm}</div>}
           {sucessoForm && <div className="bg-emerald-900/50 border border-emerald-700 text-emerald-200 p-3 rounded-xl mb-4 text-sm">{sucessoForm}</div>}
@@ -195,20 +225,6 @@ export default function Dashboard() {
               placeholder="Raça (Opcional)"
               value={raca}
               onChange={(e) => setRaca(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
-            />
-            <input
-              type="text"
-              placeholder="Seu Nome (Dono)"
-              value={dono}
-              onChange={(e) => setDono(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
-            />
-            <input
-              type="text"
-              placeholder="Telefone / WhatsApp com DDD"
-              value={telefone}
-              onChange={(e) => setTelefone(e.target.value)}
               className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm md:col-span-2 focus:outline-none focus:border-indigo-500"
             />
             <textarea
@@ -242,7 +258,7 @@ export default function Dashboard() {
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="text-lg font-bold text-white">{pet.name}</h3>
                       <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${pet.is_active ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}`}>
-                        {pet.is_active ? 'Ativo' : 'Pendente (R$ 10,00)'}
+                        {pet.is_active ? 'Ativo (Grátis)' : 'Pendente (R$ 10,00)'}
                       </span>
                     </div>
                     <p className="text-sm text-slate-400 mb-4">{pet.species} {pet.breed ? `• ${pet.breed}` : ''}</p>
