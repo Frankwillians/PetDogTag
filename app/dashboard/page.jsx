@@ -266,9 +266,16 @@ export default function Dashboard() {
                   <div>
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="text-lg font-bold text-white">{pet.name}</h3>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${pet.is_active ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}`}>
-                        {pet.is_active ? 'Ativo (Grátis)' : 'Pendente (R$ 10,00)'}
-                      </span>
+                      {/* Substitua o trecho antigo do selo por este */}
+<span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+  pet.is_active 
+    ? (index === pets.length - 1 ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-indigo-950 text-indigo-400 border border-indigo-800')
+    : 'bg-amber-950 text-amber-400 border border-amber-800'
+}`}>
+  {pet.is_active 
+    ? (index === pets.length - 1 ? 'Ativo (Grátis)' : 'Ativo (Pago)') 
+    : 'Pendente (R$ 10,00)'}
+</span>
                     </div>
                     <p className="text-sm text-slate-400 mb-4">{pet.species} {pet.breed ? `• ${pet.breed}` : ''}</p>
                   </div>
