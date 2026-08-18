@@ -136,7 +136,7 @@ export default function Perfil() {
               <label className="block text-xs font-medium text-slate-400 mb-1">Seu Nome Completo</label>
               <input
                 type="text"
-                placeholder="Ex: Frank Willians"
+                placeholder="Ex: João da Silva"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
@@ -147,7 +147,7 @@ export default function Perfil() {
               <label className="block text-xs font-medium text-slate-400 mb-1">Telefone / WhatsApp Principal</label>
               <input
                 type="text"
-                placeholder="Ex: (83) 98667-0602"
+                placeholder="Ex: (55) 0000-0000"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
