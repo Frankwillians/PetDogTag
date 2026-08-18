@@ -73,6 +73,9 @@ export default function Dashboard() {
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
 
+    console.log("Quantidade de pets encontrados para este usuário:", count) // <--- ADICIONE ISSO
+    console.log("Erro no count:", countError) // <--- ADICIONE ISSO 
+
     if (countError) {
       setErroForm('Erro ao verificar limite de pets: ' + countError.message)
       return
