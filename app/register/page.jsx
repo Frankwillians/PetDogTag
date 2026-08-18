@@ -77,7 +77,7 @@ export default function RegisterPage() {
         {/* Cabeçalho */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-extrabold text-white">Criar Conta</h1>
-          <p className="text-sm text-slate-400 mt-1">DarkStar Dog Tags Inteligentes</p>
+          <p className="text-sm text-slate-400 mt-1">DarkStar Pets</p>
         </div>
 
         {errorMsg && (
