@@ -121,7 +121,7 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  // GERADOR DE PDF USANDO IMAGENS REAIS DA PASTA PUBLIC/MOLDES
+  // GERADOR DE PDF COM POSICIONAMENTO CENTRALIZADO AJUSTADO
   const gerarPdfTag = async (petData, formato) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -140,7 +140,6 @@ export default function PetProfilePage() {
     doc.setFont("helvetica", "normal")
     doc.text(`Contato: ${petData.phone} | Escaneie para ver o perfil de emergência`, 15, 21)
 
-    // Mapeamento completo apontando para a pasta public/moldes
     const moldesImagens = {
       osso: `${currentDomain}/moldes/osso.png`,
       patinha: `${currentDomain}/moldes/patinha.png`,
@@ -168,7 +167,7 @@ export default function PetProfilePage() {
     // ================= FRENTE (Molde de Fundo + Nome do Pet) =================
     const xFrente = 20
     const yFrente = 32
-    const tamanhoTag = 50
+    const tamanhoTag = 52
 
     try {
       const base64Molde = await toBase64(imagemMoldeUrl)
@@ -179,29 +178,32 @@ export default function PetProfilePage() {
       console.warn('Erro ao inserir imagem de molde na frente', e)
     }
 
-    // Nome centralizado por cima da imagem de fundo
+    const centroTagX = xFrente + (tamanhoTag / 2)
+    const centroTagY = yFrente + (tamanhoTag / 2)
+
+    // Nome e subtítulo perfeitamente centralizados no meio da imagem
     doc.setFont("helvetica", "bold")
-    doc.setFontSize(13)
+    doc.setFontSize(12)
     doc.setTextColor(20, 20, 20)
-    doc.text(petData.name, xFrente + (tamanhoTag / 2), yFrente + (tamanhoTag / 2) - 2, { align: 'center' })
+    doc.text(petData.name, centroTagX, centroTagY - 1, { align: 'center' })
     
-    doc.setFontSize(6.5)
+    doc.setFontSize(6)
     doc.setFont("helvetica", "bold")
     doc.setTextColor(80, 80, 80)
-    doc.text('DARKSTAR PETS', xFrente + (tamanhoTag / 2), yFrente + (tamanhoTag / 2) + 5, { align: 'center' })
+    doc.text('DARKSTAR PETS', centroTagX, centroTagY + 5, { align: 'center' })
 
     doc.setFont("helvetica", "italic")
     doc.setFontSize(8)
     doc.setTextColor(0, 0, 0)
-    doc.text('[ Lado Frontal ]', xFrente + (tamanhoTag / 2), yFrente + tamanhoTag + 8, { align: 'center' })
+    doc.text('[ Lado Frontal ]', centroTagX, yFrente + tamanhoTag + 8, { align: 'center' })
 
-    // Linha pontilhada de divisão
+    // Linha pontilhada divisória central
     doc.setLineDash([1.5, 1.5], 0)
-    doc.line(82, 25, 82, 95)
+    doc.line(85, 25, 85, 95)
     doc.setLineDash([], 0)
 
     // ================= VERSO (Molde de Fundo + QR Code) =================
-    const xVerso = 95
+    const xVerso = 98
     const yVerso = 32
 
     try {
@@ -213,24 +215,27 @@ export default function PetProfilePage() {
       console.warn('Erro ao inserir imagem de molde no verso', e)
     }
 
+    const centroVersoX = xVerso + (tamanhoTag / 2)
+    const centroVersoY = yVerso + (tamanhoTag / 2)
+
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkDinamico)}`
 
     try {
       const base64Qr = await toBase64(qrUrl)
       if (base64Qr) {
         const tamanhoQr = 24
-        const offsetX = xVerso + (tamanhoTag - tamanhoQr) / 2
-        const offsetY = yVerso + (tamanhoTag - tamanhoQr) / 2 - 2
+        const offsetX = centroVersoX - (tamanhoQr / 2)
+        const offsetY = centroVersoY - (tamanhoQr / 2) - 2
         doc.addImage(base64Qr, 'PNG', offsetX, offsetY, tamanhoQr, tamanhoQr)
       }
       
       doc.setFont("helvetica", "bold")
-      doc.setFontSize(6.5)
-      doc.text('ESCANEIE-ME', xVerso + (tamanhoTag / 2), yVerso + tamanhoTag - 4, { align: 'center' })
+      doc.setFontSize(6)
+      doc.text('ESCANEIE-ME', centroVersoX, yVerso + tamanhoTag - 4, { align: 'center' })
 
       doc.setFont("helvetica", "italic")
       doc.setFontSize(8)
-      doc.text('[ Lado Traseiro / Verso ]', xVerso + (tamanhoTag / 2), yVerso + tamanhoTag + 8, { align: 'center' })
+      doc.text('[ Lado Traseiro / Verso ]', centroVersoX, yVerso + tamanhoTag + 8, { align: 'center' })
 
       doc.save(`dog-tag-${petData.name.toLowerCase()}-${formato}.pdf`)
     } catch (error) {
