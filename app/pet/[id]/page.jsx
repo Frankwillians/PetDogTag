@@ -219,14 +219,17 @@ export default function PetProfilePage() {
         (position) => {
           const lat = position.coords.latitude
           const lng = position.coords.longitude
-          const mapsLink = `https://www.google.com/maps?q=${lat},${lng}`
+          // CORRIGIDO: Link padrão funcional do Google Maps para celulares
+          const mapsLink = `https://maps.google.com/?q=${lat},${lng}`
           
+          const telefoneLimpo = pet.phone.replace(/\D/g, '')
           const mensagem = encodeURIComponent(`Olá! Encontrei seu pet ${pet.name}. Aqui está minha localização atual: ${mapsLink}`)
-          window.open(`https://wa.me/55${pet.phone}?text=${mensagem}`, '_blank')
+          window.open(`https://wa.me/55${telefoneLimpo}?text=${mensagem}`, '_blank')
         },
         () => {
           alert('Não foi possível obter sua localização. Verifique as permissões do navegador.')
-        }
+        },
+        { enableHighAccuracy: true }
       )
     } else {
       alert('Seu navegador não suporta geolocalização.')
@@ -253,8 +256,6 @@ export default function PetProfilePage() {
   }
 
   const linkPublicoPet = `${baseUrl}/pet/${pet.id}`
-  const urlQrCodeImg = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(linkPublicoPet)}`
-  
   const especieAtual = (pet.species || '').toLowerCase()
   const fotoExibicao = pet.foto_url || (especieAtual.includes('gato') ? 'https://cdn-icons-png.flaticon.com/512/616/616554.png' : 'https://cdn-icons-png.flaticon.com/512/616/616408.png')
 
@@ -266,10 +267,10 @@ export default function PetProfilePage() {
       
       {/* ALERTA VISUAL DE PET PERDIDO */}
       {pet.status === 'lost' && (
-  <div className="fixed top-0 w-full bg-red-600 border-b border-red-500 text-white font-bold py-3 text-center z-50 shadow-xl tracking-wide text-sm">
-    🚨 ATENÇÃO: ESTE PET ESTÁ PERDIDO! SE VOCÊ O ENCONTROU, ENTRE EM CONTATO COM O DONO.
-  </div>
-)}
+        <div className="fixed top-0 w-full bg-red-600 border-b border-red-500 text-white font-bold py-3 text-center z-50 shadow-xl tracking-wide text-sm">
+          🚨 ATENÇÃO: ESTE PET ESTÁ PERDIDO! SE VOCÊ O ENCONTROU, ENTRE EM CONTATO COM O DONO.
+        </div>
+      )}
 
       <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-6">
         
@@ -356,7 +357,7 @@ export default function PetProfilePage() {
             </div>
           </form>
         ) : (
-          /* Informações do Pet (Visíveis tanto para o dono quanto para quem achar) */
+          /* Informações do Pet */
           <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3 text-sm">
             <div className="flex justify-between border-b border-slate-800 pb-2">
               <span className="text-slate-400 font-semibold uppercase text-xs">Dono:</span>
@@ -388,7 +389,7 @@ export default function PetProfilePage() {
               </button>
             )}
 
-            {/* SE O PAGAMENTO ESTIVER APROVADO, LIBERA O QR CODE E O PDF */}
+            {/* SE O PAGAMENTO ESTIVER APROVADO */}
             {pagamentoAprovado ? (
               <div className="space-y-4">
                 <button
@@ -401,7 +402,6 @@ export default function PetProfilePage() {
                 <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3">
                   <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta:</p>
                   
-                  {/* Container invisível ou visível do QR Code SVG que serve de base */}
                   <div id="qr-code-svg-container" className="flex justify-center bg-white p-3 rounded-xl inline-block shadow-md">
                     <QRCodeSVG 
                       value={linkPublicoPet} 
@@ -410,9 +410,7 @@ export default function PetProfilePage() {
                     />
                   </div>
 
-                  {/* Botões de Ação */}
                   <div className="grid grid-cols-2 gap-2 pt-1">
-                    {/* Botão de Download SVG */}
                     <button 
                       onClick={() => {
                         const container = document.getElementById('qr-code-svg-container')
@@ -441,7 +439,6 @@ export default function PetProfilePage() {
                       Baixar SVG
                     </button>
 
-                    {/* Botão de Download PNG */}
                     <button 
                       onClick={() => {
                         const container = document.getElementById('qr-code-svg-container')
@@ -454,7 +451,7 @@ export default function PetProfilePage() {
                         const img = new Image()
 
                         img.onload = () => {
-                          canvas.width = 500 // Alta resolução para o PNG
+                          canvas.width = 500
                           canvas.height = 500
                           ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
                           
@@ -475,7 +472,6 @@ export default function PetProfilePage() {
                     </button>
                   </div>
 
-                  {/* Botão para voltar ao Painel Geral */}
                   <div>
                     <a 
                       href="/dashboard"
@@ -487,7 +483,6 @@ export default function PetProfilePage() {
                 </div>
               </div>
             ) : (
-              /* SE O PAGAMENTO ESTIVER PENDENTE */
               <div className="bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl text-center space-y-2">
                 <span className="text-2xl">⏳</span>
                 <h3 className="font-bold text-amber-400 text-sm">Pagamento Pendente</h3>
@@ -521,7 +516,7 @@ export default function PetProfilePage() {
           </div>
         )}
 
-        {/* Banner de Autopromoção Sutil (Apenas para visitantes) */}
+        {/* Banner de Autopromoção Sutil */}
         {!isDono && (
           <div className="border-t border-slate-800/80 pt-4 mt-4 text-center">
             <p className="text-[11px] text-slate-400 mb-1">
