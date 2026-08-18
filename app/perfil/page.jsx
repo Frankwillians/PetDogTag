@@ -60,7 +60,7 @@ export default function Perfil() {
     // Atualiza ou insere o perfil no Supabase
     const { error } = await supabase
       .from('profiles')
-      update({
+      .update({
         full_name: fullName,
         phone: phone,
         updated_at: new Date()
