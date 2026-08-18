@@ -7,7 +7,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
       
       {/* HEADER / TOPO */}
-      <header className="max-w-6xl w-full mx-auto px-6 py-6 flex items-center justify-between border-b border-slate-900/50 backdrop-blur-md sticky top-0 z-50 bg-slate-950/80">
+      <header className="max-w-6xl w-full mx-auto px-6 py-6 flex items-center justify-between border-b border-slate-900/50 backdrop-blur-md sticky top-0 z-50 bg-slate-950/85">
         <div className="flex items-center gap-2">
           <span className="text-2xl">🐾</span>
           <span className="font-extrabold text-xl text-white tracking-wide">DarkStar Pets</span>
@@ -37,26 +37,10 @@ export default function LandingPage() {
           Um portão aberto, um susto com fogos de artifício, um descuido de segundos... O medo de não saber onde ele está aperta o coração de qualquer um. Com a DarkStar Pets, se alguém encontrar o seu companheiro, basta escanear a coleira para que a <strong>localização exata do GPS chegue direto no seu WhatsApp</strong>.
         </p>
 
-        {/* BOTÕES DE AÇÃO */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-          <Link 
-            href="/register" 
-            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg px-8 py-4 rounded-2xl shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5"
-          >
-            Proteger Meu Pet Gratuitamente 🚀
-          </Link>
-          <Link 
-            href="/login" 
-            className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-semibold text-lg px-8 py-4 rounded-2xl transition"
-          >
-            Acessar Minha Conta
-          </Link>
-        </div>
-
         {/* ========================================== */}
-        {/* COMO FUNCIONA (MOVIDO PARA O TOPO) */}
+        {/* COMO FUNCIONA (LOGO APÓS A CHAMADA PRINCIPAL) */}
         {/* ========================================== */}
-        <div className="pt-10 pb-6 border-y border-slate-900 my-8">
+        <div className="pt-8 pb-6 border-y border-slate-900 my-6">
           <div className="text-center space-y-2 mb-10">
             <span className="text-indigo-400 text-xs font-bold uppercase tracking-wider bg-indigo-950/50 px-3 py-1 rounded-full border border-indigo-800/40">Passo a Passo</span>
             <h2 className="text-2xl sm:text-4xl font-black text-white">Como cuidar de quem você ama em 3 passos</h2>
@@ -103,6 +87,22 @@ export default function LandingPage() {
             <p className="text-2xl sm:text-3xl font-extrabold text-indigo-400">Paz Mental</p>
             <p className="text-xs text-slate-400">Contato direto com quem achou[cite: 5]</p>
           </div>
+        </div>
+
+        {/* BOTÕES DE AÇÃO (LOGO ABAIXO DA PARTE DOS VALORES) */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+          <Link 
+            href="/register" 
+            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg px-8 py-4 rounded-2xl shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5"
+          >
+            Proteger Meu Pet Gratuitamente 🚀
+          </Link>
+          <Link 
+            href="/login" 
+            className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-semibold text-lg px-8 py-4 rounded-2xl transition"
+          >
+            Acessar Minha Conta
+          </Link>
         </div>
 
         {/* SEÇÃO DE CHAMADA FINAL (CTA) */}
