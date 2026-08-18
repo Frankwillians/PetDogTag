@@ -121,7 +121,7 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  // GERADOR DE PDF USANDO IMAGENS REAIS DE MOLDES (OSSO.PNG / PATINHA.PNG)
+  // GERADOR DE PDF USANDO IMAGENS REAIS DA PASTA PUBLIC/MOLDES
   const gerarPdfTag = async (petData, formato) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -140,11 +140,11 @@ export default function PetProfilePage() {
     doc.setFont("helvetica", "normal")
     doc.text(`Contato: ${petData.phone} | Escaneie para ver o perfil de emergência`, 15, 21)
 
-    // Mapeamento das imagens de moldes inseridas na pasta moldes
+    // Mapeamento completo apontando para a pasta public/moldes
     const moldesImagens = {
       osso: `${currentDomain}/moldes/osso.png`,
       patinha: `${currentDomain}/moldes/patinha.png`,
-      circulo: `${currentDomain}/moldes/circulo.png`,
+      circulo: `${currentDomain}/moldes/circulo.png`
     }
 
     const imagemMoldeUrl = moldesImagens[formato] || moldesImagens.osso
@@ -152,6 +152,7 @@ export default function PetProfilePage() {
     const toBase64 = async (url) => {
       try {
         const response = await fetch(url, { mode: 'cors' })
+        if (!response.ok) throw new Error('Falha ao buscar imagem do molde')
         const blob = await response.blob()
         return new Promise((resolve) => {
           const reader = new FileReader()
@@ -159,6 +160,7 @@ export default function PetProfilePage() {
           reader.readAsDataURL(blob)
         })
       } catch (e) {
+        console.warn('Não foi possível carregar o molde:', url)
         return null
       }
     }
@@ -174,7 +176,7 @@ export default function PetProfilePage() {
         doc.addImage(base64Molde, 'PNG', xFrente, yFrente, tamanhoTag, tamanhoTag)
       }
     } catch (e) {
-      console.warn('Erro ao carregar imagem de molde para a frente', e)
+      console.warn('Erro ao inserir imagem de molde na frente', e)
     }
 
     // Nome centralizado por cima da imagem de fundo
@@ -208,7 +210,7 @@ export default function PetProfilePage() {
         doc.addImage(base64Molde, 'PNG', xVerso, yVerso, tamanhoTag, tamanhoTag)
       }
     } catch (e) {
-      console.warn('Erro ao carregar imagem de molde para o verso', e)
+      console.warn('Erro ao inserir imagem de molde no verso', e)
     }
 
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkDinamico)}`
@@ -337,7 +339,7 @@ export default function PetProfilePage() {
             </div>
             <div>
               <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Foto do Pet</label>
-              {/* ATUALIZADO PARA ACEITAR JPG, JPEG E PNG */}
+              {/* Suporta JPG, JPEG e PNG */}
               <input 
                 type="file" 
                 accept="image/jpeg, image/jpg, image/png"
