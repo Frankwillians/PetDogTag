@@ -15,7 +15,7 @@ export async function POST(request) {
         items: [{
           title: 'Ativação de Dog Tag',
           quantity: 1,
-          unit_price: 10.00,
+          unit_price: 0.01,
           currency_id: 'BRL'
         }],
         back_urls: {
