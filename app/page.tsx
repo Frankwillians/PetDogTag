@@ -48,7 +48,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
 
-                        <span className="text-indigo-400 text-xs font-bold uppercase tracking-wider bg-indigo-950/50 px-3 py-1 rounded-full border border-indigo-800/40">Passo a Passo</span>
+            <span className="text-indigo-400 text-xs font-bold uppercase tracking-wider bg-indigo-950/50 px-3 py-1 rounded-full border border-indigo-800/40">Passo a Passo</span>
 
             
             <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-indigo-500/50 transition">
