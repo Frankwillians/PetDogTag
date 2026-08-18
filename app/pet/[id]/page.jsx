@@ -77,7 +77,7 @@ export default function PetProfilePage() {
     fetchPetAndUser()
   }, [petId])
 
-  // FUNÇÕES DE FORMATAÇÃO AUTOMÁTICA (Apenas digita o número)
+  // FUNÇÕES DE FORMATAÇÃO AUTOMÁTICA
   const formatarPeso = (val) => {
     const apenasNumeros = val.replace(/[^\d.,]/g, '')
     if (!apenasNumeros) return ''
@@ -95,7 +95,6 @@ export default function PetProfilePage() {
   const handleSalvarAlteracoes = async (e) => {
     e.preventDefault()
     
-    // Aplica a formatação automática antes de salvar no banco
     const pesoFormatado = formatarPeso(peso)
     const idadeFormatada = formatarIdade(idade)
 
@@ -141,6 +140,7 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
+  // GERADOR DE PDF SEM O TEXTO DARKSTAR NA FRENTE E APONTANDO PARA A PÁGINA PÚBLICA
   const gerarPdfTag = async (petData, formato) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -163,45 +163,44 @@ export default function PetProfilePage() {
     doc.setDrawColor(40, 40, 40)
 
     if (formato === 'circular') {
-      doc.circle(45, 55, 13)
-      doc.circle(45, 55, 11) 
-      doc.circle(45, 41, 1)  
+      doc.circle(48, 57, 13)
+      doc.circle(48, 57, 11.5) 
+      doc.circle(48, 43, 1)    
 
-      doc.circle(120, 55, 13)
-      doc.circle(120, 55, 11)
-      doc.circle(120, 41, 1)  
+      doc.circle(122, 57, 13)
+      doc.circle(122, 57, 11.5)
+      doc.circle(122, 43, 1)  
     } else {
-      doc.roundedRect(28, 42, 35, 25, 3, 3)
-      doc.roundedRect(30, 44, 31, 21, 2, 2)
-      doc.circle(45, 39, 1) 
+      doc.roundedRect(30.5, 44.5, 35, 25, 3, 3)
+      doc.roundedRect(32.5, 46.5, 31, 21, 2, 2)
+      doc.circle(48, 41.5, 1) 
 
-      doc.roundedRect(103, 42, 35, 25, 3, 3)
-      doc.roundedRect(105, 44, 31, 21, 2, 2)
-      doc.circle(120, 39, 1) 
+      doc.roundedRect(104.5, 44.5, 35, 25, 3, 3)
+      doc.roundedRect(106.5, 46.5, 31, 21, 2, 2)
+      doc.circle(122, 41.5, 1) 
     }
 
-    const xFrenteCentro = formato === 'circular' ? 45 : 45.5
-    const yFrenteCentro = formato === 'circular' ? 56 : 55
+    // ================= FRENTE (Apenas Nome do Pet Centralizado) =================
+    const xFrenteCentro = 48
+    const yFrenteCentro = 57
 
     doc.setFont("helvetica", "bold")
-    doc.setFontSize(formato === 'circular' ? 10 : 11)
+    doc.setFontSize(formato === 'circular' ? 11 : 12)
     doc.setTextColor(20, 20, 20)
-    doc.text(petData.name, xFrenteCentro, yFrenteCentro, { align: 'center' })
-    
-    doc.setFontSize(5)
-    doc.setTextColor(100, 100, 100)
-    doc.text('DARKSTAR', xFrenteCentro, yFrenteCentro + 4.5, { align: 'center' })
+    doc.text(petData.name, xFrenteCentro, yFrenteCentro + 1, { align: 'center' })
 
     doc.setFont("helvetica", "italic")
     doc.setFontSize(8)
-    doc.text('[ Lado Frontal ]', 45, 85, { align: 'center' })
+    doc.text('[ Lado Frontal ]', 48, 87, { align: 'center' })
 
+    // Linha pontilhada divisória central
     doc.setLineDash([1.5, 1.5], 0)
-    doc.line(82, 25, 82, 95)
+    doc.line(85, 25, 85, 95)
     doc.setLineDash([], 0)
 
-    const xVersoCentro = formato === 'circular' ? 120 : 120.5
-    const yVersoCentro = formato === 'circular' ? 55 : 54.5
+    // ================= VERSO (QR Code Centralizado) =================
+    const xVersoCentro = 122
+    const yVersoCentro = 57
 
     const toBase64 = async (url) => {
       try {
@@ -223,13 +222,13 @@ export default function PetProfilePage() {
     try {
       const base64Qr = await toBase64(qrUrl)
       if (base64Qr) {
-        const tamanhoQr = formato === 'circular' ? 18 : 19
+        const tamanhoQr = formato === 'circular' ? 17 : 18
         doc.addImage(base64Qr, 'PNG', xVersoCentro - (tamanhoQr / 2), yVersoCentro - (tamanhoQr / 2), tamanhoQr, tamanhoQr)
       }
 
       doc.setFont("helvetica", "italic")
       doc.setFontSize(8)
-      doc.text('[ Lado Traseiro / Verso ]', 120, 85, { align: 'center' })
+      doc.text('[ Lado Traseiro / Verso ]', 122, 87, { align: 'center' })
 
       doc.save(`dog-tag-${petData.name.toLowerCase()}-${formato}.pdf`)
     } catch (error) {
@@ -305,7 +304,7 @@ export default function PetProfilePage() {
 
       <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl space-y-6">
         
-        {/* CABEÇALHO ESTILO PINNPET */}
+        {/* CABEÇALHO */}
         <div className="text-center space-y-3">
           <div className="inline-block bg-indigo-950/80 border border-indigo-800/60 text-indigo-400 text-xs font-semibold px-3.5 py-1 rounded-full">
             {isDono ? '🛡️ PAINEL DO DONO' : '🐾 PERFIL DE EMERGÊNCIA'}
@@ -340,7 +339,7 @@ export default function PetProfilePage() {
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Peso (ex: 4.5)</label>
+                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Peso (digite só o número)</label>
                 <input 
                   type="text" 
                   value={peso} 
@@ -350,7 +349,7 @@ export default function PetProfilePage() {
                 />
               </div>
               <div>
-                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Idade (ex: 2)</label>
+                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Idade (digite só o número)</label>
                 <input 
                   type="text" 
                   value={idade} 
@@ -403,7 +402,7 @@ export default function PetProfilePage() {
             </div>
           </form>
         ) : (
-          /* BLOCO DE INFORMAÇÕES ESTILO CARDS PINNPET (VISÍVEL PARA TODOS) */
+          /* BLOCO DE INFORMAÇÕES ESTILO PINNPET (VISÍVEL PARA TODOS) */
           <div className="space-y-3">
             <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 space-y-3 text-sm shadow-inner">
               <div className="flex justify-between border-b border-slate-800/60 pb-2.5">
@@ -415,7 +414,7 @@ export default function PetProfilePage() {
                 <span className="text-slate-100 font-bold">{pet.phone || 'Não informado'}</span>
               </div>
 
-              {/* CARDS DE PESO E IDADE ESTILO PINNPET */}
+              {/* CARDS DE PESO E IDADE */}
               {(pet.peso || pet.idade) && (
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   {pet.peso && (
@@ -612,6 +611,21 @@ export default function PetProfilePage() {
                 </p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* BANNER DE AUTOPROMOÇÃO SUTIL PARA QUEM ESCANEIA */}
+        {!isDono && (
+          <div className="border-t border-slate-800/80 pt-4 mt-2 text-center">
+            <p className="text-[11px] text-slate-400 mb-1">
+              Gostou da plaqueta inteligente?
+            </p>
+            <a 
+              href="/register" 
+              className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition underline underline-offset-2"
+            >
+              Proteja seu pet também com a DarkStar Pets 🐾
+            </a>
           </div>
         )}
 
