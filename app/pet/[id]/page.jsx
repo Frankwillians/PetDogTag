@@ -30,7 +30,7 @@ export default function PetProfilePage() {
   const [enviandoFoto, setEnviandoFoto] = useState(false)
   
   // Estado para o formato selecionado no select do PDF
-  const [formatoPdf, setFormatoPdf] = useState('osso')
+  const [formatoPdf, setFormatoPdf] = useState('circulo')
   
   // Estado para armazenar o link de fallback do WhatsApp
   const [whatsappLink, setWhatsappLink] = useState('')
@@ -121,7 +121,7 @@ export default function PetProfilePage() {
     alert('Foto enviada com sucesso! Clique em "Salvar Alterações" logo abaixo.')
   }
 
-  // GERADOR DE PDF USANDO IMAGENS REAIS DA PASTA PUBLIC/MOLDES
+  // GERADOR DE PDF USANDO IMAGENS REAIS DE MOLDES (OSSO.PNG / PATINHA.PNG OU CÍRCULO)
   const gerarPdfTag = async (petData, formato) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -140,19 +140,19 @@ export default function PetProfilePage() {
     doc.setFont("helvetica", "normal")
     doc.text(`Contato: ${petData.phone} | Escaneie para ver o perfil de emergência`, 15, 21)
 
-    // Mapeamento completo apontando para a pasta public/moldes
+    // Mapeamento das imagens de moldes inseridas na pasta app/moldes
     const moldesImagens = {
-      osso: `${currentDomain}/moldes/osso.png`,
-      patinha: `${currentDomain}/moldes/patinha.png`,
-      circulo: `${currentDomain}/moldes/circulo.png`
+      osso: `${currentDomain}/moldes/osso.jpg`,
+      patinha: `${currentDomain}/moldes/patinha.jpg`,
+      circulo: `${currentDomain}/moldes/circulo.jpg` // Fallback caso selecione círculo ou ajuste para URL padrão
     }
 
+    // Seleciona a imagem com base no formato escolhido
     const imagemMoldeUrl = moldesImagens[formato] || moldesImagens.osso
 
     const toBase64 = async (url) => {
       try {
         const response = await fetch(url, { mode: 'cors' })
-        if (!response.ok) throw new Error('Falha ao buscar imagem do molde')
         const blob = await response.blob()
         return new Promise((resolve) => {
           const reader = new FileReader()
@@ -160,7 +160,6 @@ export default function PetProfilePage() {
           reader.readAsDataURL(blob)
         })
       } catch (e) {
-        console.warn('Não foi possível carregar o molde:', url)
         return null
       }
     }
@@ -173,10 +172,10 @@ export default function PetProfilePage() {
     try {
       const base64Molde = await toBase64(imagemMoldeUrl)
       if (base64Molde) {
-        doc.addImage(base64Molde, 'PNG', xFrente, yFrente, tamanhoTag, tamanhoTag)
+        doc.addImage(base64Molde, 'JPG', xFrente, yFrente, tamanhoTag, tamanhoTag)
       }
     } catch (e) {
-      console.warn('Erro ao inserir imagem de molde na frente', e)
+      console.warn('Erro ao carregar imagem de molde para a frente', e)
     }
 
     // Nome centralizado por cima da imagem de fundo
@@ -207,10 +206,10 @@ export default function PetProfilePage() {
     try {
       const base64Molde = await toBase64(imagemMoldeUrl)
       if (base64Molde) {
-        doc.addImage(base64Molde, 'PNG', xVerso, yVerso, tamanhoTag, tamanhoTag)
+        doc.addImage(base64Molde, 'JPG', xVerso, yVerso, tamanhoTag, tamanhoTag)
       }
     } catch (e) {
-      console.warn('Erro ao inserir imagem de molde no verso', e)
+      console.warn('Erro ao carregar imagem de molde para o verso', e)
     }
 
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkDinamico)}`
@@ -218,10 +217,11 @@ export default function PetProfilePage() {
     try {
       const base64Qr = await toBase64(qrUrl)
       if (base64Qr) {
+        // Posiciona o QR Code de forma compacta e centralizada dentro do molde do verso
         const tamanhoQr = 24
         const offsetX = xVerso + (tamanhoTag - tamanhoQr) / 2
         const offsetY = yVerso + (tamanhoTag - tamanhoQr) / 2 - 2
-        doc.addImage(base64Qr, 'PNG', offsetX, offsetY, tamanhoQr, tamanhoQr)
+        doc.addImage(base64Qr, 'JPG', offsetX, offsetY, tamanhoQr, tamanhoQr)
       }
       
       doc.setFont("helvetica", "bold")
@@ -339,10 +339,9 @@ export default function PetProfilePage() {
             </div>
             <div>
               <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Foto do Pet</label>
-              {/* Suporta JPG, JPEG e PNG */}
               <input 
                 type="file" 
-                accept="image/jpeg, image/jpg, image/png"
+                accept="image/*"
                 onChange={handleUploadFoto}
                 className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
               />
@@ -415,7 +414,6 @@ export default function PetProfilePage() {
                     >
                       <option value="osso">🦴 Formato Osso</option>
                       <option value="patinha">🐾 Formato Patinha</option>
-                      <option value="circulo">⭕ Formato Círculo</option>
                     </select>
 
                     <button
