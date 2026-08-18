@@ -29,6 +29,9 @@ export default function PetProfilePage() {
   const [icone, setIcone] = useState('🐾')
   const [fotoUrl, setFotoUrl] = useState('')
   const [enviandoFoto, setEnviandoFoto] = useState(false)
+  
+  // Estado para armazenar o link de fallback do WhatsApp (essencial para iOS/Chrome mobile)
+  const [whatsappLink, setWhatsappLink] = useState('')
 
   const [baseUrl, setBaseUrl] = useState('')
 
@@ -223,11 +226,12 @@ export default function PetProfilePage() {
           
           const telefoneLimpo = pet.phone.replace(/\D/g, '')
           const mensagem = encodeURIComponent(`Olá! Encontrei seu pet ${pet.name}. Aqui está minha localização atual: ${mapsLink}`)
-          
-          // Usa o formato api.whatsapp.com que costuma ter melhor compatibilidade de abertura direta no app mobile
           const urlWhatsApp = `https://api.whatsapp.com/send?phone=55${telefoneLimpo}&text=${mensagem}`
           
-          // Abre diretamente na mesma aba ou força o redirecionamento mobile
+          // Salva no estado para o caso do navegador bloquear o redirecionamento automático
+          setWhatsappLink(urlWhatsApp)
+
+          // Tenta abrir direto
           window.location.href = urlWhatsApp
         },
         () => {
@@ -501,14 +505,28 @@ export default function PetProfilePage() {
 
         {/* SE FOR QUEM ACHOU O PET */}
         {!isDono && (
-          <div>
+          <div className="space-y-3">
             {pagamentoAprovado ? (
-              <button
-                onClick={handleEnviarLocalizacao}
-                className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-red-600/20 transition flex items-center justify-center gap-2"
-              >
-                📍 Enviar Minha Localização
-              </button>
+              <>
+                <button
+                  onClick={handleEnviarLocalizacao}
+                  className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-red-600/20 transition flex items-center justify-center gap-2"
+                >
+                  📍 Enviar Minha Localização
+                </button>
+
+                {/* BOTÃO DE FALLBACK (Garante funcionamento no Safari e Chrome do iOS) */}
+                {whatsappLink && (
+                  <a
+                    href={whatsappLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full text-center bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-lg animate-bounce"
+                  >
+                    📲 Clique aqui para abrir o WhatsApp com a localização
+                  </a>
+                )}
+              </>
             ) : (
               <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-2">
                 <span className="text-xl">⚠️</span>
