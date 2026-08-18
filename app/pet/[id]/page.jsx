@@ -206,7 +206,7 @@ export default function PetProfilePage() {
     try {
       const base64Molde = await toBase64(imagemMoldeUrl)
       if (base64Molde) {
-        doc.addImage(base64Molde, 'PNG', xVerso, yVerso, tamanhoTag, tamanhoTag)
+        doc.addImage(base64Molde, 'JPG', xVerso, yVerso, tamanhoTag, tamanhoTag)
       }
     } catch (e) {
       console.warn('Erro ao carregar imagem de molde para o verso', e)
@@ -221,7 +221,7 @@ export default function PetProfilePage() {
         const tamanhoQr = 24
         const offsetX = xVerso + (tamanhoTag - tamanhoQr) / 2
         const offsetY = yVerso + (tamanhoTag - tamanhoQr) / 2 - 2
-        doc.addImage(base64Qr, 'PNG', offsetX, offsetY, tamanhoQr, tamanhoQr)
+        doc.addImage(base64Qr, 'JPG', offsetX, offsetY, tamanhoQr, tamanhoQr)
       }
       
       doc.setFont("helvetica", "bold")
