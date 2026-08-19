@@ -1,19 +1,52 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 export default function LandingPage() {
+  const [isDark, setIsDark] = useState(true)
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme === 'light') {
+      setIsDark(false)
+      document.documentElement.classList.remove('dark')
+    } else {
+      setIsDark(true)
+      document.documentElement.classList.add('dark')
+    }
+  }, [])
+
+  const toggleTheme = () => {
+    if (isDark) {
+      localStorage.setItem('theme', 'light')
+      setIsDark(false)
+      document.documentElement.classList.remove('dark')
+    } else {
+      localStorage.setItem('theme', 'dark')
+      setIsDark(true)
+      document.documentElement.classList.add('dark')
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between selection:bg-indigo-500 selection:text-white transition-colors">
       
       {/* HEADER / TOPO */}
-      <header className="max-w-6xl w-full mx-auto px-6 py-6 flex items-center justify-between border-b border-slate-900/50 backdrop-blur-md sticky top-0 z-50 bg-slate-950/85">
+      <header className="max-w-6xl w-full mx-auto px-6 py-6 flex items-center justify-between border-b border-slate-200 dark:border-slate-900/50 backdrop-blur-md sticky top-0 z-50 bg-white/80 dark:bg-slate-950/85 transition-colors">
         <div className="flex items-center gap-2">
           <span className="text-2xl">🐾</span>
-          <span className="font-extrabold text-xl text-white tracking-wide">DarkStar Pets</span>
+          <span className="font-extrabold text-xl text-slate-900 dark:text-white tracking-wide">DarkStar Pets</span>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/login" className="text-sm font-semibold text-slate-300 hover:text-white transition">
+          <button
+            onClick={toggleTheme}
+            className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-300 dark:border-slate-800 shadow-sm"
+            title="Alternar entre Modo Escuro e Claro"
+          >
+            {isDark ? '☀️' : '🌙'}
+          </button>
+          <Link href="/login" className="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition">
             Entrar
           </Link>
           <Link href="/register" className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/20 transition">
@@ -25,48 +58,48 @@ export default function LandingPage() {
       {/* HERO SECTION (DESTAQUE PRINCIPAL) */}
       <main className="max-w-5xl w-full mx-auto px-6 py-16 text-center space-y-12">
         
-        <div className="inline-flex items-center gap-2 bg-indigo-950/80 border border-indigo-800/60 text-indigo-400 text-xs font-semibold px-4 py-1.5 rounded-full shadow-inner">
+        <div className="inline-flex items-center gap-2 bg-indigo-100 dark:bg-indigo-950/85 border border-indigo-200 dark:border-indigo-800/60 text-indigo-700 dark:text-indigo-400 text-xs font-semibold px-4 py-1.5 rounded-full shadow-inner">
           ❤️ Porque todo membro da família merece voltar para casa em segurança.
         </div>
 
-        <h1 className="text-4xl sm:text-7xl font-black text-white tracking-tight leading-[1.1]">
-          O pior pesadelo de todo tutor é ver o seu melhor amigo <span className="text-indigo-500 underline decoration-indigo-500/30">perdido na rua.</span>
+        <h1 className="text-4xl sm:text-7xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.1]">
+          O pior pesadelo de todo tutor é ver o seu melhor amigo <span className="text-indigo-600 dark:text-indigo-500 underline decoration-indigo-500/30">perdido na rua.</span>
         </h1>
 
-        <p className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
           Um portão aberto, um susto com fogos de artifício, um descuido de segundos... O medo de não saber onde ele está aperta o coração de qualquer um. Com a DarkStar Pets, se alguém encontrar o seu companheiro, basta escanear a coleira para que a <strong>localização exata do GPS chegue direto no seu WhatsApp</strong>.
         </p>
 
         {/* ========================================== */}
         {/* COMO FUNCIONA (LOGO APÓS A CHAMADA PRINCIPAL) */}
         {/* ========================================== */}
-        <div className="pt-8 pb-6 border-y border-slate-900 my-6">
+        <div className="pt-8 pb-6 border-y border-slate-200 dark:border-slate-900 my-6">
           <div className="text-center space-y-2 mb-10">
-            <h2 className="text-2xl sm:text-4xl font-black text-white">Como cuidar de quem você ama em 3 passos</h2>
-            <p className="text-sm text-slate-400">Entenda como é simples proteger seu pet e garantir que ele volte para casa.</p>
+            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white">Como cuidar de quem você ama em 3 passos</h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Entenda como é simples proteger seu pet e garantir que ele volte para casa.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
             
-            <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-indigo-500/50 transition">
-              <div className="text-3xl font-black text-indigo-500/20 absolute top-4 right-4">01</div>
+            <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-indigo-500/50 shadow-sm transition">
+              <div className="text-3xl font-black text-indigo-500/10 dark:text-indigo-500/20 absolute top-4 right-4">01</div>
               <div className="text-2xl">📝</div>
-              <h3 className="font-bold text-white text-lg">Cadastre com carinho</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">Insira o nome, a foto e os dados de contato. O primeiro pet da família tem ativação 100% gratuita. Para os demais, cobramos apenas uma taxa única de R$ 10,00.</p>
+              <h3 className="font-bold text-slate-900 dark:text-white text-lg">Cadastre com carinho</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">Insira o nome, a foto e os dados de contato. O primeiro pet da família tem ativação 100% gratuita. Para os demais, cobramos apenas uma taxa única de R$ 10,00.</p>
             </div>
 
-            <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-indigo-500/50 transition">
-              <div className="text-3xl font-black text-indigo-500/20 absolute top-4 right-4">02</div>
+            <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-indigo-500/50 shadow-sm transition">
+              <div className="text-3xl font-black text-indigo-500/10 dark:text-indigo-500/20 absolute top-4 right-4">02</div>
               <div className="text-2xl">🖨️</div>
-              <h3 className="font-bold text-white text-lg">Monte a plaqueta</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">Baixe o molde em PDF na hora, imprima em casa e coloque na coleira. Uma ponte direta entre o seu pet e o seu abraço.</p>
+              <h3 className="font-bold text-slate-900 dark:text-white text-lg">Monte a plaqueta</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">Baixe o molde em PDF na hora, imprima em casa e coloque na coleira. Uma ponte direta entre o seu pet e o seu abraço.</p>
             </div>
 
-            <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-indigo-500/50 transition">
-              <div className="text-3xl font-black text-indigo-500/20 absolute top-4 right-4">03</div>
+            <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-indigo-500/50 shadow-sm transition">
+              <div className="text-3xl font-black text-indigo-500/10 dark:text-indigo-500/20 absolute top-4 right-4">03</div>
               <div className="text-2xl">📍</div>
-              <h3 className="font-bold text-white text-lg">Resgate imediato</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">Se ele se perder, qualquer pessoa de bom coração que o encontrar poderá ler o QR Code e avisar onde ele está num piscar de olhos.</p>
+              <h3 className="font-bold text-slate-900 dark:text-white text-lg">Resgate imediato</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">Se ele se perder, qualquer pessoa de bom coração que o encontrar poderá ler o QR Code e avisar onde ele está num piscar de olhos.</p>
             </div>
 
           </div>
@@ -74,27 +107,27 @@ export default function LandingPage() {
 
         {/* ESTATÍSTICAS RÁPIDAS / CONFIANÇA */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 max-w-3xl mx-auto text-center">
-          <div className="bg-slate-900/50 border border-slate-900 p-4 rounded-xl">
-            <p className="text-2xl sm:text-3xl font-extrabold text-emerald-400">R$ 0,00</p>
-            <p className="text-xs text-slate-400">Ativação gratuita para o 1º pet</p>
+          <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-900 p-4 rounded-xl shadow-sm">
+            <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">R$ 0,00</p>
+            <p className="text-xs text-slate-600 dark:text-slate-400">Ativação gratuita para o 1º pet</p>
           </div>
-          <div className="bg-slate-900/50 border border-slate-900 p-4 rounded-xl">
-            <p className="text-2xl sm:text-3xl font-extrabold text-white">R$ 10,00</p>
-            <p className="text-xs text-slate-400">Taxa única para pets adicionais</p>
+          <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-900 p-4 rounded-xl shadow-sm">
+            <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">R$ 10,00</p>
+            <p className="text-xs text-slate-600 dark:text-slate-400">Taxa única para pets adicionais</p>
           </div>
-          <div className="col-span-2 sm:col-span-1 bg-slate-900/50 border border-slate-900 p-4 rounded-xl">
-            <p className="text-2xl sm:text-3xl font-extrabold text-indigo-400">Paz Mental</p>
-            <p className="text-xs text-slate-400">Contato direto com quem achou</p>
+          <div className="col-span-2 sm:col-span-1 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-900 p-4 rounded-xl shadow-sm">
+            <p className="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">Paz Mental</p>
+            <p className="text-xs text-slate-600 dark:text-slate-400">Contato direto com quem achou</p>
           </div>
         </div>
 
         {/* SEÇÃO DE CHAMADA FINAL (CTA) COM OS BOTÕES DENTRO */}
         <div className="pt-10 pb-8">
-          <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 border border-indigo-800/50 p-8 sm:p-12 rounded-3xl space-y-6 shadow-2xl">
+          <div className="bg-gradient-to-r from-indigo-900 via-indigo-950 to-indigo-900 dark:from-indigo-950 dark:via-slate-900 dark:to-indigo-950 border border-indigo-700/50 dark:border-indigo-800/50 p-8 sm:p-12 rounded-3xl space-y-6 shadow-2xl text-white">
             <h2 className="text-2xl sm:text-4xl font-extrabold text-white">
               Não espere o susto acontecer para se prevenir.
             </h2>
-            <p className="text-slate-300 text-sm sm:text-base max-w-xl mx-auto">
+            <p className="text-indigo-100 dark:text-slate-300 text-sm sm:text-base max-w-xl mx-auto">
               Dê ao seu fiel companheiro a segurança de voltar para casa caso ele se aventure longe demais.
             </p>
             
@@ -108,7 +141,7 @@ export default function LandingPage() {
               </Link>
               <Link 
                 href="/login" 
-                className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-semibold text-base px-8 py-4 rounded-2xl transition"
+                className="w-full sm:w-auto bg-slate-900/80 hover:bg-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 text-white dark:text-slate-300 border border-indigo-700/50 dark:border-slate-800 font-semibold text-base px-8 py-4 rounded-2xl transition"
               >
                 Acessar Minha Conta
               </Link>
@@ -119,11 +152,11 @@ export default function LandingPage() {
       </main>
 
       {/* RODAPÉ */}
-      <footer className="max-w-6xl w-full mx-auto px-6 py-8 border-t border-slate-900 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <footer className="max-w-6xl w-full mx-auto px-6 py-8 border-t border-slate-200 dark:border-slate-900 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors">
         <p>© 2026 DarkStar Pets. Todos os direitos reservados.</p>
         <div className="flex gap-4">
-          <Link href="/login" className="hover:text-slate-400 transition">Entrar</Link>
-          <Link href="/register" className="hover:text-slate-400 transition">Criar Conta</Link>
+          <Link href="/login" className="hover:text-slate-800 dark:hover:text-slate-400 transition">Entrar</Link>
+          <Link href="/register" className="hover:text-slate-800 dark:hover:text-slate-400 transition">Criar Conta</Link>
         </div>
       </footer>
 
