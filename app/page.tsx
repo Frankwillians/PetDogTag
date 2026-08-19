@@ -50,21 +50,24 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
             
             <div className="bg-white border border-orange-200/80 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-amber-400 shadow-md transition">
-              <div className="text-3xl font-black text-amber-500/15 absolute top-4 right-4">01</div>
+              {/* Número mais escuro e visível */}
+              <div className="text-3xl font-black text-amber-600/30 absolute top-4 right-4">01</div>
               <div className="text-2xl">📝</div>
               <h3 className="font-bold text-slate-900 text-lg">Cadastre com carinho</h3>
               <p className="text-sm text-slate-600 leading-relaxed font-medium">Insira o nome, a foto e os dados de contato. O primeiro pet da família tem ativação 100% gratuita. Para os demais, cobramos apenas uma taxa única de R$ 10,00.</p>
             </div>
 
             <div className="bg-white border border-orange-200/80 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-amber-400 shadow-md transition">
-              <div className="text-3xl font-black text-amber-500/15 absolute top-4 right-4">02</div>
+              {/* Número mais escuro e visível */}
+              <div className="text-3xl font-black text-amber-600/30 absolute top-4 right-4">02</div>
               <div className="text-2xl">🖨️</div>
               <h3 className="font-bold text-slate-900 text-lg">Monte a plaqueta</h3>
               <p className="text-sm text-slate-600 leading-relaxed font-medium">Baixe o molde em PDF na hora, imprima em casa e coloque na coleira. Uma ponte direta entre o seu pet e o seu abraço.</p>
             </div>
 
             <div className="bg-white border border-orange-200/80 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-amber-400 shadow-md transition">
-              <div className="text-3xl font-black text-amber-500/15 absolute top-4 right-4">03</div>
+              {/* Número mais escuro e visível */}
+              <div className="text-3xl font-black text-amber-600/30 absolute top-4 right-4">03</div>
               <div className="text-2xl">📍</div>
               <h3 className="font-bold text-slate-900 text-lg">Resgate imediato</h3>
               <p className="text-sm text-slate-600 leading-relaxed font-medium">Se ele se perder, qualquer pessoa de bom coração que o encontrar poderá ler o QR Code e avisar onde ele está num piscar de olhos.</p>
