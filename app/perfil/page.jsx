@@ -29,7 +29,7 @@ export default function Perfil() {
 
       setUser(session.user)
 
-      // Busca os dados do perfil existente
+      // Busca os dados do perfil existente[cite: 6]
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -57,7 +57,7 @@ export default function Perfil() {
       return
     }
 
-    // 1. Atualiza o perfil principal do usuário
+    // 1. Atualiza o perfil principal do usuário[cite: 6]
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
@@ -72,7 +72,7 @@ export default function Perfil() {
       return
     }
 
-    // 2. Atualiza automaticamente o nome e o telefone em TODOS os pets já cadastrados por este usuário
+    // 2. Atualiza automaticamente o nome e o telefone em TODOS os pets já cadastrados por este usuário[cite: 6]
     const { error: petsError } = await supabase
       .from('pets')
       .update({
@@ -90,81 +90,86 @@ export default function Perfil() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
-        <p>Carregando perfil...</p>
+      <div className="min-h-screen bg-[#e2e8f0] flex items-center justify-center text-slate-800">
+        <p className="font-semibold">Carregando perfil...</p>[cite: 6]
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6">
-      <div className="max-w-xl mx-auto">
+    <div className="min-h-screen bg-[#e2e8f0] text-slate-900 p-6 flex flex-col justify-between selection:bg-amber-500 selection:text-white">
+      <div className="max-w-xl mx-auto w-full">
         
         {/* Cabeçalho */}
-        <div className="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
+        <div className="flex justify-between items-center mb-8 border-b border-slate-300 pb-4">
           <div>
-            <h1 className="text-2xl font-bold text-indigo-400">Meu Perfil</h1>
-            <p className="text-sm text-slate-400">Gerencie seus dados de contato para as Dog Tags</p>
+            <h1 className="text-2xl font-black text-slate-900">Meu Perfil</h1>[cite: 6]
+            <p className="text-sm text-slate-600 font-semibold">Gerencie seus dados de contato para as Dog Tags</p>[cite: 6]
           </div>
           <Link
             href="/dashboard"
-            className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm px-4 py-2 rounded-xl transition font-medium"
+            className="bg-white hover:bg-slate-100 text-slate-800 text-sm px-4 py-2.5 rounded-xl transition font-bold border border-slate-300 shadow-sm"
           >
             Voltar ao Painel
           </Link>
         </div>
 
         {/* Formulário de Perfil */}
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
-          <h2 className="text-lg font-semibold mb-4 text-indigo-300">👤 Informações do Dono</h2>
+        <div className="bg-[#f8fafc] border border-slate-300 p-8 rounded-3xl shadow-xl">
+          <h2 className="text-lg font-bold mb-6 text-slate-900">👤 Informações do Dono</h2>
 
-          {erro && <div className="bg-red-900/50 border border-red-700 text-red-200 p-3 rounded-xl mb-4 text-sm">{erro}</div>}
-          {mensagem && <div className="bg-emerald-900/50 border border-emerald-700 text-emerald-200 p-3 rounded-xl mb-4 text-sm">{mensagem}</div>}
+          {erro && <div className="bg-red-100 border border-red-300 text-red-900 p-4 rounded-xl mb-6 text-sm font-bold">{erro}</div>}
+          {mensagem && <div className="bg-emerald-100 border border-emerald-300 text-emerald-900 p-4 rounded-xl mb-6 text-sm font-bold">{mensagem}</div>}
 
           <form onSubmit={handleSaveProfile} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">E-mail da Conta</label>
+              <label className="block text-xs font-bold text-slate-600 mb-1.5">E-mail da Conta</label>
               <input
                 type="text"
                 disabled
                 value={user?.email || ''}
-                className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-500 cursor-not-allowed"
+                className="w-full bg-slate-200/70 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-500 cursor-not-allowed font-semibold"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Seu Nome Completo</label>
+              <label className="block text-xs font-bold text-slate-600 mb-1.5">Seu Nome Completo</label>
               <input
                 type="text"
                 placeholder="Ex: João da Silva"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
+                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 font-semibold focus:outline-none focus:border-amber-500 shadow-sm placeholder-slate-400"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Telefone / WhatsApp Principal</label>
+              <label className="block text-xs font-bold text-slate-600 mb-1.5">Telefone / WhatsApp Principal</label>
               <input
                 type="text"
                 placeholder="Ex: (55) 0000-0000"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
+                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 font-semibold focus:outline-none focus:border-amber-500 shadow-sm placeholder-slate-400"
               />
-              <p className="text-xs text-slate-500 mt-1">Este número aparecerá nas páginas públicas dos seus pets caso alguém escaneie a Dog Tag.</p>
+              <p className="text-xs text-slate-600 mt-1.5 font-medium">Este número aparecerá nas páginas públicas dos seus pets caso alguém escaneie a Dog Tag.</p>[cite: 6]
             </div>
 
             <button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-indigo-600/20 mt-2"
+              className="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-amber-600/20 mt-4 text-sm"
             >
-              Salvar Alterações
+              Salvar Alterações 🚀
             </button>
           </form>
         </div>
 
       </div>
+
+      {/* Rodapé */}
+      <footer className="w-full text-center text-xs text-slate-600 font-bold pt-8">
+        <p>© 2026 DarkStar Pets. Todos os direitos reservados.</p>
+      </footer>
     </div>
   )
 }

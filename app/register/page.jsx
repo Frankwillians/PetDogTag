@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -22,7 +23,7 @@ export default function RegisterPage() {
     setLoading(true)
     setErrorMsg('')
 
-    // 1. Cria a conta no Supabase Auth
+    // 1. Cria a conta no Supabase Auth[cite: 7]
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -37,7 +38,7 @@ export default function RegisterPage() {
       return
     }
 
-    // 2. Insere/atualiza explicitamente na tabela profiles para garantir o vínculo imediato
+    // 2. Insere/atualiza explicitamente na tabela profiles para garantir o vínculo imediato[cite: 7]
     if (authData.user) {
       const { error: profileError } = await supabase
         .from('profiles')
@@ -55,7 +56,7 @@ export default function RegisterPage() {
       }
     }
 
-    // 3. Dispara o e-mail de boas-vindas personalizado via Resend
+    // 3. Dispara o e-mail de boas-vindas personalizado via Resend[cite: 7]
     try {
       await fetch('/api/boas-vindas', {
         method: 'POST',
@@ -71,17 +72,17 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
-      <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl">
+    <div className="min-h-screen bg-[#e2e8f0] text-slate-900 flex items-center justify-center p-6 selection:bg-amber-500 selection:text-white">
+      <div className="max-w-md w-full bg-[#f8fafc] border border-slate-300 p-8 rounded-3xl shadow-xl">
         
         {/* Cabeçalho */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-extrabold text-white">Criar Conta</h1>
-          <p className="text-sm text-slate-400 mt-1">DarkStar Pets</p>
+          <h1 className="text-2xl font-black text-slate-900">Criar Conta</h1>
+          <p className="text-sm text-slate-600 mt-1 font-semibold">DarkStar Pets</p>
         </div>
 
         {errorMsg && (
-          <div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-400 text-xs rounded-xl text-center font-medium">
+          <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-900 text-xs rounded-xl text-center font-bold">
             {errorMsg}
           </div>
         )}
@@ -89,49 +90,49 @@ export default function RegisterPage() {
         {/* Formulário */}
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <label className="block text-xs uppercase font-semibold text-slate-400 mb-1.5">Nome Completo</label>
+            <label className="block text-xs uppercase font-bold text-slate-600 mb-1.5">Nome Completo</label>
             <input
               type="text"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               required
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 text-sm focus:outline-none focus:border-indigo-500 transition"
+              className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:border-amber-500 font-semibold shadow-sm placeholder-slate-400"
               placeholder="Seu nome"
             />
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-semibold text-slate-400 mb-1.5">Telefone / WhatsApp</label>
+            <label className="block text-xs uppercase font-bold text-slate-600 mb-1.5">Telefone / WhatsApp</label>
             <input
               type="text"
               value={telefone}
               onChange={(e) => setTelefone(e.target.value)}
               required
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 text-sm focus:outline-none focus:border-indigo-500 transition"
+              className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:border-amber-500 font-semibold shadow-sm placeholder-slate-400"
               placeholder="(00) 0000-0000"
             />
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-semibold text-slate-400 mb-1.5">E-mail</label>
+            <label className="block text-xs uppercase font-bold text-slate-600 mb-1.5">E-mail</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 text-sm focus:outline-none focus:border-indigo-500 transition"
+              className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:border-amber-500 font-semibold shadow-sm placeholder-slate-400"
               placeholder="seu@email.com"
             />
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-semibold text-slate-400 mb-1.5">Senha</label>
+            <label className="block text-xs uppercase font-bold text-slate-600 mb-1.5">Senha</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 text-sm focus:outline-none focus:border-indigo-500 transition"
+              className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:border-amber-500 font-semibold shadow-sm placeholder-slate-400"
               placeholder="••••••••"
             />
           </div>
@@ -139,7 +140,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-indigo-600/20 transition mt-2"
+            className="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-amber-600/20 transition mt-2"
           >
             {loading ? 'Criando conta...' : 'Cadastrar'}
           </button>
@@ -147,11 +148,11 @@ export default function RegisterPage() {
 
         {/* Rodapé do Card */}
         <div className="text-center mt-6">
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-600 font-semibold">
             Já tem uma conta?{' '}
-            <a href="/login" className="text-indigo-400 font-semibold hover:underline">
+            <Link href="/login" className="text-amber-700 font-bold hover:underline">
               Faça login
-            </a>
+            </Link>
           </p>
         </div>
 
