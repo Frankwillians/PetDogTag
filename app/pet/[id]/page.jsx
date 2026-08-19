@@ -83,7 +83,6 @@ export default function PetProfilePage() {
 
   const handleSalvarAlteracoes = async (e) => {
     e.preventDefault()
-    // Telefone removido da edição, pois pertence à conta do tutor
     const { error } = await supabase
       .from('pets')
       .update({ name: nome, peso: peso, idade: idade, notes: notes, foto_url: fotoUrl })
@@ -268,18 +267,18 @@ export default function PetProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
-        <p className="text-sm text-slate-400 animate-pulse">Carregando informações...</p>
+      <div className="min-h-screen bg-[#fcfbfa] text-slate-800 flex items-center justify-center">
+        <p className="text-sm font-semibold animate-pulse">Carregando informações...</p>
       </div>
     )
   }
 
   if (!pet) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6 text-center">
-        <div>
-          <h1 className="text-xl font-bold text-red-400 mb-2">Pet não encontrado</h1>
-          <p className="text-sm text-slate-400">Verifique o link ou entre em contato com o suporte.</p>
+      <div className="min-h-screen bg-[#fcfbfa] text-slate-800 flex items-center justify-center p-6 text-center">
+        <div className="bg-white border border-orange-200 p-8 rounded-3xl shadow-md max-w-sm w-full">
+          <h1 className="text-xl font-bold text-red-600 mb-2">Pet não encontrado</h1>
+          <p className="text-sm text-slate-600">Verifique o link ou entre em contato com o suporte.</p>
         </div>
       </div>
     )
@@ -293,7 +292,7 @@ export default function PetProfilePage() {
   const isDono = isDonoReal && !modoPublicoForcado
 
   return (
-    <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 py-12 ${pet.status === 'lost' ? 'border-t-8 border-red-500' : ''}`}>
+    <div className={`min-h-screen bg-[#fcfbfa] text-slate-800 flex flex-col items-center justify-between p-4 py-12 selection:bg-amber-500 selection:text-white ${pet.status === 'lost' ? 'border-t-8 border-red-600' : ''}`}>
       
       {pet.status === 'lost' && (
         <div className="fixed top-0 w-full bg-red-600 border-b border-red-500 text-white font-bold py-3 text-center z-50 shadow-xl tracking-wide text-sm">
@@ -301,366 +300,374 @@ export default function PetProfilePage() {
         </div>
       )}
 
-      <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl space-y-6">
-        
-        {/* CABEÇALHO */}
-        <div className="text-center space-y-3">
-          <div className="inline-block bg-indigo-950/80 border border-indigo-800/60 text-indigo-400 text-xs font-semibold px-3.5 py-1 rounded-full">
-            {isDono ? '🛡️ PAINEL DO DONO' : '🐾 PERFIL DE EMERGÊNCIA'}
-          </div>
-
-          <div className="flex justify-center">
-            <img src={fotoExibicao} alt={pet.name} className="w-28 h-28 object-cover rounded-full border-4 border-indigo-500/30 shadow-xl bg-slate-950 p-1" />
-          </div>
-
-          <div>
-            <h1 className="text-3xl font-black text-white tracking-tight">{pet.name}</h1>
-            <p className="text-sm text-slate-400 capitalize mt-0.5">
-              {pet.species} {pet.breed ? `• ${pet.breed}` : ''}
-            </p>
-          </div>
-        </div>
-
-        {/* SE FOR O DONO E ESTIVER EDITANDO OS DADOS (Telefone removido daqui) */}
-        {isDono && editando ? (
-          <form onSubmit={handleSalvarAlteracoes} className="space-y-4 bg-slate-950/80 p-4 rounded-2xl border border-slate-800">
-            <h2 className="text-xs font-bold uppercase text-indigo-400 mb-2">Editar Dados do Pet</h2>
-            <div>
-              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Nome do Pet</label>
-              <input 
-                type="text" 
-                value={nome} 
-                onChange={(e) => setNome(e.target.value)} 
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-                required
-              />
+      <div className="w-full max-w-lg flex-1 flex flex-col items-center justify-center py-6">
+        <div className="w-full bg-white border border-orange-200/80 p-8 rounded-3xl shadow-xl space-y-6">
+          
+          {/* CABEÇALHO */}
+          <div className="text-center space-y-3">
+            <div className="inline-block bg-amber-100 border border-amber-200 text-amber-900 text-xs font-bold px-4 py-1.5 rounded-full shadow-inner">
+              {isDono ? '🛡️ PAINEL DO DONO' : '🐾 PERFIL DE EMERGÊNCIA'}
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex justify-center">
+              <img src={fotoExibicao} alt={pet.name} className="w-32 h-32 object-cover rounded-full border-4 border-amber-200 shadow-xl bg-[#fcfbfa] p-1" />
+            </div>
+
+            <div>
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight">{pet.name}</h1>
+              <p className="text-sm font-semibold text-slate-600 capitalize mt-0.5">
+                {pet.species} {pet.breed ? `• ${pet.breed}` : ''}
+              </p>
+            </div>
+          </div>
+
+          {/* SE FOR O DONO E ESTIVER EDITANDO OS DADOS */}
+          {isDono && editando ? (
+            <form onSubmit={handleSalvarAlteracoes} className="space-y-4 bg-[#fcfbfa] p-6 rounded-2xl border border-orange-200">
+              <h2 className="text-xs font-bold uppercase text-amber-800 mb-2">Editar Dados do Pet</h2>
               <div>
-                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Peso</label>
+                <label className="block text-xs uppercase font-bold text-slate-600 mb-1">Nome do Pet</label>
                 <input 
                   type="text" 
-                  value={peso} 
-                  onChange={(e) => setPeso(e.target.value)} 
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-                  placeholder="Ex: 4.5kg"
+                  value={nome} 
+                  onChange={(e) => setNome(e.target.value)} 
+                  className="w-full bg-white border border-orange-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 font-medium focus:outline-none focus:border-amber-500"
+                  required
                 />
               </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs uppercase font-bold text-slate-600 mb-1">Peso</label>
+                  <input 
+                    type="text" 
+                    value={peso} 
+                    onChange={(e) => setPeso(e.target.value)} 
+                    className="w-full bg-white border border-orange-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 font-medium focus:outline-none focus:border-amber-500"
+                    placeholder="Ex: 4.5kg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase font-bold text-slate-600 mb-1">Idade</label>
+                  <input 
+                    type="text" 
+                    value={idade} 
+                    onChange={(e) => setIdade(e.target.value)} 
+                    className="w-full bg-white border border-orange-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 font-medium focus:outline-none focus:border-amber-500"
+                    placeholder="Ex: 2 anos"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Idade</label>
+                <label className="block text-xs uppercase font-bold text-slate-600 mb-1">Foto do Pet</label>
                 <input 
-                  type="text" 
-                  value={idade} 
-                  onChange={(e) => setIdade(e.target.value)} 
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-                  placeholder="Ex: 2 anos"
+                  type="file" 
+                  accept="image/jpeg, image/jpg, image/png"
+                  onChange={handleUploadFoto}
+                  className="w-full bg-white border border-orange-200 rounded-xl px-3.5 py-2 text-xs text-slate-700 font-medium file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer"
+                />
+                {enviandoFoto && <p className="text-xs text-amber-700 mt-1 font-semibold animate-pulse">Enviando foto...</p>}
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase font-bold text-slate-600 mb-1">Cuidados / Alergias</label>
+                <textarea 
+                  value={notes} 
+                  onChange={(e) => setNotes(e.target.value)} 
+                  className="w-full bg-white border border-orange-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 font-medium focus:outline-none focus:border-amber-500"
+                  rows="2"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Foto do Pet</label>
-              <input 
-                type="file" 
-                accept="image/jpeg, image/jpg, image/png"
-                onChange={handleUploadFoto}
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
-              />
-              {enviandoFoto && <p className="text-[10px] text-indigo-400 mt-1 animate-pulse">Enviando foto...</p>}
-            </div>
-
-            <div>
-              <label className="block text-xs uppercase font-semibold text-slate-400 mb-1">Cuidados / Alergias</label>
-              <textarea 
-                value={notes} 
-                onChange={(e) => setNotes(e.target.value)} 
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-                rows="2"
-              />
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-xs transition">
-                Salvar
-              </button>
-              <button type="button" onClick={() => setEditando(false)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-xl text-xs transition">
-                Cancelar
-              </button>
-            </div>
-          </form>
-        ) : (
-          /* BLOCO DE INFORMAÇÕES COM LISTA EM LINHAS E ÍCONES */
-          <div className="space-y-3">
-            <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 space-y-3 text-sm shadow-inner">
-              <div className="flex justify-between items-center border-b border-slate-800/60 pb-2.5">
-                <span className="text-slate-400 font-medium text-xs flex items-center gap-1.5">👤 Tutor responsável:</span>
-                <span className="text-slate-100 font-bold">{pet.owner_name}</span>
+              <div className="flex gap-2 pt-2">
+                <button type="submit" className="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow">
+                  Salvar
+                </button>
+                <button type="button" onClick={() => setEditando(false)} className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition">
+                  Cancelar
+                </button>
               </div>
-              <div className="flex justify-between items-center border-b border-slate-800/60 pb-2.5">
-                <span className="text-slate-400 font-medium text-xs flex items-center gap-1.5">📱 WhatsApp:</span>
-                <span className="text-slate-100 font-bold">{pet.phone || 'Não informado'}</span>
+            </form>
+          ) : (
+            /* BLOCO DE INFORMAÇÕES COM LISTA EM LINHAS E ÍCONES */
+            <div className="space-y-3">
+              <div className="bg-[#fcfbfa] border border-orange-200/80 rounded-2xl p-5 space-y-3.5 text-sm shadow-inner">
+                <div className="flex justify-between items-center border-b border-orange-100 pb-3">
+                  <span className="text-slate-600 font-semibold text-xs flex items-center gap-1.5">👤 Tutor responsável:</span>
+                  <span className="text-slate-900 font-bold">{pet.owner_name}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-orange-100 pb-3">
+                  <span className="text-slate-600 font-semibold text-xs flex items-center gap-1.5">📱 WhatsApp:</span>
+                  <span className="text-slate-900 font-bold">{pet.phone || 'Não informado'}</span>
+                </div>
+
+                {pet.peso && (
+                  <div className="flex justify-between items-center border-b border-orange-100 pb-3">
+                    <span className="text-slate-600 font-semibold text-xs flex items-center gap-1.5">⚖️ Peso:</span>
+                    <span className="text-amber-700 font-bold">{pet.peso}</span>
+                  </div>
+                )}
+
+                {pet.idade && (
+                  <div className="flex justify-between items-center border-b border-orange-100 pb-3">
+                    <span className="text-slate-600 font-semibold text-xs flex items-center gap-1.5">🎂 Idade:</span>
+                    <span className="text-amber-700 font-bold">{pet.idade}</span>
+                  </div>
+                )}
+
+                {pet.notes && (
+                  <div className="pt-1">
+                    <span className="text-slate-600 font-semibold text-xs block mb-1">⚠️ Cuidados especiais / Alergias:</span>
+                    <p className="text-slate-700 bg-white border border-orange-200 p-3 rounded-xl text-xs leading-relaxed font-medium">{pet.notes}</p>
+                  </div>
+                )}
               </div>
-
-              {pet.peso && (
-                <div className="flex justify-between items-center border-b border-slate-800/60 pb-2.5">
-                  <span className="text-slate-400 font-medium text-xs flex items-center gap-1.5">⚖️ Peso:</span>
-                  <span className="text-indigo-400 font-bold">{pet.peso}</span>
-                </div>
-              )}
-
-              {pet.idade && (
-                <div className="flex justify-between items-center border-b border-slate-800/60 pb-2.5">
-                  <span className="text-slate-400 font-medium text-xs flex items-center gap-1.5">🎂 Idade:</span>
-                  <span className="text-indigo-400 font-bold">{pet.idade}</span>
-                </div>
-              )}
-
-              {pet.notes && (
-                <div className="pt-1">
-                  <span className="text-slate-400 font-medium text-xs block mb-1">⚠️ Cuidados especiais / Alergias:</span>
-                  <p className="text-slate-300 bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl text-xs leading-relaxed">{pet.notes}</p>
-                </div>
-              )}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* CONTROLE DE EXIBIÇÃO: DONO X QUEM ACHOU */}
-        {isDono ? (
-          <div className="space-y-4 pt-1">
-            {!editando && (
-              <button
-                onClick={() => setEditando(true)}
-                className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-sm transition shadow-md"
-              >
-                ✏️ Alterar Dados / Foto
-              </button>
-            )}
+          {/* CONTROLE DE EXIBIÇÃO: DONO X QUEM ACHOU */}
+          {isDono ? (
+            <div className="space-y-4 pt-1">
+              {!editando && (
+                <button
+                  onClick={() => setEditando(true)}
+                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3.5 rounded-2xl text-sm transition border border-slate-200 shadow-sm"
+                >
+                  ✏️ Alterar Dados / Foto
+                </button>
+              )}
 
-            {pagamentoAprovado ? (
-              <div className="space-y-4">
-                
-                {/* PERSONALIZAÇÃO DE CORES COM BORDA PREENCHIDA E PREVIEW AO VIVO */}
-                <div className="bg-slate-950/60 border border-slate-800/80 p-4 rounded-2xl text-center space-y-4">
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Personalize sua Plaqueta:</label>
+              {pagamentoAprovado ? (
+                <div className="space-y-4">
                   
-                  <div className="flex gap-2">
-                    <select
-                      value={formatoPdf}
-                      onChange={(e) => setFormatoPdf(e.target.value)}
-                      className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-medium"
-                    >
-                      <option value="circular">🪙 Circular (26mm)</option>
-                      <option value="retangular">🪪 Retangular</option>
-                    </select>
-                  </div>
-
-                  {/* PAINEL DE SELEÇÃO DE CORES */}
-                  <div className="grid grid-cols-3 gap-2 bg-slate-900/90 p-3 rounded-xl border border-slate-800 text-left">
-                    <div>
-                      <span className="text-[9px] uppercase font-semibold text-slate-400 block mb-1">Borda Externa</span>
-                      <div className="flex items-center gap-1.5">
-                        <input type="color" value={corBorda} onChange={(e) => setCorBorda(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0" />
-                        <span className="text-[10px] font-mono text-slate-300">{corBorda}</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-[9px] uppercase font-semibold text-slate-400 block mb-1">Fundo Interno</span>
-                      <div className="flex items-center gap-1.5">
-                        <input type="color" value={corInterna} onChange={(e) => setCorInterna(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0" />
-                        <span className="text-[10px] font-mono text-slate-300">{corInterna}</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-[9px] uppercase font-semibold text-slate-400 block mb-1">Cor do Nome</span>
-                      <div className="flex items-center gap-1.5">
-                        <input type="color" value={corTexto} onChange={(e) => setCorTexto(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0" />
-                        <span className="text-[10px] font-mono text-slate-300">{corTexto}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* PREVIEW AO VIVO DA FRENTE DA TAG */}
-                  <div className="space-y-1.5 pt-1">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Preview ao Vivo (Frente)</span>
-                    <div className="w-32 h-32 mx-auto rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center p-2 shadow-inner">
-                      <div 
-                        className={`w-24 h-24 flex flex-col items-center justify-center shadow-md transition-all ${formatoPdf === 'circular' ? 'rounded-full' : 'rounded-lg'}`}
-                        style={{ backgroundColor: corBorda }}
+                  {/* PERSONALIZAÇÃO DE CORES COM BORDA PREENCHIDA E PREVIEW AO VIVO */}
+                  <div className="bg-[#fcfbfa] border border-orange-200 p-5 rounded-2xl text-center space-y-4">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Personalize sua Plaqueta:</label>
+                    
+                    <div className="flex gap-2">
+                      <select
+                        value={formatoPdf}
+                        onChange={(e) => setFormatoPdf(e.target.value)}
+                        className="flex-1 bg-white border border-orange-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-amber-500 font-bold shadow-sm"
                       >
-                        <div 
-                          className={`w-[80%] h-[80%] flex items-center justify-center ${formatoPdf === 'circular' ? 'rounded-full' : 'rounded-md'}`}
-                          style={{ backgroundColor: corInterna }}
-                        >
-                          <span className="text-xs font-black truncate max-w-[60px]" style={{ color: corTexto }}>
-                            {pet.name}
-                          </span>
+                        <option value="circular">🪙 Circular (26mm)</option>
+                        <option value="retangular">🪪 Retangular</option>
+                      </select>
+                    </div>
+
+                    {/* PAINEL DE SELEÇÃO DE CORES */}
+                    <div className="grid grid-cols-3 gap-2 bg-white p-3.5 rounded-2xl border border-orange-200 text-left shadow-sm">
+                      <div>
+                        <span className="text-[9px] uppercase font-bold text-slate-600 block mb-1">Borda Externa</span>
+                        <div className="flex items-center gap-1.5">
+                          <input type="color" value={corBorda} onChange={(e) => setCorBorda(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0" />
+                          <span className="text-[10px] font-mono font-bold text-slate-700">{corBorda}</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-[9px] uppercase font-bold text-slate-600 block mb-1">Fundo Interno</span>
+                        <div className="flex items-center gap-1.5">
+                          <input type="color" value={corInterna} onChange={(e) => setCorInterna(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0" />
+                          <span className="text-[10px] font-mono font-bold text-slate-700">{corInterna}</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-[9px] uppercase font-bold text-slate-600 block mb-1">Cor do Nome</span>
+                        <div className="flex items-center gap-1.5">
+                          <input type="color" value={corTexto} onChange={(e) => setCorTexto(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0" />
+                          <span className="text-[10px] font-mono font-bold text-slate-700">{corTexto}</span>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <button
-                    onClick={() => gerarPdfTag(pet, formatoPdf)}
-                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-1.5"
-                  >
-                    🛠️ Baixar PDF Personalizado
-                  </button>
-                </div>
-
-                {/* QR CODE DA PLAQUETA + BOTÕES SVG E PNG */}
-                <div className="bg-slate-950/60 border border-slate-800/80 p-4 rounded-2xl text-center space-y-3">
-                  <p className="text-xs font-semibold text-slate-400">QR Code da Plaqueta:</p>
-                  
-                  <div className="flex justify-center">
-                    <div id="qr-code-svg-container" className="relative inline-block bg-white p-3 rounded-2xl shadow-lg">
-                      <QRCodeSVG 
-                        value={linkPublicoPet} 
-                        size={140}
-                        level="H"
-                      />
+                    {/* PREVIEW AO VIVO DA FRENTE DA TAG */}
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[10px] text-slate-600 uppercase font-bold block">Preview ao Vivo (Frente)</span>
+                      <div className="w-32 h-32 mx-auto rounded-2xl bg-white border border-orange-200 flex items-center justify-center p-2 shadow-sm">
+                        <div 
+                          className={`w-24 h-24 flex flex-col items-center justify-center shadow-md transition-all ${formatoPdf === 'circular' ? 'rounded-full' : 'rounded-lg'}`}
+                          style={{ backgroundColor: corBorda }}
+                        >
+                          <div 
+                            className={`w-[80%] h-[80%] flex items-center justify-center ${formatoPdf === 'circular' ? 'rounded-full' : 'rounded-md'}`}
+                            style={{ backgroundColor: corInterna }}
+                          >
+                            <span className="text-xs font-black truncate max-w-[60px]" style={{ color: corTexto }}>
+                              {pet.name}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
+
+                    <button
+                      onClick={() => gerarPdfTag(pet, formatoPdf)}
+                      className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl text-xs transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-1.5"
+                    >
+                      🛠️ Baixar PDF Personalizado
+                    </button>
                   </div>
 
-                  {/* BOTÕES DE DOWNLOAD SVG E PNG */}
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    <button 
-                      onClick={() => {
-                        const container = document.getElementById('qr-code-svg-container')
-                        const svgElement = container.querySelector('svg')
-                        if (!svgElement) return
+                  {/* QR CODE DA PLAQUETA + BOTÕES SVG E PNG */}
+                  <div className="bg-[#fcfbfa] border border-orange-200 p-5 rounded-2xl text-center space-y-3.5">
+                    <p className="text-xs font-bold text-slate-700">QR Code da Plaqueta:</p>
+                    
+                    <div className="flex justify-center">
+                      <div id="qr-code-svg-container" className="relative inline-block bg-white p-3.5 rounded-2xl shadow-md border border-orange-100">
+                        <QRCodeSVG 
+                          value={linkPublicoPet} 
+                          size={140}
+                          level="H"
+                        />
+                      </div>
+                    </div>
 
-                        const serializer = new XMLSerializer()
-                        let source = serializer.serializeToString(svgElement)
+                    {/* BOTÕES DE DOWNLOAD SVG E PNG */}
+                    <div className="grid grid-cols-2 gap-2.5 pt-1">
+                      <button 
+                        onClick={() => {
+                          const container = document.getElementById('qr-code-svg-container')
+                          const svgElement = container.querySelector('svg')
+                          if (!svgElement) return
 
-                        if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
-                          source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"')
-                        }
+                          const serializer = new XMLSerializer()
+                          let source = serializer.serializeToString(svgElement)
 
-                        const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' })
-                        const url = URL.createObjectURL(blob)
-                        
-                        const link = document.createElement('a')
-                        link.href = url
-                        link.download = `qrcode-${pet.name.toLowerCase()}.svg`
-                        document.body.appendChild(link)
-                        link.click()
-                        document.body.removeChild(link)
-                      }}
-                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-2 rounded-xl text-center transition shadow"
-                    >
-                      Baixar SVG
-                    </button>
+                          if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+                            source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"')
+                          }
 
-                    <button 
-                      onClick={() => {
-                        const container = document.getElementById('qr-code-svg-container')
-                        const svgElement = container.querySelector('svg')
-                        if (!svgElement) return
-
-                        const svgData = new XMLSerializer().serializeToString(svgElement)
-                        const canvas = document.createElement('canvas')
-                        const ctx = canvas.getContext('2d')
-                        const img = new Image()
-
-                        img.onload = () => {
-                          canvas.width = 500
-                          canvas.height = 500
-                          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+                          const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' })
+                          const url = URL.createObjectURL(blob)
                           
-                          const pngUrl = canvas.toDataURL('image/png')
                           const link = document.createElement('a')
-                          link.href = pngUrl
-                          link.download = `qrcode-${pet.name.toLowerCase()}.png`
+                          link.href = url
+                          link.download = `qrcode-${pet.name.toLowerCase()}.svg`
                           document.body.appendChild(link)
                           link.click()
                           document.body.removeChild(link)
-                        }
+                        }}
+                        className="bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold py-3 px-2 rounded-xl text-center transition border border-orange-200 shadow-sm"
+                      >
+                        Baixar SVG
+                      </button>
 
-                        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
-                      }}
-                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-2 rounded-xl text-center transition shadow"
-                    >
-                      Baixar PNG
-                    </button>
-                  </div>
+                      <button 
+                        onClick={() => {
+                          const container = document.getElementById('qr-code-svg-container')
+                          const svgElement = container.querySelector('svg')
+                          if (!svgElement) return
 
-                  <div>
-                    <a 
-                      href="/dashboard"
-                      className="block w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-xl text-center transition shadow-md shadow-indigo-600/20"
-                    >
-                      Painel Geral
-                    </a>
+                          const svgData = new XMLSerializer().serializeToString(svgElement)
+                          const canvas = document.createElement('canvas')
+                          const ctx = canvas.getContext('2d')
+                          const img = new Image()
+
+                          img.onload = () => {
+                            canvas.width = 500
+                            canvas.height = 500
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+                            
+                            const pngUrl = canvas.toDataURL('image/png')
+                            const link = document.createElement('a')
+                            link.href = pngUrl
+                            link.download = `qrcode-${pet.name.toLowerCase()}.png`
+                            document.body.appendChild(link)
+                            link.click()
+                            document.body.removeChild(link)
+                          }
+
+                          img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
+                        }}
+                        className="bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold py-3 px-2 rounded-xl text-center transition border border-orange-200 shadow-sm"
+                      >
+                        Baixar PNG
+                      </button>
+                    </div>
+
+                    <div>
+                      <a 
+                        href="/dashboard"
+                        className="block w-full bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold py-3 rounded-xl text-center transition shadow-md shadow-amber-600/20"
+                      >
+                        Painel Geral
+                      </a>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="bg-amber-950/40 border border-amber-800/60 p-4 rounded-2xl text-center space-y-2">
-                <span className="text-2xl">⏳</span>
-                <h3 className="font-bold text-amber-400 text-sm">Pagamento Pendente</h3>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  O acesso ao QR Code e aos moldes PDF será liberado assim que o pagamento de ativação for confirmado.
-                </p>
-              </div>
-            )}
+              ) : (
+                <div className="bg-amber-50 border border-amber-300 p-5 rounded-2xl text-center space-y-2">
+                  <span className="text-2xl">⏳</span>
+                  <h3 className="font-bold text-amber-900 text-sm">Pagamento Pendente</h3>
+                  <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                    O acesso ao QR Code e aos moldes PDF será liberado assim que o pagamento de ativação for confirmado.
+                  </p>
+                </div>
+              )}
 
-          </div>
-        ) : null}
+            </div>
+          ) : null}
 
-        {/* SE FOR QUEM ACHOU O PET (PÁGINA PÚBLICA) */}
-        {!isDono && (
-          <div className="space-y-3 pt-2">
-            {pagamentoAprovado ? (
-              <>
-                <button
-                  onClick={handleEnviarLocalizacao}
-                  className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-2xl text-sm shadow-xl shadow-red-600/30 transition flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
-                >
-                  📍 Enviar Minha Localização
-                </button>
-
-                {whatsappLink && (
-                  <a
-                    href={whatsappLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full text-center bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-2xl text-sm transition shadow-lg animate-bounce"
+          {/* SE FOR QUEM ACHOU O PET (PÁGINA PÚBLICA) */}
+          {!isDono && (
+            <div className="space-y-3.5 pt-2">
+              {pagamentoAprovado ? (
+                <>
+                  <button
+                    onClick={handleEnviarLocalizacao}
+                    className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-2xl text-sm shadow-xl shadow-red-600/30 transition flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
                   >
-                    📲 Clique aqui para abrir o WhatsApp com a localização
-                  </a>
-                )}
-              </>
-            ) : (
-              <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl text-center space-y-2">
-                <span className="text-xl">⚠️</span>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Esta plaqueta ainda não foi ativada pelo dono. O resgate via QR Code estará disponível assim que a taxa de cadastro for confirmada.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+                    📍 Enviar Minha Localização
+                  </button>
 
-        {/* BANNER DE AUTOPROMOÇÃO SUTIL PARA QUEM ESCANEIA */}
-        {!isDono && (
-          <div className="border-t border-slate-800/80 pt-4 mt-2 text-center">
-            <p className="text-[11px] text-slate-400 mb-1">
-              Gostou da plaqueta inteligente?
-            </p>
-            <a 
-              href="/register" 
-              className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition underline underline-offset-2"
-            >
-              Proteja seu pet também com a DarkStar Pets 🐾
-            </a>
-          </div>
-        )}
+                  {whatsappLink && (
+                    <a
+                      href={whatsappLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full text-center bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl text-sm transition shadow-lg animate-bounce"
+                    >
+                      📲 Clique aqui para abrir o WhatsApp com a localização
+                    </a>
+                  )}
+                </>
+              ) : (
+                <div className="bg-white border border-orange-200 p-5 rounded-2xl text-center space-y-2 shadow-sm">
+                  <span className="text-xl">⚠️</span>
+                  <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                    Esta plaqueta ainda não foi ativada pelo dono. O resgate via QR Code estará disponível assim que a taxa de cadastro for confirmada.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
+          {/* BANNER DE AUTOPROMOÇÃO SUTIL PARA QUEM ESCANEIA */}
+          {!isDono && (
+            <div className="border-t border-orange-100 pt-4 mt-2 text-center">
+              <p className="text-[11px] text-slate-600 mb-1 font-medium">
+                Gostou da plaqueta inteligente?
+              </p>
+              <a 
+                href="/register" 
+                className="text-xs font-bold text-amber-700 hover:text-amber-600 transition underline underline-offset-2"
+              >
+                Proteja seu pet também com a DarkStar Pets 🐾
+              </a>
+            </div>
+          )}
+
+        </div>
       </div>
+
+      {/* RODAPÉ SIMPLES */}
+      <footer className="w-full px-6 py-6 text-center text-xs text-slate-500 font-medium">
+        <p>© 2026 DarkStar Pets. Todos os direitos reservados.</p>
+      </footer>
+
     </div>
   )
 }

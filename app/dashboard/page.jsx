@@ -181,62 +181,64 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
-        <p>Carregando painel...</p>
+      <div className="min-h-screen bg-[#fcfbfa] flex items-center justify-center text-slate-800">
+        <p className="font-semibold">Carregando painel...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6">
-      <div className="max-w-4xl mx-auto">
-        
-       {/* Cabeçalho */}
-        <div className="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-indigo-400">DarkStar Pets</h1>
-            <p className="text-sm text-slate-400">Painel de Gerenciamento de Dog Tags Inteligentes</p>
-          </div>
-          <div className="flex items-center gap-3">
-            {userProfile?.full_name && (
-              <span className="text-xs text-slate-300 hidden md:inline">
-                Olá, <strong className="text-indigo-300">{userProfile.full_name}</strong>
-              </span>
-            )}
-
-            <a
-              href="/perfil"
-              className="bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/50 text-indigo-300 text-sm px-4 py-2 rounded-xl transition font-medium"
-            >
-              ⚙️ Meu Perfil
-            </a>
-
-            <button
-              onClick={handleLogout}
-              className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm px-4 py-2 rounded-xl transition font-medium"
-            >
-              Sair da Conta
-            </button>
-          </div>
+    <div className="min-h-screen bg-[#fcfbfa] text-slate-800 flex flex-col justify-between selection:bg-amber-500 selection:text-white">
+      
+      {/* CABEÇALHO */}
+      <header className="w-full px-6 sm:px-12 py-6 flex items-center justify-between border-b border-orange-100 backdrop-blur-md sticky top-0 z-50 bg-[#fcfbfa]/95 shadow-sm">
+        <div>
+          <h1 className="text-xl font-extrabold text-slate-900 tracking-wide">🐾 DarkStar Pets</h1>
+          <p className="text-xs text-slate-500 font-medium">Painel de Gerenciamento de Dog Tags Inteligentes</p>
         </div>
+        <div className="flex items-center gap-4">
+          {userProfile?.full_name && (
+            <span className="text-xs text-slate-600 hidden md:inline font-medium">
+              Olá, <strong className="text-slate-900">{userProfile.full_name}</strong>
+            </span>
+          )}
 
-        {/* Formulário de Cadastro com Peso e Idade */}
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl mb-10">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-indigo-300">🐾 Cadastrar Novo Pet</h2>
-            <span className="text-xs text-slate-400 bg-slate-950 px-3 py-1 rounded-full border border-slate-800">
-              Contato vinculado: <strong className="text-slate-200">{userProfile?.phone || 'Não cadastrado'}</strong>
+          <a
+            href="/perfil"
+            className="bg-amber-100/80 hover:bg-amber-200 border border-amber-300 text-amber-900 text-sm px-4 py-2 rounded-xl transition font-semibold"
+          >
+            ⚙️ Meu Perfil
+          </a>
+
+          <button
+            onClick={handleLogout}
+            className="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-4 py-2 rounded-xl transition font-semibold"
+          >
+            Sair
+          </button>
+        </div>
+      </header>
+
+      {/* CONTEÚDO PRINCIPAL (FLUIDO) */}
+      <main className="w-full px-6 sm:px-12 py-10 space-y-10 flex-1">
+        
+        {/* Formulário de Cadastro de Pet */}
+        <div className="bg-white border border-orange-200/80 p-6 sm:p-8 rounded-3xl shadow-md">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 border-b border-orange-100 pb-4">
+            <h2 className="text-xl font-black text-slate-900">🐾 Cadastrar Novo Pet</h2>
+            <span className="text-xs text-slate-600 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200 font-medium">
+              Contato vinculado: <strong className="text-slate-900">{userProfile?.phone || 'Não cadastrado'}</strong>
             </span>
           </div>
 
           {(!userProfile?.full_name || !userProfile?.phone) && (
-            <div className="bg-amber-950/50 border border-amber-700 text-amber-200 p-3 rounded-xl mb-4 text-sm">
+            <div className="bg-amber-50 border border-amber-300 text-amber-900 p-4 rounded-xl mb-6 text-sm font-medium">
               ⚠️ Atenção: Você precisa cadastrar seu Nome e Telefone no seu perfil para poder gerar as tags corretamente.
             </div>
           )}
 
-          {erroForm && <div className="bg-red-900/50 border border-red-700 text-red-200 p-3 rounded-xl mb-4 text-sm">{erroForm}</div>}
-          {sucessoForm && <div className="bg-emerald-900/50 border border-emerald-700 text-emerald-200 p-3 rounded-xl mb-4 text-sm">{sucessoForm}</div>}
+          {erroForm && <div className="bg-red-50 border border-red-300 text-red-800 p-4 rounded-xl mb-6 text-sm font-medium">{erroForm}</div>}
+          {sucessoForm && <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 p-4 rounded-xl mb-6 text-sm font-medium">{sucessoForm}</div>}
 
           <form onSubmit={handleCadastrarPet} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
@@ -244,37 +246,36 @@ export default function Dashboard() {
               placeholder="Nome do Pet (ex: Thor)"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
+              className="bg-[#fcfbfa] border border-orange-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 font-medium text-slate-800 placeholder-slate-400"
             />
             <input
               type="text"
               placeholder="Espécie (ex: Cachorro, Gato)"
               value={especie}
               onChange={(e) => setEspecie(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
+              className="bg-[#fcfbfa] border border-orange-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 font-medium text-slate-800 placeholder-slate-400"
             />
             <input
               type="text"
               placeholder="Raça (Opcional)"
               value={raca}
               onChange={(e) => setRaca(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm md:col-span-2 focus:outline-none focus:border-indigo-500"
+              className="bg-[#fcfbfa] border border-orange-200 rounded-xl px-4 py-3 text-sm md:col-span-2 focus:outline-none focus:border-amber-500 font-medium text-slate-800 placeholder-slate-400"
             />
             
-            {/* Campos de Peso e Idade */}
             <input
               type="text"
               placeholder="Peso (ex: 4.5)"
               value={peso}
               onChange={(e) => setPeso(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
+              className="bg-[#fcfbfa] border border-orange-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 font-medium text-slate-800 placeholder-slate-400"
             />
             <input
               type="text"
               placeholder="Idade (ex: 2)"
               value={idade}
               onChange={(e) => setIdade(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
+              className="bg-[#fcfbfa] border border-orange-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 font-medium text-slate-800 placeholder-slate-400"
             />
 
             <textarea
@@ -282,56 +283,56 @@ export default function Dashboard() {
               value={observacoes}
               onChange={(e) => setObservacoes(e.target.value)}
               rows="3"
-              className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm md:col-span-2 focus:outline-none focus:border-indigo-500"
+              className="bg-[#fcfbfa] border border-orange-200 rounded-xl px-4 py-3 text-sm md:col-span-2 focus:outline-none focus:border-amber-500 font-medium text-slate-800 placeholder-slate-400"
             ></textarea>
 
             <button
               type="submit"
-              className="md:col-span-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-indigo-600/20"
+              className="md:col-span-2 bg-amber-600 hover:bg-amber-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-amber-600/20"
             >
-              Cadastrar Pet no Sistema
+              Cadastrar Pet no Sistema 🚀
             </button>
           </form>
         </div>
 
         {/* Listagem de Pets */}
         <div>
-          <h2 className="text-xl font-semibold mb-4 text-slate-200">Meus Pets Cadastrados</h2>
+          <h2 className="text-2xl font-black mb-6 text-slate-900">Meus Pets Cadastrados</h2>
 
           {pets.length === 0 ? (
-            <p className="text-slate-500 text-sm">Nenhum pet cadastrado ainda. Cadastre acima para gerar sua Dog Tag!</p>
+            <p className="text-slate-500 text-sm font-medium bg-white p-6 rounded-2xl border border-orange-200/80">Nenhum pet cadastrado ainda. Cadastre acima para gerar sua Dog Tag!</p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pets.map((pet, index) => (
-                <div key={pet.id} className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between">
+                <div key={pet.id} className="bg-white border border-orange-200/80 p-6 rounded-3xl flex flex-col justify-between shadow-md hover:border-amber-400 transition">
                   <div>
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-lg font-bold text-white">{pet.name}</h3>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="text-xl font-bold text-slate-900">{pet.name}</h3>
+                      <span className={`text-xs px-3 py-1 rounded-full font-bold ${
                         pet.is_active 
-                          ? (index === 0 ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-indigo-950 text-indigo-400 border border-indigo-800')
-                          : 'bg-amber-950 text-amber-400 border border-amber-800'
+                          ? (index === 0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-900 border border-amber-200')
+                          : 'bg-red-100 text-red-800 border border-red-200'
                       }`}>
                         {pet.is_active 
                           ? (index === 0 ? 'Ativo (Grátis)' : 'Ativo (Pago)') 
                           : 'Pendente (R$ 10,00)'}
                       </span>
                     </div>
-                    <p className="text-sm text-slate-400 mb-4">{pet.species} {pet.breed ? `• ${pet.breed}` : ''}</p>
+                    <p className="text-sm text-slate-600 font-medium mb-4">{pet.species} {pet.breed ? `• ${pet.breed}` : ''}</p>
                   </div>
 
-                  <div className="space-y-2 mt-4">
+                  <div className="space-y-2.5 mt-4">
                     {pet.is_active ? (
                       <>
                         <a
                           href={`/pet/${pet.id}`}
-                          className="block w-full text-center bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium py-2 rounded-xl transition"
+                          className="block w-full text-center bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold py-2.5 rounded-xl transition shadow"
                         >
                           Ver / Baixar QR Code
                         </a>
                         <a
                           href={`/pet/${pet.id}?public=true`}
-                          className="block w-full text-center bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium py-2 rounded-xl transition"
+                          className="block w-full text-center bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold py-2.5 rounded-xl transition border border-slate-200"
                         >
                           Ver Página Pública
                         </a>
@@ -347,7 +348,7 @@ export default function Dashboard() {
 
                         <a
                           href={`/pet/${pet.id}?public=true`}
-                          className="block w-full text-center bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium py-2 rounded-xl transition"
+                          className="block w-full text-center bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold py-2.5 rounded-xl transition border border-slate-200"
                         >
                           Ver Página Pública
                         </a>
@@ -360,7 +361,7 @@ export default function Dashboard() {
                         await supabase.from('pets').update({ status: novoStatus }).eq('id', pet.id);
                         window.location.reload();
                       }}
-                      className={`w-full text-xs font-bold py-2.5 rounded-xl transition ${pet.status === 'lost' ? 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/30' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'}`}
+                      className={`w-full text-xs font-bold py-2.5 rounded-xl transition shadow-sm ${pet.status === 'lost' ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/30' : 'bg-slate-900 hover:bg-slate-800 text-white'}`}
                     >
                       {pet.status === 'lost' ? '🚨 MARCAR COMO ENCONTRADO' : '🔍 MARCAR COMO PERDIDO'}
                     </button>
@@ -372,7 +373,14 @@ export default function Dashboard() {
           )}
         </div>
 
-      </div>
+      </main>
+
+      {/* RODAPÉ */}
+      <footer className="w-full px-6 sm:px-12 py-8 border-t border-orange-100 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4 font-medium">
+        <p>© 2026 DarkStar Pets. Todos os direitos reservados.</p>
+        <p className="text-slate-400">Sistema seguro de recuperação de pets</p>
+      </footer>
+
     </div>
   )
 }
