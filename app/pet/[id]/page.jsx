@@ -610,7 +610,7 @@ export default function PetProfilePage() {
             </div>
           ) : null}
 
-          {/* SE FERNANDO / QUEM ACHOU O PET (PÁGINA PÚBLICA) */}
+          {/* SE FOR QUEM ACHOU O PET (PÁGINA PÚBLICA) */}
           {!isDono && (
             <div className="space-y-3.5 pt-2">
               {pagamentoAprovado ? (
