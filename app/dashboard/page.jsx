@@ -226,7 +226,7 @@ export default function Dashboard() {
         <div className="bg-[#f8fafc] border border-slate-300 p-6 sm:p-8 rounded-3xl shadow-lg">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 border-b border-slate-200 pb-4">
             <h2 className="text-xl font-black text-slate-900">🐾 Cadastrar Novo Pet</h2>
-            <span className="text-xs text-slate-700 bg-slate-200/80 px-3 py-1.5 rounded-full border border-slate-300 font-bold">
+            <span className="text-xs text-slate-700 bg-amber-100/80 px-3 py-1.5 rounded-full border border-amber-300 font-bold">
               Contato vinculado: <strong className="text-slate-900">{userProfile?.phone || 'Não cadastrado'}</strong>
             </span>
           </div>
@@ -246,21 +246,21 @@ export default function Dashboard() {
               placeholder="Nome do Pet (ex: Thor)"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
-              className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-slate-700 font-semibold text-slate-900 placeholder-slate-400 shadow-sm"
+              className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 font-semibold text-slate-900 placeholder-slate-400 shadow-sm"
             />
             <input
               type="text"
               placeholder="Espécie (ex: Cachorro, Gato)"
               value={especie}
               onChange={(e) => setEspecie(e.target.value)}
-              className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-slate-700 font-semibold text-slate-900 placeholder-slate-400 shadow-sm"
+              className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 font-semibold text-slate-900 placeholder-slate-400 shadow-sm"
             />
             <input
               type="text"
               placeholder="Raça (Opcional)"
               value={raca}
               onChange={(e) => setRaca(e.target.value)}
-              className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm md:col-span-2 focus:outline-none focus:border-slate-700 font-semibold text-slate-900 placeholder-slate-400 shadow-sm"
+              className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm md:col-span-2 focus:outline-none focus:border-amber-500 font-semibold text-slate-900 placeholder-slate-400 shadow-sm"
             />
             
             <input
@@ -268,14 +268,14 @@ export default function Dashboard() {
               placeholder="Peso (ex: 4.5)"
               value={peso}
               onChange={(e) => setPeso(e.target.value)}
-              className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-slate-700 font-semibold text-slate-900 placeholder-slate-400 shadow-sm"
+              className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 font-semibold text-slate-900 placeholder-slate-400 shadow-sm"
             />
             <input
               type="text"
               placeholder="Idade (ex: 2)"
               value={idade}
               onChange={(e) => setIdade(e.target.value)}
-              className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-slate-700 font-semibold text-slate-900 placeholder-slate-400 shadow-sm"
+              className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 font-semibold text-slate-900 placeholder-slate-400 shadow-sm"
             />
 
             <textarea
@@ -283,12 +283,12 @@ export default function Dashboard() {
               value={observacoes}
               onChange={(e) => setObservacoes(e.target.value)}
               rows="3"
-              className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm md:col-span-2 focus:outline-none focus:border-slate-700 font-semibold text-slate-900 placeholder-slate-400 shadow-sm"
+              className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm md:col-span-2 focus:outline-none focus:border-amber-500 font-semibold text-slate-900 placeholder-slate-400 shadow-sm"
             ></textarea>
 
             <button
               type="submit"
-              className="md:col-span-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-slate-900/20"
+              className="md:col-span-2 bg-amber-600 hover:bg-amber-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-amber-600/20"
             >
               Cadastrar Pet no Sistema 🚀
             </button>
@@ -326,7 +326,7 @@ export default function Dashboard() {
                       <>
                         <a
                           href={`/pet/${pet.id}`}
-                          className="block w-full text-center bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold py-2.5 rounded-xl transition shadow"
+                          className="block w-full text-center bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold py-2.5 rounded-xl transition shadow"
                         >
                           Ver / Baixar QR Code
                         </a>
@@ -361,7 +361,7 @@ export default function Dashboard() {
                         await supabase.from('pets').update({ status: novoStatus }).eq('id', pet.id);
                         window.location.reload();
                       }}
-                      className={`w-full text-xs font-bold py-2.5 rounded-xl transition shadow-sm ${pet.status === 'lost' ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/30' : 'bg-slate-800 hover:bg-slate-700 text-white'}`}
+                      className={`w-full text-xs font-bold py-2.5 rounded-xl transition shadow-sm ${pet.status === 'lost' ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/30' : 'bg-slate-900 hover:bg-slate-800 text-white'}`}
                     >
                       {pet.status === 'lost' ? '🚨 MARCAR COMO ENCONTRADO' : '🔍 MARCAR COMO PERDIDO'}
                     </button>

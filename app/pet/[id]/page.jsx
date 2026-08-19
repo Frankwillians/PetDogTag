@@ -304,12 +304,12 @@ export default function PetProfilePage() {
           
           {/* CABEÇALHO */}
           <div className="text-center space-y-3">
-            <div className="inline-block bg-slate-200 border border-slate-300 text-slate-800 text-xs font-extrabold px-4 py-1.5 rounded-full shadow-inner tracking-wide">
+            <div className="inline-block bg-amber-100 border border-amber-300 text-amber-900 text-xs font-extrabold px-4 py-1.5 rounded-full shadow-inner tracking-wide">
               {isDono ? '🛡️ PAINEL DO DONO' : '🐾 PERFIL DE EMERGÊNCIA'}
             </div>
 
             <div className="flex justify-center">
-              <img src={fotoExibicao} alt={pet.name} className="w-32 h-32 object-cover rounded-full border-4 border-slate-300 shadow-xl bg-slate-200 p-1" />
+              <img src={fotoExibicao} alt={pet.name} className="w-32 h-32 object-cover rounded-full border-4 border-amber-200 shadow-xl bg-slate-200 p-1" />
             </div>
 
             <div>
@@ -330,7 +330,7 @@ export default function PetProfilePage() {
                   type="text" 
                   value={nome} 
                   onChange={(e) => setNome(e.target.value)} 
-                  className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-slate-700 shadow-sm"
+                  className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-amber-500 shadow-sm"
                   required
                 />
               </div>
@@ -342,7 +342,7 @@ export default function PetProfilePage() {
                     type="text" 
                     value={peso} 
                     onChange={(e) => setPeso(e.target.value)} 
-                    className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-slate-700 shadow-sm"
+                    className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-amber-500 shadow-sm"
                     placeholder="Ex: 4.5kg"
                   />
                 </div>
@@ -352,7 +352,7 @@ export default function PetProfilePage() {
                     type="text" 
                     value={idade} 
                     onChange={(e) => setIdade(e.target.value)} 
-                    className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-slate-700 shadow-sm"
+                    className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-amber-500 shadow-sm"
                     placeholder="Ex: 2 anos"
                   />
                 </div>
@@ -364,9 +364,9 @@ export default function PetProfilePage() {
                   type="file" 
                   accept="image/jpeg, image/jpg, image/png"
                   onChange={handleUploadFoto}
-                  className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-700 font-semibold file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-white hover:file:bg-slate-700 cursor-pointer shadow-sm"
+                  className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-700 font-semibold file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer shadow-sm"
                 />
-                {enviandoFoto && <p className="text-xs text-slate-700 mt-1 font-bold animate-pulse">Enviando foto...</p>}
+                {enviandoFoto && <p className="text-xs text-amber-700 mt-1 font-bold animate-pulse">Enviando foto...</p>}
               </div>
 
               <div>
@@ -374,13 +374,13 @@ export default function PetProfilePage() {
                 <textarea 
                   value={notes} 
                   onChange={(e) => setNotes(e.target.value)} 
-                  className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-slate-700 shadow-sm"
+                  className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-amber-500 shadow-sm"
                   rows="2"
                 />
               </div>
 
               <div className="flex gap-2 pt-2">
-                <button type="submit" className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs transition shadow">
+                <button type="submit" className="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow">
                   Salvar
                 </button>
                 <button type="button" onClick={() => setEditando(false)} className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 rounded-xl text-xs transition">
@@ -404,14 +404,14 @@ export default function PetProfilePage() {
                 {pet.peso && (
                   <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                     <span className="text-slate-600 font-bold text-xs flex items-center gap-1.5">⚖️ Peso:</span>
-                    <span className="text-slate-900 font-bold">{pet.peso}</span>
+                    <span className="text-amber-700 font-bold">{pet.peso}</span>
                   </div>
                 )}
 
                 {pet.idade && (
                   <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                     <span className="text-slate-600 font-bold text-xs flex items-center gap-1.5">🎂 Idade:</span>
-                    <span className="text-slate-900 font-bold">{pet.idade}</span>
+                    <span className="text-amber-700 font-bold">{pet.idade}</span>
                   </div>
                 )}
 
@@ -448,7 +448,7 @@ export default function PetProfilePage() {
                       <select
                         value={formatoPdf}
                         onChange={(e) => setFormatoPdf(e.target.value)}
-                        className="flex-1 bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-700 font-bold shadow-sm"
+                        className="flex-1 bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-bold shadow-sm"
                       >
                         <option value="circular">🪙 Circular (26mm)</option>
                         <option value="retangular">🪪 Retangular</option>
@@ -504,7 +504,7 @@ export default function PetProfilePage() {
 
                     <button
                       onClick={() => gerarPdfTag(pet, formatoPdf)}
-                      className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-xl text-xs transition shadow-lg shadow-slate-900/20 flex items-center justify-center gap-1.5"
+                      className="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 px-4 rounded-xl text-xs transition shadow-lg shadow-amber-600/20 flex items-center justify-center gap-1.5"
                     >
                       🛠️ Baixar PDF Personalizado
                     </button>
@@ -590,7 +590,7 @@ export default function PetProfilePage() {
                     <div>
                       <a 
                         href="/dashboard"
-                        className="block w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-3 rounded-xl text-center transition shadow-md shadow-slate-900/20"
+                        className="block w-full bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold py-3 rounded-xl text-center transition shadow-md shadow-amber-600/20"
                       >
                         Painel Geral
                       </a>
@@ -617,7 +617,7 @@ export default function PetProfilePage() {
                 <>
                   <button
                     onClick={handleEnviarLocalizacao}
-                    className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-2xl text-sm shadow-xl shadow-red-600/30 transition flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
+                    className="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-4 rounded-2xl text-sm shadow-xl shadow-amber-600/30 transition flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
                   >
                     📍 Enviar Minha Localização
                   </button>
@@ -652,7 +652,7 @@ export default function PetProfilePage() {
               </p>
               <a 
                 href="/register" 
-                className="text-xs font-bold text-slate-900 hover:text-slate-700 transition underline underline-offset-2"
+                className="text-xs font-bold text-amber-700 hover:text-amber-600 transition underline underline-offset-2"
               >
                 Proteja seu pet também com a DarkStar Pets 🐾
               </a>
