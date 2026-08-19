@@ -266,7 +266,7 @@ export default function PetProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#eef1f5] text-slate-800 flex items-center justify-center">
+      <div className="min-h-screen bg-[#e2e8f0] text-slate-800 flex items-center justify-center">
         <p className="text-sm font-semibold animate-pulse">Carregando informações...</p>
       </div>
     )
@@ -274,8 +274,8 @@ export default function PetProfilePage() {
 
   if (!pet) {
     return (
-      <div className="min-h-screen bg-[#eef1f5] text-slate-800 flex items-center justify-center p-6 text-center">
-        <div className="bg-white border border-slate-300 p-8 rounded-3xl shadow-md max-w-sm w-full">
+      <div className="min-h-screen bg-[#e2e8f0] text-slate-800 flex items-center justify-center p-6 text-center">
+        <div className="bg-[#f8fafc] border border-slate-300 p-8 rounded-3xl shadow-md max-w-sm w-full">
           <h1 className="text-xl font-bold text-red-600 mb-2">Pet não encontrado</h1>
           <p className="text-sm text-slate-600">Verifique o link ou entre em contato com o suporte.</p>
         </div>
@@ -291,7 +291,7 @@ export default function PetProfilePage() {
   const isDono = isDonoReal && !modoPublicoForcado
 
   return (
-    <div className={`min-h-screen bg-[#eef1f5] text-slate-900 flex flex-col items-center justify-between p-4 py-12 selection:bg-amber-500 selection:text-white ${pet.status === 'lost' ? 'border-t-8 border-red-600' : ''}`}>
+    <div className={`min-h-screen bg-[#e2e8f0] text-slate-900 flex flex-col items-center justify-between p-4 py-12 selection:bg-amber-500 selection:text-white ${pet.status === 'lost' ? 'border-t-8 border-red-600' : ''}`}>
       
       {pet.status === 'lost' && (
         <div className="fixed top-0 w-full bg-red-600 border-b border-red-500 text-white font-bold py-3 text-center z-50 shadow-xl tracking-wide text-sm">
@@ -300,16 +300,16 @@ export default function PetProfilePage() {
       )}
 
       <div className="w-full max-w-lg flex-1 flex flex-col items-center justify-center py-6">
-        <div className="w-full bg-white border border-slate-200/90 p-8 rounded-3xl shadow-xl space-y-6">
+        <div className="w-full bg-[#f8fafc] border border-slate-300 p-8 rounded-3xl shadow-xl space-y-6">
           
           {/* CABEÇALHO */}
           <div className="text-center space-y-3">
-            <div className="inline-block bg-slate-100 border border-slate-300 text-slate-800 text-xs font-extrabold px-4 py-1.5 rounded-full shadow-inner tracking-wide">
+            <div className="inline-block bg-slate-200 border border-slate-300 text-slate-800 text-xs font-extrabold px-4 py-1.5 rounded-full shadow-inner tracking-wide">
               {isDono ? '🛡️ PAINEL DO DONO' : '🐾 PERFIL DE EMERGÊNCIA'}
             </div>
 
             <div className="flex justify-center">
-              <img src={fotoExibicao} alt={pet.name} className="w-32 h-32 object-cover rounded-full border-4 border-slate-200 shadow-xl bg-slate-100 p-1" />
+              <img src={fotoExibicao} alt={pet.name} className="w-32 h-32 object-cover rounded-full border-4 border-slate-300 shadow-xl bg-slate-200 p-1" />
             </div>
 
             <div>
@@ -322,7 +322,7 @@ export default function PetProfilePage() {
 
           {/* SE FOR O DONO E ESTIVER EDITANDO OS DADOS */}
           {isDono && editando ? (
-            <form onSubmit={handleSalvarAlteracoes} className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+            <form onSubmit={handleSalvarAlteracoes} className="space-y-4 bg-white p-6 rounded-2xl border border-slate-300 shadow-sm">
               <h2 className="text-xs font-bold uppercase text-slate-700 mb-2">Editar Dados do Pet</h2>
               <div>
                 <label className="block text-xs uppercase font-bold text-slate-600 mb-1">Nome do Pet</label>
@@ -330,7 +330,7 @@ export default function PetProfilePage() {
                   type="text" 
                   value={nome} 
                   onChange={(e) => setNome(e.target.value)} 
-                  className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-medium focus:outline-none focus:border-slate-700"
+                  className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-slate-700 shadow-sm"
                   required
                 />
               </div>
@@ -342,7 +342,7 @@ export default function PetProfilePage() {
                     type="text" 
                     value={peso} 
                     onChange={(e) => setPeso(e.target.value)} 
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-medium focus:outline-none focus:border-slate-700"
+                    className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-slate-700 shadow-sm"
                     placeholder="Ex: 4.5kg"
                   />
                 </div>
@@ -352,7 +352,7 @@ export default function PetProfilePage() {
                     type="text" 
                     value={idade} 
                     onChange={(e) => setIdade(e.target.value)} 
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-medium focus:outline-none focus:border-slate-700"
+                    className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-slate-700 shadow-sm"
                     placeholder="Ex: 2 anos"
                   />
                 </div>
@@ -364,9 +364,9 @@ export default function PetProfilePage() {
                   type="file" 
                   accept="image/jpeg, image/jpg, image/png"
                   onChange={handleUploadFoto}
-                  className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-700 font-medium file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-white hover:file:bg-slate-700 cursor-pointer"
+                  className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-700 font-semibold file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-white hover:file:bg-slate-700 cursor-pointer shadow-sm"
                 />
-                {enviandoFoto && <p className="text-xs text-slate-700 mt-1 font-semibold animate-pulse">Enviando foto...</p>}
+                {enviandoFoto && <p className="text-xs text-slate-700 mt-1 font-bold animate-pulse">Enviando foto...</p>}
               </div>
 
               <div>
@@ -374,7 +374,7 @@ export default function PetProfilePage() {
                 <textarea 
                   value={notes} 
                   onChange={(e) => setNotes(e.target.value)} 
-                  className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-medium focus:outline-none focus:border-slate-700"
+                  className="w-full bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-slate-700 shadow-sm"
                   rows="2"
                 />
               </div>
@@ -391,34 +391,34 @@ export default function PetProfilePage() {
           ) : (
             /* BLOCO DE INFORMAÇÕES COM LISTA EM LINHAS E ÍCONES */
             <div className="space-y-3">
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-3.5 text-sm shadow-inner">
+              <div className="bg-white border border-slate-300 rounded-2xl p-5 space-y-3.5 text-sm shadow-sm">
                 <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-                  <span className="text-slate-600 font-semibold text-xs flex items-center gap-1.5">👤 Tutor responsável:</span>
+                  <span className="text-slate-600 font-bold text-xs flex items-center gap-1.5">👤 Tutor responsável:</span>
                   <span className="text-slate-900 font-bold">{pet.owner_name}</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-                  <span className="text-slate-600 font-semibold text-xs flex items-center gap-1.5">📱 WhatsApp:</span>
+                  <span className="text-slate-600 font-bold text-xs flex items-center gap-1.5">📱 WhatsApp:</span>
                   <span className="text-slate-900 font-bold">{pet.phone || 'Não informado'}</span>
                 </div>
 
                 {pet.peso && (
                   <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-                    <span className="text-slate-600 font-semibold text-xs flex items-center gap-1.5">⚖️ Peso:</span>
+                    <span className="text-slate-600 font-bold text-xs flex items-center gap-1.5">⚖️ Peso:</span>
                     <span className="text-slate-900 font-bold">{pet.peso}</span>
                   </div>
                 )}
 
                 {pet.idade && (
                   <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-                    <span className="text-slate-600 font-semibold text-xs flex items-center gap-1.5">🎂 Idade:</span>
+                    <span className="text-slate-600 font-bold text-xs flex items-center gap-1.5">🎂 Idade:</span>
                     <span className="text-slate-900 font-bold">{pet.idade}</span>
                   </div>
                 )}
 
                 {pet.notes && (
                   <div className="pt-1">
-                    <span className="text-slate-600 font-semibold text-xs block mb-1">⚠️ Cuidados especiais / Alergias:</span>
-                    <p className="text-slate-800 bg-white border border-slate-200 p-3 rounded-xl text-xs leading-relaxed font-medium">{pet.notes}</p>
+                    <span className="text-slate-600 font-bold text-xs block mb-1">⚠️ Cuidados especiais / Alergias:</span>
+                    <p className="text-slate-800 bg-[#f8fafc] border border-slate-200 p-3 rounded-xl text-xs leading-relaxed font-semibold">{pet.notes}</p>
                   </div>
                 )}
               </div>
@@ -431,7 +431,7 @@ export default function PetProfilePage() {
               {!editando && (
                 <button
                   onClick={() => setEditando(true)}
-                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3.5 rounded-2xl text-sm transition border border-slate-200 shadow-sm"
+                  className="w-full bg-white hover:bg-slate-100 text-slate-800 font-bold py-3.5 rounded-2xl text-sm transition border border-slate-300 shadow-sm"
                 >
                   ✏️ Alterar Dados / Foto
                 </button>
@@ -441,14 +441,14 @@ export default function PetProfilePage() {
                 <div className="space-y-4">
                   
                   {/* PERSONALIZAÇÃO DE CORES COM BORDA PREENCHIDA E PREVIEW AO VIVO */}
-                  <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl text-center space-y-4">
+                  <div className="bg-white border border-slate-300 p-5 rounded-2xl text-center space-y-4 shadow-sm">
                     <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider">Personalize sua Plaqueta:</label>
                     
                     <div className="flex gap-2">
                       <select
                         value={formatoPdf}
                         onChange={(e) => setFormatoPdf(e.target.value)}
-                        className="flex-1 bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-700 font-bold shadow-sm"
+                        className="flex-1 bg-[#f8fafc] border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-700 font-bold shadow-sm"
                       >
                         <option value="circular">🪙 Circular (26mm)</option>
                         <option value="retangular">🪪 Retangular</option>
@@ -456,7 +456,7 @@ export default function PetProfilePage() {
                     </div>
 
                     {/* PAINEL DE SELEÇÃO DE CORES */}
-                    <div className="grid grid-cols-3 gap-2 bg-white p-3.5 rounded-2xl border border-slate-200 text-left shadow-sm">
+                    <div className="grid grid-cols-3 gap-2 bg-[#f8fafc] p-3.5 rounded-2xl border border-slate-300 text-left shadow-sm">
                       <div>
                         <span className="text-[9px] uppercase font-bold text-slate-600 block mb-1">Borda Externa</span>
                         <div className="flex items-center gap-1.5">
@@ -485,7 +485,7 @@ export default function PetProfilePage() {
                     {/* PREVIEW AO VIVO DA FRENTE DA TAG */}
                     <div className="space-y-1.5 pt-1">
                       <span className="text-[10px] text-slate-600 uppercase font-bold block">Preview ao Vivo (Frente)</span>
-                      <div className="w-32 h-32 mx-auto rounded-2xl bg-white border border-slate-200 flex items-center justify-center p-2 shadow-sm">
+                      <div className="w-32 h-32 mx-auto rounded-2xl bg-[#f8fafc] border border-slate-300 flex items-center justify-center p-2 shadow-sm">
                         <div 
                           className={`w-24 h-24 flex flex-col items-center justify-center shadow-md transition-all ${formatoPdf === 'circular' ? 'rounded-full' : 'rounded-lg'}`}
                           style={{ backgroundColor: corBorda }}
@@ -511,11 +511,11 @@ export default function PetProfilePage() {
                   </div>
 
                   {/* QR CODE DA PLAQUETA + BOTÕES SVG E PNG */}
-                  <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl text-center space-y-3.5">
+                  <div className="bg-white border border-slate-300 p-5 rounded-2xl text-center space-y-3.5 shadow-sm">
                     <p className="text-xs font-bold text-slate-800">QR Code da Plaqueta:</p>
                     
                     <div className="flex justify-center">
-                      <div id="qr-code-svg-container" className="relative inline-block bg-white p-3.5 rounded-2xl shadow-md border border-slate-200">
+                      <div id="qr-code-svg-container" className="relative inline-block bg-[#f8fafc] p-3.5 rounded-2xl shadow-md border border-slate-300">
                         <QRCodeSVG 
                           value={linkPublicoPet} 
                           size={140}
@@ -549,7 +549,7 @@ export default function PetProfilePage() {
                           link.click()
                           document.body.removeChild(link)
                         }}
-                        className="bg-white hover:bg-slate-100 text-slate-800 text-xs font-bold py-3 px-2 rounded-xl text-center transition border border-slate-300 shadow-sm"
+                        className="bg-[#f8fafc] hover:bg-slate-100 text-slate-800 text-xs font-bold py-3 px-2 rounded-xl text-center transition border border-slate-300 shadow-sm"
                       >
                         Baixar SVG
                       </button>
@@ -581,7 +581,7 @@ export default function PetProfilePage() {
 
                           img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
                         }}
-                        className="bg-white hover:bg-slate-100 text-slate-800 text-xs font-bold py-3 px-2 rounded-xl text-center transition border border-slate-300 shadow-sm"
+                        className="bg-[#f8fafc] hover:bg-slate-100 text-slate-800 text-xs font-bold py-3 px-2 rounded-xl text-center transition border border-slate-300 shadow-sm"
                       >
                         Baixar PNG
                       </button>
@@ -598,10 +598,10 @@ export default function PetProfilePage() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-amber-50 border border-amber-300 p-5 rounded-2xl text-center space-y-2">
+                <div className="bg-amber-100 border border-amber-300 p-5 rounded-2xl text-center space-y-2 shadow-sm">
                   <span className="text-2xl">⏳</span>
                   <h3 className="font-bold text-amber-900 text-sm">Pagamento Pendente</h3>
-                  <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                  <p className="text-xs text-slate-700 leading-relaxed font-semibold">
                     O acesso ao QR Code e aos moldes PDF será liberado assim que o pagamento de ativação for confirmado.
                   </p>
                 </div>
@@ -634,9 +634,9 @@ export default function PetProfilePage() {
                   )}
                 </>
               ) : (
-                <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl text-center space-y-2 shadow-sm">
+                <div className="bg-white border border-slate-300 p-5 rounded-2xl text-center space-y-2 shadow-sm">
                   <span className="text-xl">⚠️</span>
-                  <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                  <p className="text-xs text-slate-700 leading-relaxed font-semibold">
                     Esta plaqueta ainda não foi ativada pelo dono. O resgate via QR Code estará disponível assim que a taxa de cadastro for confirmada.
                   </p>
                 </div>
@@ -647,7 +647,7 @@ export default function PetProfilePage() {
           {/* BANNER DE AUTOPROMOÇÃO SUTIL PARA QUEM ESCANEIA */}
           {!isDono && (
             <div className="border-t border-slate-200 pt-4 mt-2 text-center">
-              <p className="text-[11px] text-slate-600 mb-1 font-medium">
+              <p className="text-[11px] text-slate-600 mb-1 font-semibold">
                 Gostou da plaqueta inteligente?
               </p>
               <a 
@@ -663,7 +663,7 @@ export default function PetProfilePage() {
       </div>
 
       {/* RODAPÉ SIMPLES */}
-      <footer className="w-full px-6 py-6 text-center text-xs text-slate-500 font-medium">
+      <footer className="w-full px-6 py-6 text-center text-xs text-slate-600 font-bold">
         <p>© 2026 DarkStar Pets. Todos os direitos reservados.</p>
       </footer>
 
