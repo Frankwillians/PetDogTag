@@ -6,8 +6,8 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#fcfbfa] text-slate-800 flex flex-col justify-between selection:bg-amber-500 selection:text-white">
       
-      {/* HEADER / TOPO */}
-      <header className="max-w-6xl w-full mx-auto px-6 py-6 flex items-center justify-between border-b border-orange-100 backdrop-blur-md sticky top-0 z-50 bg-[#fcfbfa]/95 shadow-sm">
+      {/* HEADER / TOPO - Ocupa 100% da largura */}
+      <header className="w-full px-6 sm:px-12 py-6 flex items-center justify-between border-b border-orange-100 backdrop-blur-md sticky top-0 z-50 bg-[#fcfbfa]/95 shadow-sm">
         <div className="flex items-center gap-2">
           <span className="text-2xl">🐾</span>
           <span className="font-extrabold text-xl text-slate-900 tracking-wide">DarkStar Pets</span>
@@ -22,32 +22,31 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* HERO SECTION (DESTAQUE PRINCIPAL) */}
-      <main className="max-w-5xl w-full mx-auto px-6 py-16 text-center space-y-12">
+      {/* HERO SECTION (DESTAQUE PRINCIPAL) - Largura fluida */}
+      <main className="w-full px-6 sm:px-12 py-16 text-center space-y-12">
         
         <div className="inline-flex items-center gap-2 bg-amber-100 border border-amber-200 text-amber-900 text-xs font-bold px-4 py-1.5 rounded-full shadow-inner">
           ❤️ Porque todo membro da família merece voltar para casa em segurança.
         </div>
 
-        <h1 className="text-4xl sm:text-7xl font-black text-slate-900 tracking-tight leading-[1.1]">
+        <h1 className="text-4xl sm:text-7xl font-black text-slate-900 tracking-tight leading-[1.1] max-w-5xl mx-auto">
           O pior pesadelo de todo tutor é ver o seu melhor amigo <span className="text-amber-600 underline decoration-amber-400/40">perdido na rua.</span>
         </h1>
 
-        <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-medium">
+        <p className="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-medium">
           Um portão aberto, um susto com fogos de artifício, um descuido de segundos... O medo de não saber onde ele está aperta o coração de qualquer um. Com a DarkStar Pets, se alguém encontrar o seu companheiro, basta escanear a coleira para que a <strong>localização exata do GPS chegue direto no seu WhatsApp</strong>.
         </p>
 
         {/* ========================================== */}
-        {/* COMO FUNCIONA (ALINHADO CORRETAMENTE) */}
+        {/* COMO FUNCIONA (OCUPANDO ESPAÇO FLUIDO) */}
         {/* ========================================== */}
-        <div className="pt-8 pb-6 border-y border-orange-200/60 my-6">
+        <div className="pt-8 pb-6 border-y border-orange-200/60 my-6 max-w-6xl mx-auto">
           <div className="text-center space-y-2 mb-10">
             <span className="text-amber-700 text-xs font-bold uppercase tracking-wider bg-amber-100 px-3 py-1 rounded-full border border-amber-200">Passo a Passo</span>
             <h2 className="text-2xl sm:text-4xl font-black text-slate-900">Como cuidar de quem você ama em 3 passos</h2>
             <p className="text-sm text-slate-600 font-medium">Entenda como é simples proteger seu pet e garantir que ele volte para casa.</p>
           </div>
 
-          {/* Cards com texto alinhado à esquerda para leitura fluida */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
             
             <div className="bg-white border border-orange-200/80 p-6 rounded-2xl space-y-3 relative overflow-hidden group hover:border-amber-400 shadow-md transition">
@@ -75,7 +74,7 @@ export default function LandingPage() {
         </div>
 
         {/* ESTATÍSTICAS RÁPIDAS / CONFIANÇA */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 max-w-3xl mx-auto text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 max-w-4xl mx-auto text-center">
           <div className="bg-white border border-emerald-200 p-4 rounded-xl shadow-md">
             <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600">R$ 0,00</p>
             <p className="text-xs text-slate-600 font-semibold">Ativação gratuita para o 1º pet</p>
@@ -91,7 +90,7 @@ export default function LandingPage() {
         </div>
 
         {/* SEÇÃO DE CHAMADA FINAL (CTA) COM OS BOTÕES DENTRO */}
-        <div className="pt-10 pb-8">
+        <div className="pt-10 pb-8 max-w-5xl mx-auto w-full">
           <div className="bg-amber-600 border border-amber-500 p-8 sm:p-12 rounded-3xl space-y-6 shadow-2xl text-white">
             <h2 className="text-2xl sm:text-4xl font-extrabold text-white">
               Não espere o susto acontecer para se prevenir.
@@ -121,7 +120,7 @@ export default function LandingPage() {
       </main>
 
       {/* RODAPÉ */}
-      <footer className="max-w-6xl w-full mx-auto px-6 py-8 border-t border-orange-100 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <footer className="w-full px-6 sm:px-12 py-8 border-t border-orange-100 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p>© 2026 DarkStar Pets. Todos os direitos reservados.</p>
         <div className="flex gap-4">
           <Link href="/login" className="hover:text-slate-800 transition font-medium">Entrar</Link>
