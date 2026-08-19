@@ -91,7 +91,7 @@ export default function Perfil() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#e2e8f0] flex items-center justify-center text-slate-800">
-        <p className="font-semibold">Carregando perfil...</p>[cite: 6]
+        <p className="font-semibold">Carregando perfil...</p>
       </div>
     )
   }
@@ -103,8 +103,8 @@ export default function Perfil() {
         {/* Cabeçalho */}
         <div className="flex justify-between items-center mb-8 border-b border-slate-300 pb-4">
           <div>
-            <h1 className="text-2xl font-black text-slate-900">Meu Perfil</h1>[cite: 6]
-            <p className="text-sm text-slate-600 font-semibold">Gerencie seus dados de contato para as Dog Tags</p>[cite: 6]
+            <h1 className="text-2xl font-black text-slate-900">Meu Perfil</h1>
+            <p className="text-sm text-slate-600 font-semibold">Gerencie seus dados de contato para as Dog Tags</p>
           </div>
           <Link
             href="/dashboard"
@@ -152,7 +152,7 @@ export default function Perfil() {
                 onChange={(e) => setPhone(e.target.value)}
                 className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 font-semibold focus:outline-none focus:border-amber-500 shadow-sm placeholder-slate-400"
               />
-              <p className="text-xs text-slate-600 mt-1.5 font-medium">Este número aparecerá nas páginas públicas dos seus pets caso alguém escaneie a Dog Tag.</p>[cite: 6]
+              <p className="text-xs text-slate-600 mt-1.5 font-medium">Este número aparecerá nas páginas públicas dos seus pets caso alguém escaneie a Dog Tag.</p>
             </div>
 
             <button
